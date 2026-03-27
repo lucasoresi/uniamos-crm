@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uniamos - Acceso</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}:root{--lime:#C4E538;--bg:#0A0A0A;--surface:#161616;--border:rgba(255,255,255,.08);--text:#FFF;--text-2:rgba(255,255,255,.7);--text-3:rgba(255,255,255,.4)}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.card{background:var(--surface);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.4);width:100%;max-width:420px;overflow:hidden;border:1px solid var(--border)}.card-top{background:#0A0A0A;padding:36px 32px 28px;text-align:center}.logo-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#C4E538;margin-right:8px}.logo-name{color:#fff;font-size:1.5rem;font-weight:900}.logo-sub{color:rgba(255,255,255,.35);font-size:.8rem;margin-top:6px}.card-body{padding:32px}.tabs{display:flex;margin-bottom:28px;border-bottom:2px solid var(--border)}.tab{flex:1;text-align:center;padding:10px;font-size:.88rem;font-weight:700;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}.tab.active{color:#C4E538;border-bottom-color:#C4E538}.form-group{margin-bottom:16px}.form-label{display:block;font-size:.78rem;font-weight:700;color:var(--text-2);margin-bottom:6px}.form-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;color:var(--text);background:#1A1A1A;outline:none}.form-input:focus{border-color:#C4E538}.btn-main{width:100%;padding:12px;background:#C4E538;color:#0A0A0A;border:none;border-radius:8px;font-size:.95rem;font-weight:800;cursor:pointer;margin-top:4px}.btn-main:hover{background:#A8C42A}.btn-google{width:100%;padding:12px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}.btn-google:hover{border-color:#C4E538}.msg{margin-top:16px;padding:10px 14px;border-radius:8px;font-size:.82rem;font-weight:600;text-align:center;display:none}.msg.error{background:rgba(220,38,38,.2);color:#EF4444;display:block}.msg.success{background:rgba(34,197,94,.2);color:#86EFAC;display:block}.cloud-badge{background:rgba(196,229,56,.15);color:#C4E538;border-radius:8px;padding:8px 12px;font-size:.75rem;font-weight:700;text-align:center;margin-bottom:20px;border:1px solid rgba(196,229,56,.3)}.footer-note{margin-top:20px;text-align:center;font-size:.75rem;color:var(--text-3)}.forgot-pass{text-align:center;margin-top:16px}.forgot-pass a{font-size:.8rem;color:#C4E538;text-decoration:none;cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-top">
+    <div><span class="logo-dot"></span><span class="logo-name">Uniamos</span></div>
+    <div class="logo-sub">Sales Hub - CRM + PRM</div>
+  </div>
+  <div class="card-body">
+    <div class="cloud-badge">Cloud - Tus datos se sincronizan en la nube</div>
+    <div class="tabs">
+      <div class="tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesion</div>
+      <div class="tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
+    </div>
+    <div id="panel-login">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="tu@email.com"></div>
+      <div class="form-group"><label class="form-label">Contrasena</label><input class="form-input" id="login-pass" type="password" placeholder="........"></div>
+      <button class="btn-main" onclick="doLogin()">Entrar al CRM</button>
+      <button class="btn-google" onclick="doGoogleLogin()">Continuar con Google</button>
+      <div id="login-msg" class="msg"></div>
+      <div class="forgot-pass"><a onclick="doForgotPassword()">Olvidaste tu contrasena?</a></div>
+    </div>
+    <div id="panel-register" style="display:none">
+      <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="reg-name" type="text" placeholder="Nombre Apellido"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="reg-email" type="email" placeholder="tu@email.com"></div>
+      <div class="form-group"><label class="form-label">Contrasena</label><input class="form-input" id="reg-pass" type="password" placeholder="Minimo 6 caracteres"></div>
+      <button class="btn-main" onclick="doRegister()">Crear cuenta</button>
+      <button class="btn-google" onclick="doGoogleLogin()">Continuar con Google</button>
+      <div id="register-msg" class="msg"></div>
+    </div>
+    <div class="footer-note">Acceso seguro con autenticacion en la nube.</div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://xhqufddfvwzdptqhohxe.supabase.co';const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhocXVmZGRmdnd6ZHB0cWhvaHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODc0MzQsImV4cCI6MjA4OTM2MzQzNH0.GSqA2mfjppfI_Rar59bgs_sSPjLT4aYzusFi-6yI0b4';const{createClient}=window.supabase;const supabase=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+(async function(){try{const{data:{session}}=await supabase.auth.getSession();if(session)window.location.href='app.html'}catch(e){}})();
+function switchTab(t){document.getElementById('tab-login').classList.toggle('active',t==='login');document.getElementById('tab-register').classList.toggle('active',t==='register');document.getElementById('panel-login').style.display=t==='login'?'':'none';document.getElementById('panel-register').style.display=t==='register'?'':'none'}
+function showMsg(id,t,type){const e=document.getElementById(id);e.textContent=t;e.className='msg '+type}
+async function doLogin(){const em=document.getElementById('login-email').value.trim();const pw=document.getElementById('login-pass').value;if(!em||!pw){showMsg('login-msg','Completa todos los campos.','error');return}const{data,error}=await supabase.auth.signInWithPassword({email:em,password:pw});if(error){showMsg('login-msg',error.message,'error');return}if(data.session)window.location.href='app.html'}
+async function doRegister(){const nm=document.getElementById('reg-name').value.trim();const em=document.getElementById('reg-email').value.trim();const pw=document.getElementById('reg-pass').value;if(!nm||!em||!pw){showMsg('register-msg','Completa todos los campos.','error');return}if(pw.length<6){showMsg('register-msg','Minimo 6 caracteres.','error');return}const{error}=await supabase.auth.signUp({email:em,password:pw,options:{data:{full_name:nm}}});if(error){showMsg('register-msg',error.message,'error');return}showMsg('register-msg','Cuenta creada! Revisa tu email.','success');setTimeout(()=>switchTab('login'),2e3)}
+async function doGoogleLogin(){await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+'/app.html'}})}
+async function doForgotPassword(){const em=document.getElementById('login-email').value.trim();if(!em){showMsg('login-msg','Ingresa tu email.','error');return}await supabase.auth.resetPasswordForEmail(em);showMsg('login-msg','Email de recuperacion enviado.','success')}
+</script>
+</body>
+</html>
