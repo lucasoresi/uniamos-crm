@@ -120,12 +120,12 @@ const SUPABASE_URL = 'https://xhqufddfvwzdptqhohxe.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhocXVmZGRmdnd6ZHB0cWhvaHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODc0MzQsImV4cCI6MjA4OTM2MzQzNH0.GSqA2mfjppfI_Rar59bgs_sSPjLT4aYzusFi-6yI0b4';
 
 const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── CHECK EXISTING SESSION ON LOAD ────────────────────────────────────────
 (async function() {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await sb.auth.getSession();
     if (session) {
       window.location.href = 'app.html';
     }
@@ -166,7 +166,7 @@ async function doLogin() {
 
   setButtonLoading('btn-login', true);
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await sb.auth.signInWithPassword({
       email,
       password: pass
     });
@@ -203,7 +203,7 @@ async function doRegister() {
 
   setButtonLoading('btn-register', true);
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await sb.auth.signUp({
       email,
       password: pass,
       options: {
@@ -233,7 +233,7 @@ async function doRegister() {
 
 async function doGoogleLogin() {
   try {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: window.location.origin + '/app.html'
@@ -260,7 +260,7 @@ async function doForgotPassword() {
   }
 
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/reset-password.html'
     });
 
