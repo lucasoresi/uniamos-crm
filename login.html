@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uniamos â Acceso</title>
+<title>Uniamos – Acceso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -49,12 +49,12 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 <div class="card">
   <div class="card-top">
     <div><span class="logo-dot"></span><span class="logo-name">Un<span style="color:#B8FF00">IA</span>mos</span></div>
-    <div class="logo-sub">Sales Hub Â· CRM + PRM</div>
+    <div class="logo-sub">Sales Hub · CRM + PRM</div>
   </div>
   <div class="card-body">
-    <div class="cloud-badge">âï¸ Cloud Â· Tus datos se sincronizan en la nube</div>
+    <div class="cloud-badge">☁️ Cloud · Tus datos se sincronizan en la nube</div>
     <div class="tabs">
-      <div class="tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesiÃ³n</div>
+      <div class="tab active" id="tab-login" onclick="switchTab('login')">Iniciar sesión</div>
       <div class="tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
     </div>
 
@@ -65,8 +65,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
         <input class="form-input" id="login-email" type="email" placeholder="tu@email.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label">ContraseÃ±a</label>
-        <input class="form-input" id="login-pass" type="password" placeholder="Â·Â·Â·Â·Â·Â·Â·Â·" autocomplete="current-password">
+        <label class="form-label">Contraseña</label>
+        <input class="form-input" id="login-pass" type="password" placeholder="········" autocomplete="current-password">
       </div>
       <button class="btn-main" id="btn-login" onclick="doLogin()">Entrar al CRM</button>
       <button class="btn-google" id="btn-google-login" onclick="doGoogleLogin()">
@@ -79,7 +79,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
         Continuar con Google
       </button>
       <div id="login-msg" class="msg"></div>
-      <div class="forgot-pass"><a onclick="doForgotPassword()">Â¿Olvidaste tu contraseÃ±a?</a></div>
+      <div class="forgot-pass"><a onclick="doForgotPassword()">¿Olvidaste tu contraseña?</a></div>
     </div>
 
     <!-- Register -->
@@ -93,8 +93,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
         <input class="form-input" id="reg-email" type="email" placeholder="tu@email.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label">ContraseÃ±a</label>
-        <input class="form-input" id="reg-pass" type="password" placeholder="MÃ­nimo 6 caracteres" autocomplete="new-password">
+        <label class="form-label">Contraseña</label>
+        <input class="form-input" id="reg-pass" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
       </div>
       <button class="btn-main" id="btn-register" onclick="doRegister()">Crear cuenta</button>
       <button class="btn-google" id="btn-google-register" onclick="doGoogleLogin()">
@@ -109,20 +109,20 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <div id="register-msg" class="msg"></div>
     </div>
 
-    <div class="footer-note">Acceso seguro con autenticaciÃ³n en la nube.<br>Tus datos estÃ¡n protegidos y sincronizados.</div>
+    <div class="footer-note">Acceso seguro con autenticación en la nube.<br>Tus datos están protegidos y sincronizados.</div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ââ SUPABASE INIT âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── SUPABASE INIT ─────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://xhqufddfvwzdptqhohxe.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhocXVmZGRmdnd6ZHB0cWhvaHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODc0MzQsImV4cCI6MjA4OTM2MzQzNH0.GSqA2mfjppfI_Rar59bgs_sSPjLT4aYzusFi-6yI0b4';
 
 const { createClient } = window.supabase;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ââ CHECK EXISTING SESSION ON LOAD ââââââââââââââââââââââââââââââââââââââââ
+// ── CHECK EXISTING SESSION ON LOAD ────────────────────────────────────────
 (async function() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -134,7 +134,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 })();
 
-// ââ UI HELPERS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── UI HELPERS ────────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.getElementById('tab-login').classList.toggle('active', tab === 'login');
   document.getElementById('tab-register').classList.toggle('active', tab === 'register');
@@ -154,7 +154,7 @@ function setButtonLoading(btnId, loading) {
   btn.textContent = loading ? 'Cargando...' : (btnId === 'btn-login' ? 'Entrar al CRM' : btnId === 'btn-register' ? 'Crear cuenta' : 'Continuar con Google');
 }
 
-// ââ AUTH FUNCTIONS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── AUTH FUNCTIONS ────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
@@ -172,7 +172,7 @@ async function doLogin() {
     });
 
     if (error) {
-      showMsg('login-msg', error.message === 'Invalid login credentials' ? 'Email o contraseÃ±a incorrectos.' : error.message, 'error');
+      showMsg('login-msg', error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : error.message, 'error');
       setButtonLoading('btn-login', false);
       return;
     }
@@ -181,7 +181,7 @@ async function doLogin() {
       window.location.href = 'app.html';
     }
   } catch (e) {
-    showMsg('login-msg', 'Error al iniciar sesiÃ³n. Intenta de nuevo.', 'error');
+    showMsg('login-msg', 'Error al iniciar sesión. Intenta de nuevo.', 'error');
     setButtonLoading('btn-login', false);
   }
 }
@@ -197,7 +197,7 @@ async function doRegister() {
   }
 
   if (pass.length < 6) {
-    showMsg('register-msg', 'La contraseÃ±a debe tener mÃ­nimo 6 caracteres.', 'error');
+    showMsg('register-msg', 'La contraseña debe tener mínimo 6 caracteres.', 'error');
     return;
   }
 
@@ -219,7 +219,7 @@ async function doRegister() {
       return;
     }
 
-    showMsg('register-msg', 'Â¡Cuenta creada! Revisa tu email para confirmar. Luego inicia sesiÃ³n.', 'success');
+    showMsg('register-msg', '¡Cuenta creada! Revisa tu email para confirmar. Luego inicia sesión.', 'success');
     setTimeout(() => {
       switchTab('login');
       document.getElementById('login-email').value = email;
@@ -265,17 +265,17 @@ async function doForgotPassword() {
     });
 
     if (error) {
-      showMsg('login-msg', 'Error al enviar email de recuperaciÃ³n. Intenta de nuevo.', 'error');
+      showMsg('login-msg', 'Error al enviar email de recuperación. Intenta de nuevo.', 'error');
       return;
     }
 
-    showMsg('login-msg', 'Se enviÃ³ un email de recuperaciÃ³n. Revisa tu bandeja de entrada.', 'success');
+    showMsg('login-msg', 'Se envió un email de recuperación. Revisa tu bandeja de entrada.', 'success');
   } catch (e) {
     showMsg('login-msg', 'Error al procesar la solicitud. Intenta de nuevo.', 'error');
   }
 }
 
-// ââ KEYBOARD SUPPORT ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ── KEYBOARD SUPPORT ──────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   const loginPanel = document.getElementById('panel-login');
