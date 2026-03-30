@@ -2,27 +2,45 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Uniamos – Cargar Contactos LinkedIn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#F2F1F7;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.card{background:#fff;border-radius:16px;padding:36px 40px;max-width:520px;width:100%;box-shadow:0 12px 48px rgba(109,40,217,.13);text-align:center}
-.logo{font-size:1.4rem;font-weight:900;color:#1A1535;margin-bottom:6px}
-.logo span{color:#6D28D9}
-p{color:#6B6880;font-size:.9rem;margin-bottom:24px;line-height:1.5}
-.btn{display:block;width:100%;padding:14px;background:#6D28D9;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;transition:background .15s}
-.btn:hover{background:#5B21B6}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --lime:#C4E538;--lime-dark:#A8C42A;
+  --bg:#0A0A0A;--surface:#161616;--border:rgba(255,255,255,.08);
+  --text:#FFFFFF;--text-2:rgba(255,255,255,.7);--text-3:rgba(255,255,255,.4);
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px}
+.card{background:var(--surface);border-radius:16px;padding:36px 40px;max-width:520px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,.4);text-align:center;border:1px solid var(--border)}
+.logo{font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:6px}
+.logo span{color:var(--lime)}
+p{color:var(--text-2);font-size:.9rem;margin-bottom:24px;line-height:1.5}
+.btn{display:block;width:100%;padding:14px;background:var(--lime);color:#0A0A0A;border:none;border-radius:10px;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn:hover{background:var(--lime-dark)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
 .result{margin-top:20px;padding:14px;border-radius:10px;font-size:.88rem;font-weight:700;display:none}
-.result.ok{background:#DCFCE7;color:#166534;display:block}
-.result.err{background:#FEE2E2;color:#991B1B;display:block}
+.result.ok{background:rgba(34,197,94,.2);color:#86EFAC;display:block}
+.result.err{background:rgba(220,38,38,.2);color:#EF4444;display:block}
 .stats{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap}
-.stat{background:#EDE9FE;color:#6D28D9;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:800}
+.stat{background:rgba(196,229,56,.15);color:var(--lime);border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:800}
+.login-msg{margin-top:16px;font-size:.85rem;color:var(--text-3)}
+.login-msg a{color:var(--lime);text-decoration:none;font-weight:700}
+.login-msg a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="logo">🔗 <span>Uniamos</span> CRM</div>
-  <p>Este archivo cargará todos los contactos de LinkedIn en tu CRM y PRM.<br>Los contactos activos (respondieron) van al CRM. Los que aún no respondieron van al PRM.</p>
-  <button class="btn" onclick="injectData()">⚡ Cargar contactos ahora</button>
+  <div class="logo">🔗 Un<span>IA</span>mos CRM</div>
+  <p>Este archivo cargará contactos de LinkedIn en tu CRM y PRM.<br>Los contactos activos (respondieron) van al CRM. Los que aún no respondieron van al PRM.</p>
+  <div id="login-required" style="display:none">
+    <p class="login-msg">Debes iniciar sesión para cargar contactos.<br><a href="login.html">Iniciar sesión</a></p>
+  </div>
+  <div id="main-content">
+    <button class="btn" id="btn-inject" onclick="injectData()">Cargar contactos ahora</button>
+  </div>
   <div id="result" class="result"></div>
   <div class="stats" id="stats" style="display:none">
     <div class="stat" id="s-crm">CRM: 0</div>
@@ -30,278 +48,96 @@ p{color:#6B6880;font-size:.9rem;margin-bottom:24px;line-height:1.5}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-function hashPass(pass) {
-  let h = 0;
-  for (let i = 0; i < pass.length; i++) h = (Math.imul(31, h) + pass.charCodeAt(i)) | 0;
-  return h.toString(36) + pass.length;
-}
+const SUPABASE_URL='https://xhqufddfvwzdptqhohxe.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhocXVmZGRmdnd6ZHB0cWhvaHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODc0MzQsImV4cCI6MjA4OTM2MzQzNH0.GSqA2mfjppfI_Rar59bgs_sSPjLT4aYzusFi-6yI0b4';
+const supabase=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function injectData() {
-  try {
-    const EMAIL = 'gerard@uniamos.com';
-    const NAME  = 'Gerard';
-    const PASS  = 'uniamos2024';
+let currentUser=null;
 
-    // 1. Crear cuenta si no existe
-    let users = {};
-    try { users = JSON.parse(localStorage.getItem('uniamos_users') || '{}'); } catch(e) {}
-    if (!users[EMAIL]) {
-      users[EMAIL] = { name: NAME, hash: hashPass(PASS) };
-      localStorage.setItem('uniamos_users', JSON.stringify(users));
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+
+(async function(){
+  try{
+    const {data:{session}}=await supabase.auth.getSession();
+    if(!session){
+      document.getElementById('main-content').style.display='none';
+      document.getElementById('login-required').style.display='block';
+      return;
     }
+    currentUser=session.user;
+  }catch(e){
+    document.getElementById('main-content').style.display='none';
+    document.getElementById('login-required').style.display='block';
+  }
+})();
 
-    // 2. Crear sesión
-    const session = { email: EMAIL, name: NAME, id: EMAIL };
-    localStorage.setItem('uniamos_session', JSON.stringify(session));
+async function injectData(){
+  if(!currentUser){
+    document.getElementById('result').textContent='Debes iniciar sesión primero.';
+    document.getElementById('result').className='result err';
+    return;
+  }
 
-    const UID     = EMAIL;
-    const CRM_KEY = 'uniamos_crm_' + UID;
-    const PRM_KEY = 'uniamos_prm_' + UID;
-    const today   = new Date().toLocaleDateString('es');
-    const todayISO = new Date().toISOString().split('T')[0];
+  const btn=document.getElementById('btn-inject');
+  btn.disabled=true;
+  btn.textContent='Cargando...';
 
-    // ═══════════════════════════════════════════
-    // CRM LEADS (respondieron con interés activo)
-    // ═══════════════════════════════════════════
-    const crmLeads = [
-      {
-        id: uid(),
-        empresa: 'Tallers ECI',
-        lead: 'Eusebi Roca Reguant',
-        email: 'eci@tallereseci.com',
-        tel: '',
-        domain: 'tallereseci.com',
-        gmailUrl: '',
-        estado: 'activa',
-        prioridad: 'alta',
-        valor: '—',
-        primerContacto: today,
-        ultimoContacto: today,
-        resumen: 'Respondió en LinkedIn pidiendo información por email. Contactado hoy (20 mar). Propuesto llamada martes 24 o miércoles 25.',
-        accion: 'Enviar dossier a eci@tallereseci.com. Confirmar llamada esta semana.',
-        activity: [
-          { text: 'Respondió en LinkedIn: pidió info a eci@tallereseci.com', type: 'pos', time: '20/03/2026 21:53' },
-          { text: 'Enviado mensaje con propuesta de llamada mar 24 o mié 25', type: 'pos', time: '20/03/2026 21:53' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Almexca / Consultoría Independiente',
-        lead: 'David Martinez',
-        email: '',
-        tel: '',
-        domain: '',
-        gmailUrl: '',
-        estado: 'activa',
-        prioridad: 'alta',
-        valor: '—',
-        primerContacto: '16/12/2025',
-        ultimoContacto: today,
-        resumen: 'Consultor Estratégico. Mostró interés en colaborar ("que tal vex podamos hacer en equipo"). Confirmó disponibilidad 2 veces para reunión pero Gerard no llegó a proponer hora concreta. Retomado hoy.',
-        accion: 'Esperar confirmación de hora para mar 24 o mié 25. Preparar propuesta de colaboración.',
-        activity: [
-          { text: 'Primer contacto LinkedIn — interés en IA para Almexca', type: 'pos', time: '16/12/2025' },
-          { text: 'David: "me interesa mas otros proyectos Gerard" — quiere colaborar', type: 'pos', time: '17/12/2025' },
-          { text: 'David: "te parece bien lunes solo confirmamos hora"', type: 'pos', time: '19/12/2025' },
-          { text: 'David: "si claro dejame saber la hora y con gusto"', type: 'pos', time: '29/12/2025' },
-          { text: 'Retomado: propuesto mar 24 10:00 o mié 25 11:00 (México)', type: 'pos', time: '20/03/2026' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'La Nómada de los Embudos',
-        lead: 'Carmen Miravalls',
-        email: '',
-        tel: '',
-        domain: '',
-        gmailUrl: '',
-        estado: 'activa',
-        prioridad: 'media',
-        valor: '—',
-        primerContacto: '29/12/2025',
-        ultimoContacto: today,
-        resumen: 'Diseñadora/implementadora de sistemas de ventas. Preguntó si seguían pendientes de hablar tras notar que Gerard le dio like a sus posts. Retomado hoy con propuesta de charla.',
-        accion: 'Esperar respuesta. Propuesto mar 24 o mié 25, ella elige hora.',
-        activity: [
-          { text: 'Carmen preguntó si seguían pendientes de hablar', type: 'pos', time: '29/12/2025' },
-          { text: 'Respondido hoy: propuesta charla 15-20 min mar/mié', type: 'pos', time: '20/03/2026' }
-        ]
-      }
+  try{
+    const today=new Date().toLocaleDateString('es');
+
+    const crmLeads=[
+      {empresa:'Tallers ECI',lead:'Eusebi Roca Reguant',email:'eci@tallereseci.com',domain:'tallereseci.com',estado:'activa',prioridad:'alta',valor:'—',primerContacto:today,ultimoContacto:today,resumen:'Respondió en LinkedIn pidiendo información por email.',accion:'Enviar dossier a eci@tallereseci.com. Confirmar llamada esta semana.',activity:[{text:'Respondió en LinkedIn: pidió info a eci@tallereseci.com',type:'pos',time:'20/03/2026 21:53'}]},
+      {empresa:'Almexca / Consultoría Independiente',lead:'David Martinez',email:'',estado:'activa',prioridad:'alta',valor:'—',primerContacto:'16/12/2025',ultimoContacto:today,resumen:'Consultor Estratégico. Mostró interés en colaborar.',accion:'Esperar confirmación de hora. Preparar propuesta de colaboración.',activity:[{text:'Primer contacto LinkedIn — interés en IA',type:'pos',time:'16/12/2025'}]},
+      {empresa:'La Nómada de los Embudos',lead:'Carmen Miravalls',email:'',estado:'activa',prioridad:'media',valor:'—',primerContacto:'29/12/2025',ultimoContacto:today,resumen:'Diseñadora de sistemas de ventas. Preguntó si seguían pendientes de hablar.',accion:'Esperar respuesta.',activity:[{text:'Carmen preguntó si seguían pendientes de hablar',type:'pos',time:'29/12/2025'}]}
     ];
 
-    // ═══════════════════════════════════════════
-    // PRM PROSPECTOS (sin respuesta / fríos)
-    // ═══════════════════════════════════════════
-    const prmProspects = [
-      {
-        id: uid(),
-        empresa: 'Gruppo Berlingo',
-        contacto: 'Marc Truqué',
-        email: '',
-        linkedin: 'linkedin.com/in/marc-truqué',
-        cargo: 'CEO',
-        domain: '',
-        canal: 'LinkedIn',
-        sector: 'Empresas / Grupo empresarial',
-        pais: 'España',
-        prioridad: 'alta',
-        estado: 'fu2',
-        ultimoContacto: '2025-12-31',
-        contexto: 'Marta (su contacto) va a retomar el tema cuando terminen foco interno de Q1. Potencial alto.',
-        respuesta: 'Respondió amablemente. Marta los contactará cuando tengan capacidad.',
-        accion: 'Follow-up a Marta en abril si no hay noticias.',
-        fuLog: [
-          { text: 'Contacto inicial LinkedIn', result: 'neutral', date: 'dic 2025' },
-          { text: 'Marc: Marta os contactará cuando puedan', result: 'pos', date: '31/12/2025' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Florida BMI Realty',
-        contacto: 'Darkis Rodriguez',
-        email: '',
-        linkedin: 'linkedin.com/in/darkis-rodriguez',
-        cargo: 'Directora',
-        domain: 'floridabmirealty.com',
-        canal: 'LinkedIn',
-        sector: 'Real Estate',
-        pais: 'Miami, USA',
-        prioridad: 'media',
-        estado: 'contactado',
-        ultimoContacto: '2025-12-05',
-        contexto: 'Propuesta de agente IA interno para Florida BMI Realty. Sin respuesta. Activa en LinkedIn.',
-        respuesta: '',
-        accion: 'Follow-up en 2 semanas si no responde.',
-        fuLog: [
-          { text: 'Propuesta agente IA para su equipo de real estate', result: 'neutral', date: '05/12/2025' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Skydropx Inc',
-        contacto: 'Daniel Michael Alvarado',
-        email: '',
-        linkedin: 'linkedin.com/in/daniel-michael-alvarado',
-        cargo: 'Co-founder / Chief Customer Officer',
-        domain: 'skydropx.com',
-        canal: 'LinkedIn',
-        sector: 'Logística / SaaS',
-        pais: 'México',
-        prioridad: 'alta',
-        estado: 'contactado',
-        ultimoContacto: '2025-12-05',
-        contexto: 'Propuesta IA para limpiar datos, automatizar soporte y dar visibilidad operativa. Empresa de logística en LATAM. Sin respuesta.',
-        respuesta: '',
-        accion: 'Follow-up en 2 semanas.',
-        fuLog: [
-          { text: 'Propuesta IA para CX y operaciones logísticas en LATAM', result: 'neutral', date: '05/12/2025' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Ex-Sears / Sanborns / Univar',
-        contacto: 'Eduardo Sterling',
-        email: '',
-        linkedin: '',
-        cargo: 'CCO / Director de Operaciones',
-        domain: '',
-        canal: 'LinkedIn',
-        sector: 'Retail / Supply Chain',
-        pais: 'México',
-        prioridad: 'media',
-        estado: 'contactado',
-        ultimoContacto: '2025-12-05',
-        contexto: 'Trayectoria en retail a escala. Propuesta IA para reducir horas fricción en supply chain. Activo hace 1h. Sin respuesta.',
-        respuesta: '',
-        accion: 'Follow-up esta semana.',
-        fuLog: [
-          { text: 'Propuesta IA para supply chain y operaciones retail', result: 'neutral', date: '05/12/2025' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Teclim Química / Glomarchem',
-        contacto: 'Josep Oriol Turmo Rosell',
-        email: '',
-        linkedin: '',
-        cargo: 'Director',
-        domain: '',
-        canal: 'LinkedIn',
-        sector: 'Química / Distribución',
-        pais: 'España',
-        prioridad: 'media',
-        estado: 'contactado',
-        ultimoContacto: '2025-12-02',
-        contexto: 'Propuesta IA para eliminar horas de trabajo repetitivo en operaciones y documentación técnica. Sin respuesta.',
-        respuesta: '',
-        accion: 'Follow-up en 2 semanas.',
-        fuLog: [
-          { text: 'Propuesta IA para operaciones y documentación técnica', result: 'neutral', date: '02/12/2025' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Fixi / @fixi',
-        contacto: 'Israel Contreras Ojeda',
-        email: '',
-        linkedin: 'linkedin.com/in/israel-contreras',
-        cargo: 'Founder',
-        domain: 'fixi.mx',
-        canal: 'LinkedIn',
-        sector: 'Tech / Servicios',
-        pais: 'México',
-        prioridad: 'baja',
-        estado: 'fu1',
-        ultimoContacto: '2025-12-08',
-        contexto: 'Intercambio cordial. Dijo "Gracias Gerard. Seguimos en contacto". Gerard envió GIF. No hay reunión concreta.',
-        respuesta: 'Positivo pero sin compromiso concreto.',
-        accion: 'Retomar con propuesta concreta cuando haya caso de uso para su sector.',
-        fuLog: [
-          { text: 'Israel: "Gracias Gerard. Seguimos en contacto 👊"', result: 'pos', date: '08/12/2025' }
-        ]
-      },
-      {
-        id: uid(),
-        empresa: 'Adquiere.co',
-        contacto: 'Daniel Rodriguez',
-        email: '',
-        linkedin: '',
-        cargo: 'Director',
-        domain: 'adquiere.co',
-        canal: 'LinkedIn',
-        sector: 'Consultoría / IA',
-        pais: 'México',
-        prioridad: 'baja',
-        estado: 'negativo',
-        ultimoContacto: '2025-12-06',
-        contexto: 'Respuesta clara: "no estoy interesado en subcontratar servicios de implementación de IA ni de consultoría ni nada similar".',
-        respuesta: '❌ No interesado explícitamente.',
-        accion: 'No volver a contactar.',
-        fuLog: [
-          { text: 'Respondió: no interesado en servicios de IA/consultoría', result: 'neg', date: '06/12/2025' }
-        ]
-      }
+    const prmProspects=[
+      {empresa:'Gruppo Berlingo',contacto:'Marc Truqué',email:'',linkedin:'linkedin.com/in/marc-truqué',cargo:'CEO',canal:'LinkedIn',sector:'Empresas / Grupo empresarial',pais:'España',prioridad:'alta',estado:'fu2',ultimoContacto:'2025-12-31',contexto:'Marta retomará el tema en Q2.',respuesta:'Respondió amablemente.',accion:'Follow-up a Marta en abril.',fuLog:[{text:'Marc: Marta os contactará cuando puedan',result:'pos',date:'31/12/2025'}]},
+      {empresa:'Florida BMI Realty',contacto:'Darkis Rodriguez',email:'',linkedin:'linkedin.com/in/darkis-rodriguez',cargo:'Directora',domain:'floridabmirealty.com',canal:'LinkedIn',sector:'Real Estate',pais:'Miami, USA',prioridad:'media',estado:'contactado',ultimoContacto:'2025-12-05',contexto:'Propuesta agente IA interno. Sin respuesta.',respuesta:'',accion:'Follow-up en 2 semanas.',fuLog:[{text:'Propuesta agente IA para real estate',result:'neutral',date:'05/12/2025'}]},
+      {empresa:'Skydropx Inc',contacto:'Daniel Michael Alvarado',email:'',linkedin:'linkedin.com/in/daniel-michael-alvarado',cargo:'Co-founder / CCO',domain:'skydropx.com',canal:'LinkedIn',sector:'Logística / SaaS',pais:'México',prioridad:'alta',estado:'contactado',ultimoContacto:'2025-12-05',contexto:'Propuesta IA para logística LATAM. Sin respuesta.',respuesta:'',accion:'Follow-up en 2 semanas.',fuLog:[{text:'Propuesta IA para CX y operaciones',result:'neutral',date:'05/12/2025'}]},
+      {empresa:'Ex-Sears / Sanborns / Univar',contacto:'Eduardo Sterling',email:'',cargo:'CCO / Director de Operaciones',canal:'LinkedIn',sector:'Retail / Supply Chain',pais:'México',prioridad:'media',estado:'contactado',ultimoContacto:'2025-12-05',contexto:'Propuesta IA para supply chain. Sin respuesta.',respuesta:'',accion:'Follow-up esta semana.',fuLog:[{text:'Propuesta IA para supply chain',result:'neutral',date:'05/12/2025'}]},
+      {empresa:'Teclim Química / Glomarchem',contacto:'Josep Oriol Turmo Rosell',email:'',cargo:'Director',canal:'LinkedIn',sector:'Química / Distribución',pais:'España',prioridad:'media',estado:'contactado',ultimoContacto:'2025-12-02',contexto:'Propuesta IA para operaciones. Sin respuesta.',respuesta:'',accion:'Follow-up en 2 semanas.',fuLog:[{text:'Propuesta IA para operaciones',result:'neutral',date:'02/12/2025'}]},
+      {empresa:'Fixi',contacto:'Israel Contreras Ojeda',email:'',linkedin:'linkedin.com/in/israel-contreras',cargo:'Founder',domain:'fixi.mx',canal:'LinkedIn',sector:'Tech / Servicios',pais:'México',prioridad:'baja',estado:'fu1',ultimoContacto:'2025-12-08',contexto:'Intercambio cordial. Sin reunión concreta.',respuesta:'Positivo pero sin compromiso.',accion:'Retomar con propuesta concreta.',fuLog:[{text:'Israel: "Seguimos en contacto"',result:'pos',date:'08/12/2025'}]},
+      {empresa:'Adquiere.co',contacto:'Daniel Rodriguez',email:'',cargo:'Director',domain:'adquiere.co',canal:'LinkedIn',sector:'Consultoría / IA',pais:'México',prioridad:'baja',estado:'negativo',ultimoContacto:'2025-12-06',contexto:'No interesado en servicios de IA.',respuesta:'No interesado explícitamente.',accion:'No volver a contactar.',fuLog:[{text:'Respondió: no interesado',result:'neg',date:'06/12/2025'}]}
     ];
 
-    // 3. Guardar en localStorage
-    localStorage.setItem(CRM_KEY, JSON.stringify(crmLeads));
-    localStorage.setItem(PRM_KEY, JSON.stringify(prmProspects));
-    localStorage.setItem('uniamos_crm_ts_' + UID, new Date().toISOString());
+    // Insert leads into Supabase
+    const leadsToInsert=crmLeads.map(d=>({
+      id:uid(),
+      user_id:currentUser.id,
+      data:d,
+      updated_at:new Date().toISOString()
+    }));
 
-    // 4. Mostrar resultado
-    document.getElementById('result').textContent = '✅ ¡Datos cargados! ' + crmLeads.length + ' leads en CRM y ' + prmProspects.length + ' prospectos en PRM. Redirigiendo al CRM...';
-    document.getElementById('result').className = 'result ok';
-    document.getElementById('stats').style.display = 'flex';
-    document.getElementById('s-crm').textContent = 'CRM: ' + crmLeads.length + ' leads';
-    document.getElementById('s-prm').textContent = 'PRM: ' + prmProspects.length + ' prospectos';
+    const {error:leadsError}=await supabase.from('leads').insert(leadsToInsert);
+    if(leadsError)throw leadsError;
 
-    setTimeout(() => { window.location.href = 'app.html'; }, 2200);
+    // Insert prospects into Supabase
+    const prospectsToInsert=prmProspects.map(d=>({
+      id:uid(),
+      user_id:currentUser.id,
+      data:d,
+      updated_at:new Date().toISOString()
+    }));
 
-  } catch(e) {
-    document.getElementById('result').textContent = '❌ Error: ' + e.message;
-    document.getElementById('result').className = 'result err';
+    const {error:prospectsError}=await supabase.from('prospects').insert(prospectsToInsert);
+    if(prospectsError)throw prospectsError;
+
+    document.getElementById('result').textContent='Datos cargados! '+leadsToInsert.length+' leads en CRM y '+prospectsToInsert.length+' prospectos en PRM. Redirigiendo...';
+    document.getElementById('result').className='result ok';
+    document.getElementById('stats').style.display='flex';
+    document.getElementById('s-crm').textContent='CRM: '+leadsToInsert.length+' leads';
+    document.getElementById('s-prm').textContent='PRM: '+prospectsToInsert.length+' prospectos';
+
+    setTimeout(()=>{window.location.href='app.html';},2200);
+
+  }catch(e){
+    document.getElementById('result').textContent='Error: '+e.message;
+    document.getElementById('result').className='result err';
+    btn.disabled=false;
+    btn.textContent='Cargar contactos ahora';
   }
 }
 </script>

@@ -1028,7 +1028,7 @@ let leads=[], prospects=[];
 async function initSession() {
   try{
     const {data:{session}}=await supabase.auth.getSession();
-    if(!session){window.location.href='index.html';}
+    if(!session){window.location.href='login.html';}
     currentUser=session.user;
     const name=session.user.user_metadata?.name||session.user.email?.split('@')[0]||'Usuario';
     const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -1053,7 +1053,7 @@ async function initSession() {
     
     crm_renderBoard();
     prm_renderBoard();
-  }catch(e){console.error('Auth error:',e);window.location.href='index.html';}
+  }catch(e){console.error('Auth error:',e);window.location.href='login.html';}
 }
 
 
@@ -1120,7 +1120,7 @@ async function autoSetupData(){
 }
 
 function doLogout(){
-  supabase.auth.signOut().then(()=>{window.location.href='index.html';});
+  supabase.auth.signOut().then(()=>{window.location.href='login.html';});
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────────
@@ -1225,21 +1225,7 @@ function crm_renderBoard(searchTerm=''){
     items.forEach(item=>{
       const color=logoColor(item.data.empresa||'?');
       const badgeClass={'urgente':'b-urg','alta':'b-alta','media':'b-media','baja':'b-baja'}[item.data.prioridad]||'b-media';
-      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')"><div class="card-bar" style="background:${stage.color}"></div><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span></div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>
-        <div class="card-body">
-          <div class="card-top">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info">
-            <div class="card-co">${item.data.empresa||'?'}</div>
-            <div class="card-ct">${item.data.lead||''}</div>
-          </div></div>
-          <div class="card-sep"></div>
-          ${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}
-          ${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}
-          <div class="card-foot">
-            <span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span>
-            <span class="card-date">${item.data.ultimoContacto||'—'}</span>
-          </div>
-        </div>
-      </div>`;
+      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')"><div class="card-bar" style="background:${stage.color}"></div><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span></div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
     });
     html+='</div><button class="col-add-btn" onclick="crm_openAddModal()">+ Añadir Lead</button></div>';
   });
@@ -1652,78 +1638,6 @@ async function prm_deleteProspect(){
 
 function prm_exportAllPositivos(){alert('Exportación (feature en desarrollo)');}
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// AUTOMATIONS MODULE
-// ═══════════════════════════════════════════════════════════════════════════════
-function automation_renderDashboard(){
-  // Follow-up alerts
-  const followUpNeeded=leads.filter(l=>{
-    const lastContact=new Date(l.data.ultimoContacto||new Date());
-    const daysSince=Math.floor((new Date()-lastContact)/(1000*60*60*24));
-    return daysSince>7;
-  });
-  let followUpHtml=`Leads sin contactar por >7 días: ${followUpNeeded.length}<br>`;
-  followUpNeeded.slice(0,5).forEach(l=>{followUpHtml+=`• ${l.data.empresa}<br>`;});
-  document.getElementById('automation-followup-alerts').innerHTML=followUpHtml;
-
-  // Scoring
-  const avgScore=leads.length>0?Math.round(leads.reduce((sum,l)=>sum+automation_calculateScore(l.data),0)/leads.length):0;
-  document.getElementById('automation-scoring-summary').innerHTML=`Puntuación promedio: ${avgScore}/100<br>Leads analizados: ${leads.length}`;
-
-  // Metrics
-  const stages=CRM_STAGES.map(s=>({stage:s.id,count:leads.filter(l=>l.data.estado===s.id).length})).filter(s=>s.count>0);
-  let metricsHtml='Distribución por etapa: ';
-  stages.forEach(s=>{metricsHtml+=`${s.stage}(${s.count}) `;});
-  document.getElementById('automation-metrics').innerHTML=metricsHtml;
-
-  // Activity
-  document.getElementById('automation-activity').innerHTML='Últimos cambios en el sistema. Sistema de actividad preparado.';
-}
-
-function automation_calculateScore(data){
-  let score=50;
-  if(data.email)score+=10;
-  if(data.tel)score+=10;
-  if(data.domain)score+=5;
-  const priorityBonus={'urgente':15,'alta':10,'media':5,'baja':0};
-  score+=priorityBonus[data.prioridad]||0;
-  const stageBonus={'cierre':20,'propuesta':15,'activa':10,'ghost':-10,'frio':-15,'sininfo':0};
-  score+=stageBonus[data.estado]||0;
-  const lastContact=new Date(data.ultimoContacto||new Date());
-  const daysSince=Math.floor((new Date()-lastContact)/(1000*60*60*24));
-  if(daysSince>7)score-=Math.min(20,daysSince*2);
-  return Math.max(0,Math.min(100,score));
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// INTEGRACIONES MODULE
-// ═══════════════════════════════════════════════════════════════════════════════
-function integraciones_checkStatus(){
-  const hasGoogle=!!currentUser?.user_metadata?.provider;
-  document.getElementById('integration-calendar-status').style.display=hasGoogle?'block':'none';
-}
-
-function integraciones_connectGoogle(){
-  supabase.auth.signInWithOAuth({
-    provider:'google',
-    options:{
-      scopes:'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/contacts.readonly',
-      redirectTo:window.location.href
-    }
-  });
-}
-
-function integraciones_openGmailCompose(){
-  window.open('https://mail.google.com/mail/?view=cm','_blank');
-}
-
-function integraciones_openDrive(){
-  window.open('https://drive.google.com','_blank');
-}
-
-function integraciones_importContacts(){
-  alert('Importación de contactos (feature en desarrollo - requiere Google Contacts API)');
-}
 
 // INIT
 initSession();
