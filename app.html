@@ -479,7 +479,11 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <button class="btn-sm btn-sm-sec" onclick="crm_addNote()">📝 Nota</button>
       <button class="btn-sm btn-sm-danger" onclick="crm_deleteLead()">🗑 Eliminar</button>
     </div>
-    <div class="panel-body">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="crm_switchPanelTab('datos')">Datos</div>
+      <div class="panel-tab" onclick="crm_switchPanelTab('actividad')">Actividad</div>
+    </div>
+    <div class="panel-body" id="crm_panel_datos">
       <div class="pf-section">
         <div class="pf-section-title">Empresa y Contacto</div>
         <div class="pf-grid">
@@ -524,7 +528,29 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
           <div class="pf-group full"><label class="pf-label">Próxima acción</label><textarea class="pf-textarea" id="crm_m-accion" rows="2"></textarea></div>
         </div>
       </div>
-      <div><div class="activity-hd">Actividad reciente</div><div id="crm_m-activity"></div></div>
+    </div>
+    <div class="timeline-wrap" id="crm_panel_actividad" style="display:none">
+      <div class="timeline-filters">
+        <button class="tl-pill active" data-filter="todos" onclick="activity_setFilter('todos')">Todos</button>
+        <button class="tl-pill" data-filter="notas" onclick="activity_setFilter('notas')">Notas</button>
+        <button class="tl-pill" data-filter="emails" onclick="activity_setFilter('emails')">Emails</button>
+        <button class="tl-pill" data-filter="cambios" onclick="activity_setFilter('cambios')">Cambios</button>
+      </div>
+      <div class="timeline-list" id="activity_timeline_list">
+        <div class="tl-empty">Sin actividad registrada</div>
+      </div>
+      <div class="timeline-input">
+        <div class="tl-subtypes">
+          <button class="tl-subtype" data-subtype="llamada" onclick="activity_setSubtype('llamada')">📞 Llamada</button>
+          <button class="tl-subtype" data-subtype="reunion" onclick="activity_setSubtype('reunion')">🤝 Reunión</button>
+          <button class="tl-subtype active" data-subtype="nota" onclick="activity_setSubtype('nota')">📝 Nota</button>
+          <button class="tl-subtype" data-subtype="tarea" onclick="activity_setSubtype('tarea')">✅ Tarea</button>
+        </div>
+        <div class="tl-input-row">
+          <input id="activity_note_input" type="text" placeholder="Agregar nota..." onkeydown="if(event.key==='Enter')activity_addNote('lead',crm_editingId)">
+          <button onclick="activity_addNote('lead',crm_editingId)">Enviar</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -618,7 +644,11 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <button class="btn-sm btn-sm-crm" id="prm_btn-mover-crm" onclick="prm_moverAlCRM()" style="display:none">🚀 Mover al CRM</button>
       <button class="btn-sm btn-sm-danger" onclick="prm_deleteProspect()">🗑</button>
     </div>
-    <div class="panel-body">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="prm_switchPanelTab('datos')">Datos</div>
+      <div class="panel-tab" onclick="prm_switchPanelTab('actividad')">Actividad</div>
+    </div>
+    <div class="panel-body" id="prm_panel_datos">
       <div class="pf-section">
         <div class="pf-section-title">Empresa y Contacto</div>
         <div class="pf-grid">
@@ -677,6 +707,29 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <div class="fu-log">
         <div class="fu-log-title">Log de Follow-ups</div>
         <div id="prm_m-fu-log"></div>
+      </div>
+    </div>
+    <div class="timeline-wrap" id="prm_panel_actividad" style="display:none">
+      <div class="timeline-filters">
+        <button class="tl-pill active" data-filter="todos" onclick="activity_setFilter('todos')">Todos</button>
+        <button class="tl-pill" data-filter="notas" onclick="activity_setFilter('notas')">Notas</button>
+        <button class="tl-pill" data-filter="emails" onclick="activity_setFilter('emails')">Emails</button>
+        <button class="tl-pill" data-filter="cambios" onclick="activity_setFilter('cambios')">Cambios</button>
+      </div>
+      <div class="timeline-list" id="activity_timeline_list_prm">
+        <div class="tl-empty">Sin actividad registrada</div>
+      </div>
+      <div class="timeline-input">
+        <div class="tl-subtypes">
+          <button class="tl-subtype" data-subtype="llamada" onclick="activity_setSubtype('llamada')">📞 Llamada</button>
+          <button class="tl-subtype" data-subtype="reunion" onclick="activity_setSubtype('reunion')">🤝 Reunión</button>
+          <button class="tl-subtype active" data-subtype="nota" onclick="activity_setSubtype('nota')">📝 Nota</button>
+          <button class="tl-subtype" data-subtype="tarea" onclick="activity_setSubtype('tarea')">✅ Tarea</button>
+        </div>
+        <div class="tl-input-row">
+          <input id="activity_note_input_prm" type="text" placeholder="Agregar nota..." onkeydown="if(event.key==='Enter')activity_addNote_prm()">
+          <button onclick="activity_addNote_prm()">Enviar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1332,6 +1385,17 @@ function crm_closeDetail(){
   crm_editingId=null;
 }
 
+function crm_switchPanelTab(tab) {
+  document.getElementById('crm_panel_datos').style.display = tab === 'datos' ? 'block' : 'none';
+  document.getElementById('crm_panel_actividad').style.display = tab === 'actividad' ? 'flex' : 'none';
+  document.querySelectorAll('#crm_detailOverlay .panel-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'actividad' && crm_editingId) {
+    activity_currentFilter = 'todos';
+    activity_loadAndRender('lead', crm_editingId);
+  }
+}
+
 async function crm_saveDetail(){
   if(!crm_editingId)return;
   const lead=leads.find(l=>l.id===crm_editingId);
@@ -1531,6 +1595,17 @@ function prm_openDetail(id){
 }
 
 function prm_closeDetail(){document.getElementById('prm_detailOverlay').classList.remove('open');prm_editingId=null;}
+
+function prm_switchPanelTab(tab) {
+  document.getElementById('prm_panel_datos').style.display = tab === 'datos' ? 'block' : 'none';
+  document.getElementById('prm_panel_actividad').style.display = tab === 'actividad' ? 'flex' : 'none';
+  document.querySelectorAll('#prm_detailOverlay .panel-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  if (tab === 'actividad' && prm_editingId) {
+    activity_currentFilter = 'todos';
+    activity_loadAndRender('prospect', prm_editingId);
+  }
+}
 
 async function prm_saveDetail(){
   if(!prm_editingId)return;
