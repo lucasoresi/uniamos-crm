@@ -1142,6 +1142,7 @@ async function initSession() {
       await autoSetupData();
     }
     
+    await activity_loadLastActivities();
     crm_renderBoard();
     prm_renderBoard();
   }catch(e){console.error('Auth error:',e);window.location.href='login.html';}
@@ -1316,7 +1317,7 @@ function crm_renderBoard(searchTerm=''){
     items.forEach(item=>{
       const color=logoColor(item.data.empresa||'?');
       const badgeClass={'urgente':'b-urg','alta':'b-alta','media':'b-media','baja':'b-baja'}[item.data.prioridad]||'b-media';
-      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')"><div class="card-bar" style="background:${stage.color}"></div><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span></div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
+      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')"><div class="card-bar" style="background:${stage.color}"></div><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('lead', item.id)}</div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
     });
     html+='</div><button class="col-add-btn" onclick="crm_openAddModal()">+ Añadir Lead</button></div>';
   });
@@ -1352,6 +1353,11 @@ async function crm_dropCard(e,stageId){
 
 function crm_openDetail(id){
   crm_editingId=id;
+  const datosPanel = document.getElementById('crm_panel_datos');
+  const actPanel = document.getElementById('crm_panel_actividad');
+  if (datosPanel) datosPanel.style.display = 'block';
+  if (actPanel) actPanel.style.display = 'none';
+  document.querySelectorAll('#crm_detailOverlay .panel-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
   const lead=leads.find(l=>l.id===id);
   if(!lead)return;
   const d=lead.data;
@@ -1379,7 +1385,7 @@ function crm_openDetail(id){
   }else{
     document.getElementById('crm_m-gmail-link').style.display='none';
   }
-  document.getElementById('crm_m-activity').innerHTML=(d.activity||[]).map(a=>`<div class="fu-entry"><div class="fu-entry-dot ${a.type==='pos'?'pos':'neg'}">${a.type==='pos'?'✓':'✗'}</div><div class="fu-entry-body"><div class="fu-entry-text">${a.text}</div><div class="fu-entry-time">${a.time}</div></div></div>`).join('')||'<div class="fu-empty">Sin actividad</div>';
+  // Activity section now handled by timeline module
   document.getElementById('crm_detailOverlay').classList.add('open');
 }
 
@@ -1490,7 +1496,10 @@ async function crm_saveNewLead(){
   activity_log('lead', newLead.id, 'created', { empresa: newLead.data.empresa, lead: newLead.data.lead });
 }
 
-function crm_addNote(){alert('Nota agregada (feature en desarrollo)');}
+function crm_addNote(){
+  crm_switchPanelTab('actividad');
+  document.getElementById('activity_note_input').focus();
+}
 
 async function crm_deleteLead(){
   if(!crm_editingId||!confirm('Eliminar este lead?'))return;
@@ -1572,6 +1581,7 @@ function prm_renderBoard(searchTerm=''){
             <div class="card-ct">${item.data.contacto||''}</div>
           </div></div>
           ${item.data.canal?'<span class="tag tag-canal">'+item.data.canal+'</span>':''}
+          <div class="card-foot"><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('prospect', item.id)}</div>
         </div>
       </div>`;
     });
@@ -1594,6 +1604,11 @@ function prm_updateStats(filtered=prospects){
 
 function prm_openDetail(id){
   prm_editingId=id;
+  const datosPanel = document.getElementById('prm_panel_datos');
+  const actPanel = document.getElementById('prm_panel_actividad');
+  if (datosPanel) datosPanel.style.display = 'block';
+  if (actPanel) actPanel.style.display = 'none';
+  document.querySelectorAll('#prm_detailOverlay .panel-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
   const p=prospects.find(x=>x.id===id);
   if(!p)return;
   const d=p.data;
