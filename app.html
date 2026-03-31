@@ -1342,9 +1342,12 @@ async function crm_dropCard(e,stageId){
   e.preventDefault();e.currentTarget.classList.remove('drag-over');
   const lead=leads.find(l=>l.id===crm_dragId);
   if(!lead)return;
+  const oldStage = lead.data.estado;
+  if (oldStage === stageId) return;
   lead.data.estado=stageId;
   await crm_saveLead(lead);
   crm_renderBoard();
+  activity_log('lead', lead.id, 'stage_change', { from: oldStage, to: stageId });
 }
 
 function crm_openDetail(id){
@@ -1400,6 +1403,11 @@ async function crm_saveDetail(){
   if(!crm_editingId)return;
   const lead=leads.find(l=>l.id===crm_editingId);
   if(!lead)return;
+  const oldEstado = lead.data.estado;
+  const oldPrioridad = lead.data.prioridad;
+  const oldValor = lead.data.valor;
+  const oldLead = lead.data.lead;
+  const oldEmail = lead.data.email;
   lead.data={
     empresa:document.getElementById('crm_m-empresa').value,
     lead:document.getElementById('crm_m-lead').value,
@@ -1419,6 +1427,22 @@ async function crm_saveDetail(){
   await crm_saveLead(lead);
   crm_renderBoard();
   showToast('Lead actualizado');
+  const newEstado = lead.data.estado;
+  if (oldEstado !== newEstado) {
+    activity_log('lead', crm_editingId, 'stage_change', { from: oldEstado, to: newEstado });
+  }
+  if (oldPrioridad !== lead.data.prioridad) {
+    activity_log('lead', crm_editingId, 'field_change', { field: 'prioridad', from: oldPrioridad, to: lead.data.prioridad });
+  }
+  if (oldValor !== lead.data.valor) {
+    activity_log('lead', crm_editingId, 'field_change', { field: 'valor', from: oldValor, to: lead.data.valor });
+  }
+  if (oldLead !== lead.data.lead) {
+    activity_log('lead', crm_editingId, 'field_change', { field: 'contacto', from: oldLead, to: lead.data.lead });
+  }
+  if (oldEmail !== lead.data.email) {
+    activity_log('lead', crm_editingId, 'field_change', { field: 'email', from: oldEmail, to: lead.data.email });
+  }
 }
 
 async function crm_saveLead(lead){
@@ -1463,12 +1487,16 @@ async function crm_saveNewLead(){
   crm_renderBoard();
   crm_closeAddModal();
   showToast('Lead creado');
+  activity_log('lead', newLead.id, 'created', { empresa: newLead.data.empresa, lead: newLead.data.lead });
 }
 
 function crm_addNote(){alert('Nota agregada (feature en desarrollo)');}
 
 async function crm_deleteLead(){
   if(!crm_editingId||!confirm('Eliminar este lead?'))return;
+  const lead = leads.find(l => l.id === crm_editingId);
+  const logData = lead ? { empresa: lead.data.empresa, lead: lead.data.lead } : {};
+  const deleteId = crm_editingId;
   try{
     const {error}=await supabase.from('leads').delete().eq('id',crm_editingId);
     if(error)throw error;
@@ -1476,6 +1504,7 @@ async function crm_deleteLead(){
     crm_closeDetail();
     crm_renderBoard();
     showToast('Lead eliminado');
+    activity_log('lead', deleteId, 'deleted', logData);
   }catch(e){console.error('Delete error:',e);}
 }
 
@@ -1486,6 +1515,7 @@ function crm_sendEmail(){
   const email=lead.data.email;
   const subject=`Follow-up: ${lead.data.empresa}`;
   window.open(`https://mail.google.com/mail/?view=cm&to=${email}&su=${encodeURIComponent(subject)}`,'_blank');
+  activity_log('lead', crm_editingId, 'email_sent', { to: email, subject: subject });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1611,6 +1641,10 @@ async function prm_saveDetail(){
   if(!prm_editingId)return;
   const p=prospects.find(x=>x.id===prm_editingId);
   if(!p)return;
+  const oldEstado = p.data.estado;
+  const oldPrioridad = p.data.prioridad;
+  const oldContacto = p.data.contacto;
+  const oldEmail = p.data.email;
   p.data={
     empresa:document.getElementById('prm_m-empresa').value,
     contacto:document.getElementById('prm_m-contacto').value,
@@ -1639,6 +1673,19 @@ async function prm_saveDetail(){
     if(error)throw error;
     prm_renderBoard();
     showToast('Prospecto actualizado');
+    const newEstado = p.data.estado;
+    if (oldEstado !== newEstado) {
+      activity_log('prospect', prm_editingId, 'stage_change', { from: oldEstado, to: newEstado });
+    }
+    if (oldPrioridad !== p.data.prioridad) {
+      activity_log('prospect', prm_editingId, 'field_change', { field: 'prioridad', from: oldPrioridad, to: p.data.prioridad });
+    }
+    if (oldContacto !== p.data.contacto) {
+      activity_log('prospect', prm_editingId, 'field_change', { field: 'contacto', from: oldContacto, to: p.data.contacto });
+    }
+    if (oldEmail !== p.data.email) {
+      activity_log('prospect', prm_editingId, 'field_change', { field: 'email', from: oldEmail, to: p.data.email });
+    }
   }catch(e){console.error('Save error:',e);}
 }
 
@@ -1681,6 +1728,7 @@ async function prm_saveNewProspect(){
     prm_renderBoard();
     prm_closeAddModal();
     showToast('Prospecto añadido');
+    activity_log('prospect', newProspect.id, 'created', { empresa: newProspect.data.empresa, contacto: newProspect.data.contacto });
   }catch(e){console.error('Save error:',e);}
 }
 
@@ -1736,16 +1784,22 @@ async function prm_confirmarMoverAlCRM(){
   prm_renderBoard();
   crm_renderBoard();
   showToast('Prospecto movido al CRM');
+  activity_log('lead', newLead.id, 'prm_to_crm', { prospect_empresa: p.data.empresa, new_lead_id: newLead.id });
+  activity_log('prospect', prm_editingId, 'prm_to_crm', { prospect_empresa: p.data.empresa, new_lead_id: newLead.id });
 }
 
 async function prm_deleteProspect(){
   if(!prm_editingId||!confirm('Eliminar este prospecto?'))return;
+  const p = prospects.find(x => x.id === prm_editingId);
+  const logData = p ? { empresa: p.data.empresa, contacto: p.data.contacto } : {};
+  const deleteId = prm_editingId;
   try{
-    await supabase.from('prospects').delete().eq('id',prm_editingId);
-    prospects=prospects.filter(x=>x.id!==prm_editingId);
+    await supabase.from('prospects').delete().eq('id',deleteId);
+    prospects=prospects.filter(x=>x.id!==deleteId);
     prm_closeDetail();
     prm_renderBoard();
     showToast('Prospecto eliminado');
+    activity_log('prospect', deleteId, 'deleted', logData);
   }catch(e){console.error('Delete error:',e);}
 }
 
@@ -2354,8 +2408,11 @@ function automation_runAll() {
       const lastContact = new Date(l.data.ultimoContacto || new Date());
       const daysSince = Math.floor((now - lastContact) / (1000 * 60 * 60 * 24));
       if (daysSince >= 14 && l.data.estado !== 'ghost') {
+        const oldEstado = l.data.estado;
         l.data.estado = 'ghost';
         changes++;
+        activity_log('lead', l.id, 'automation', { rule: 'ghost_rule', description: 'Auto-movido a Ghost por ' + daysSince + ' dias sin contacto' });
+        activity_log('lead', l.id, 'stage_change', { from: oldEstado, to: 'ghost' });
       }
     });
   }
@@ -2367,8 +2424,11 @@ function automation_runAll() {
         const createdAt = new Date(l.created_at || l.data.ultimoContacto || new Date());
         const daysSince = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
         if (daysSince >= 7 && l.data.prioridad !== 'urgente') {
+          const oldPrioridad = l.data.prioridad;
           l.data.prioridad = 'urgente';
           changes++;
+          activity_log('lead', l.id, 'automation', { rule: 'priority_escalation', description: 'Prioridad escalada a urgente por ' + daysSince + ' dias en propuesta' });
+          activity_log('lead', l.id, 'field_change', { field: 'prioridad', from: oldPrioridad, to: 'urgente' });
         }
       }
     });
@@ -2403,6 +2463,7 @@ function crm_quickCalendar(leadId) {
   const dateStr = startDate.toISOString().split('T')[0];
   const url = 'https://calendar.google.com/calendar/r/eventedit?text=' + encodeURIComponent(eventTitle) + '&details=' + encodeURIComponent(eventDetails) + '&dates=' + dateStr.replace(/-/g, '') + '/' + dateStr.replace(/-/g, '');
   window.open(url, '_blank');
+  activity_log('lead', leadId, 'calendar_event', { title: eventTitle, date: dateStr });
 }
 
 function crm_quickEmail(leadId) {
@@ -2416,6 +2477,7 @@ function crm_quickEmail(leadId) {
   const body = 'Hola ' + (d.lead || 'Contacto') + ',\n\nEspero que estés bien. Te escribo para hacer seguimiento.\n\nSaludos';
   const url = 'https://mail.google.com/mail/?view=cm&to=' + d.email + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   window.open(url, '_blank');
+  activity_log('lead', leadId, 'email_sent', { to: d.email, subject: subject });
 }
 
 function crm_quickDrive(leadId) {
