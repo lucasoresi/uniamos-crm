@@ -117,6 +117,44 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .tag-pais{background:rgba(196,229,56,.15);color:#C4E538}
 .tag-canal{background:#E0F2FE;color:var(--blue)}
 
+/* TIMELINE */
+.panel-tabs{display:flex;border-bottom:2px solid var(--border);padding:0 24px;flex-shrink:0}
+.panel-tab{padding:10px 14px;font-size:.78rem;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;font-weight:600;transition:all .15s}
+.panel-tab.active{color:#C4E538;border-bottom-color:#C4E538;font-weight:700}
+.panel-tab:hover:not(.active){color:var(--text-2)}
+.timeline-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.timeline-filters{display:flex;gap:5px;padding:10px 24px;flex-wrap:wrap;flex-shrink:0}
+.tl-pill{padding:3px 10px;border-radius:12px;font-size:.67rem;font-weight:700;cursor:pointer;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);transition:all .15s;font-family:inherit}
+.tl-pill.active{background:rgba(196,229,56,.15);color:#C4E538}
+.tl-pill:hover:not(.active){background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+.timeline-list{flex:1;overflow-y:auto;padding:0 24px}
+.tl-entry{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.tl-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem}
+.tl-icon-stage{background:rgba(196,229,56,.15)}
+.tl-icon-email{background:rgba(59,130,246,.15)}
+.tl-icon-note{background:rgba(251,146,60,.15)}
+.tl-icon-field{background:rgba(255,255,255,.06)}
+.tl-icon-created{background:rgba(34,197,94,.15)}
+.tl-icon-deleted{background:rgba(220,38,38,.15)}
+.tl-icon-automation{background:rgba(234,179,8,.15)}
+.tl-icon-prm{background:rgba(196,229,56,.15)}
+.tl-body{flex:1;min-width:0}
+.tl-title{font-size:.78rem;font-weight:600;color:var(--text)}
+.tl-sub{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:1px}
+.tl-note-text{font-size:.68rem;color:rgba(255,255,255,.55);line-height:1.4;margin-top:2px}
+.tl-time{font-size:.65rem;color:rgba(255,255,255,.3);white-space:nowrap;flex-shrink:0}
+.tl-empty{text-align:center;padding:40px 20px;color:var(--text-3);font-size:.82rem}
+.timeline-input{border-top:1px solid var(--border);padding:10px 24px;background:#0A0A0A;flex-shrink:0}
+.tl-subtypes{display:flex;gap:6px;margin-bottom:6px}
+.tl-subtype{padding:2px 8px;border-radius:8px;font-size:.62rem;font-weight:700;cursor:pointer;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);transition:all .15s;font-family:inherit}
+.tl-subtype.active{background:rgba(251,146,60,.2);color:#FB923C}
+.tl-input-row{display:flex;gap:6px}
+.tl-input-row input{flex:1;padding:7px 10px;background:#1A1A1A;border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#fff;font-size:.78rem;outline:none;font-family:inherit}
+.tl-input-row input:focus{border-color:#C4E538;box-shadow:0 0 0 3px rgba(196,229,56,.2)}
+.tl-input-row button{padding:7px 14px;background:#C4E538;color:#0A0A0A;border:none;border-radius:6px;font-weight:800;font-size:.75rem;cursor:pointer;font-family:inherit}
+.tl-input-row button:hover{background:#A8C42A}
+.card-activity-badge{font-size:.62rem;color:var(--text-3);display:inline-flex;align-items:center;gap:3px}
+
 /* DETAIL PANEL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:flex-end}
 .overlay.open{display:flex}
@@ -2330,6 +2368,250 @@ function crm_quickContact(leadId) {
   a.href = url;
   a.download = d.empresa + '_' + d.lead + '.vcf';
   a.click();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ACTIVITY TIMELINE MODULE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const ACTIVITY_ICONS = {
+  stage_change: { icon: '↗', css: 'tl-icon-stage' },
+  email_sent:   { icon: '✉', css: 'tl-icon-email' },
+  calendar_event: { icon: '📅', css: 'tl-icon-note' },
+  note:         { icon: '📝', css: 'tl-icon-note' },
+  field_change: { icon: '✎', css: 'tl-icon-field' },
+  created:      { icon: '+', css: 'tl-icon-created' },
+  deleted:      { icon: '✗', css: 'tl-icon-deleted' },
+  automation:   { icon: '⚙', css: 'tl-icon-automation' },
+  prm_to_crm:   { icon: '⬆', css: 'tl-icon-prm' }
+};
+
+const ACTIVITY_NOTE_ICONS = {
+  llamada: '📞',
+  reunion: '🤝',
+  nota: '📝',
+  tarea: '✅'
+};
+
+const ACTIVITY_FILTER_MAP = {
+  todos: null,
+  notas: ['note'],
+  emails: ['email_sent', 'calendar_event'],
+  cambios: ['stage_change', 'field_change', 'automation', 'created', 'deleted', 'prm_to_crm']
+};
+
+let activity_currentFilter = 'todos';
+let activity_currentSubtype = 'nota';
+let activity_cachedList = [];
+let activity_lastByEntity = {};
+
+function activity_formatTime(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMs / 3600000);
+  const diffDay = Math.floor(diffMs / 86400000);
+  if (diffMin < 1) return 'ahora';
+  if (diffMin < 60) return 'hace ' + diffMin + 'm';
+  if (diffHr < 24) return 'hace ' + diffHr + 'h';
+  if (diffDay === 1) return 'ayer';
+  if (diffDay < 7) return 'hace ' + diffDay + 'd';
+  return date.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+}
+
+async function activity_log(entityType, entityId, type, data) {
+  try {
+    await supabase.from('activities').insert([{
+      user_id: currentUser.id,
+      entity_type: entityType,
+      entity_id: entityId,
+      type: type,
+      data: data || {}
+    }]);
+  } catch (e) {
+    console.warn('Activity log failed:', e);
+  }
+  // Update local badge cache
+  activity_lastByEntity[entityType + ':' + entityId] = {
+    entity_type: entityType,
+    entity_id: entityId,
+    type: type,
+    data: data || {},
+    created_at: new Date().toISOString()
+  };
+  // If detail panel is open for this entity, refresh timeline
+  const openId = entityType === 'lead' ? crm_editingId : prm_editingId;
+  if (openId === entityId) {
+    activity_loadAndRender(entityType, entityId);
+  }
+}
+
+async function activity_loadTimeline(entityType, entityId) {
+  try {
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .eq('entity_type', entityType)
+      .eq('entity_id', entityId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.warn('Activity load failed:', e);
+    return [];
+  }
+}
+
+function activity_renderEntry(a) {
+  const iconInfo = ACTIVITY_ICONS[a.type] || { icon: '?', css: 'tl-icon-field' };
+  let icon = iconInfo.icon;
+  let title = '';
+  let sub = '';
+  let noteText = '';
+
+  switch (a.type) {
+    case 'stage_change':
+      title = 'Movido a <span style="color:#C4E538">' + (CRM_STAGES.find(s => s.id === a.data.to)?.label || PRM_STAGES.find(s => s.id === a.data.to)?.label || a.data.to) + '</span>';
+      sub = 'desde ' + (CRM_STAGES.find(s => s.id === a.data.from)?.label || PRM_STAGES.find(s => s.id === a.data.from)?.label || a.data.from) + ' · Auto';
+      break;
+    case 'note':
+      icon = ACTIVITY_NOTE_ICONS[a.data.subtype] || '📝';
+      title = (a.data.subtype || 'Nota').charAt(0).toUpperCase() + (a.data.subtype || 'nota').slice(1);
+      noteText = a.data.text || '';
+      break;
+    case 'email_sent':
+      title = 'Email enviado';
+      sub = (a.data.subject || '') + ' · ' + (a.data.to || '');
+      break;
+    case 'calendar_event':
+      title = 'Evento de calendario';
+      sub = (a.data.title || '') + ' · ' + (a.data.date || '');
+      break;
+    case 'field_change':
+      title = (a.data.field || 'Campo') + ' cambiado';
+      sub = (a.data.from || '?') + ' → ' + (a.data.to || '?') + ' · Auto';
+      break;
+    case 'created':
+      title = 'Lead creado';
+      sub = (a.data.empresa || '') + ' · ' + (a.data.lead || a.data.contacto || '');
+      break;
+    case 'deleted':
+      title = 'Eliminado';
+      sub = (a.data.empresa || '') + ' · ' + (a.data.lead || a.data.contacto || '');
+      break;
+    case 'automation':
+      title = 'Automatización';
+      sub = a.data.description || a.data.rule || '';
+      break;
+    case 'prm_to_crm':
+      title = 'Promovido a CRM';
+      sub = (a.data.prospect_empresa || '') + ' · Auto';
+      break;
+    default:
+      title = a.type;
+  }
+
+  return '<div class="tl-entry">' +
+    '<div class="tl-icon ' + iconInfo.css + '">' + icon + '</div>' +
+    '<div class="tl-body">' +
+      '<div class="tl-title">' + title + '</div>' +
+      (sub ? '<div class="tl-sub">' + sub + '</div>' : '') +
+      (noteText ? '<div class="tl-note-text">' + noteText + '</div>' : '') +
+    '</div>' +
+    '<div class="tl-time">' + activity_formatTime(a.created_at) + '</div>' +
+  '</div>';
+}
+
+function activity_renderTimeline(activities, containerId) {
+  const filterTypes = ACTIVITY_FILTER_MAP[activity_currentFilter];
+  const filtered = filterTypes ? activities.filter(a => filterTypes.includes(a.type)) : activities;
+  const container = document.getElementById(containerId || 'activity_timeline_list');
+  if (!container) return;
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="tl-empty">Sin actividad registrada</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(a => activity_renderEntry(a)).join('');
+}
+
+async function activity_loadAndRender(entityType, entityId) {
+  activity_cachedList = await activity_loadTimeline(entityType, entityId);
+  const containerId = entityType === 'lead' ? 'activity_timeline_list' : 'activity_timeline_list_prm';
+  activity_renderTimeline(activity_cachedList, containerId);
+}
+
+function activity_setFilter(filter) {
+  activity_currentFilter = filter;
+  document.querySelectorAll('.tl-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.filter === filter);
+  });
+  activity_renderTimeline(activity_cachedList);
+}
+
+function activity_setSubtype(subtype) {
+  activity_currentSubtype = subtype;
+  document.querySelectorAll('.tl-subtype').forEach(s => {
+    s.classList.toggle('active', s.dataset.subtype === subtype);
+  });
+}
+
+async function activity_addNote(entityType, entityId) {
+  const input = document.getElementById('activity_note_input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  await activity_log(entityType, entityId, 'note', {
+    text: text,
+    subtype: activity_currentSubtype
+  });
+  input.value = '';
+}
+
+async function activity_addNote_prm() {
+  const input = document.getElementById('activity_note_input_prm');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  await activity_log('prospect', prm_editingId, 'note', {
+    text: text,
+    subtype: activity_currentSubtype
+  });
+  input.value = '';
+}
+
+async function activity_loadLastActivities() {
+  try {
+    const { data, error } = await supabase
+      .from('activities')
+      .select('entity_type,entity_id,type,data,created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+    activity_lastByEntity = {};
+    (data || []).forEach(a => {
+      const key = a.entity_type + ':' + a.entity_id;
+      if (!activity_lastByEntity[key]) {
+        activity_lastByEntity[key] = a;
+      }
+    });
+  } catch (e) {
+    console.warn('Activity badge load failed:', e);
+  }
+}
+
+function activity_getBadgeHtml(entityType, entityId) {
+  const a = activity_lastByEntity[entityType + ':' + entityId];
+  if (!a) return '';
+  const typeLabels = {
+    stage_change: 'movido', email_sent: 'email', calendar_event: 'calendario',
+    note: a.data?.subtype || 'nota', field_change: 'editado', created: 'creado',
+    deleted: 'eliminado', automation: 'auto', prm_to_crm: 'promovido'
+  };
+  const label = typeLabels[a.type] || a.type;
+  return '<span class="card-activity-badge">🕐 ' + activity_formatTime(a.created_at) + ': ' + label + '</span>';
 }
 
 // Initialize API webhooks from localStorage
