@@ -6,16 +6,16 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GCDBCN/uniamos-crm.git"
+    "url": "git+https://github.com/lucasoresi/uniamos-crm.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/GCDBCN/uniamos-crm/issues"
   },
-  "homepage": "https://github.com/GCDBCN/uniamos-crm#readme",
+  "homepage": "https://github.com/lucasoresi/uniamos-crm#readme",
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.5.0"
