@@ -1203,7 +1203,69 @@ async function autoSetupData(){
     // Update local arrays
     leads.push(...leadsToInsert);
     prospects.push(...prospectsToInsert);
-    
+
+    // Seed demo activities (fails gracefully if table doesn't exist yet)
+    try {
+      const ago = (days, hours=0) => new Date(Date.now() - (days*86400+hours*3600)*1000).toISOString();
+      const [eci, almexca, seguridad, optimus, berlingo, gabor, ccb, nextech] = leadsToInsert;
+      const activitiesToInsert = [
+        // Tallers ECI — llamada + reunion + followup
+        {user_id:currentUser.id,entity_type:'lead',entity_id:eci.id,type:'created',data:{empresa:'Tallers ECI',lead:'Eusebi Roca Reguant'},created_at:ago(14)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:eci.id,type:'note',data:{subtype:'llamada',text:'Llamada inicial. Muy interesado en automatizar su proceso de ventas. Pide demo la próxima semana.'},created_at:ago(12)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:eci.id,type:'email_sent',data:{to:'eci@tallereseci.com',subject:'Demo personalizada Uniamos CRM'},created_at:ago(10)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:eci.id,type:'note',data:{subtype:'reunion',text:'Demo por videoconferencia. Mostré kanban y automatizaciones. Quieren propuesta formal.'},created_at:ago(7)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:eci.id,type:'stage_change',data:{from:'sininfo',to:'activa'},created_at:ago(7)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:eci.id,type:'note',data:{subtype:'tarea',text:'Enviar propuesta económica con desglose de licencias para 5 usuarios'},created_at:ago(2)},
+
+        // Seguridad Shatter — propuesta avanzada
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'created',data:{empresa:'Seguridad Shatter'},created_at:ago(30)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'note',data:{subtype:'llamada',text:'Contacto inicial por LinkedIn. Necesitan CRM para su equipo de ventas de 8 personas.'},created_at:ago(28)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'stage_change',data:{from:'sininfo',to:'activa'},created_at:ago(28)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'note',data:{subtype:'reunion',text:'1ª reunión: presentación general del producto. Buena recepción del equipo.'},created_at:ago(20)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'note',data:{subtype:'reunion',text:'2ª reunión: implementación IA realizada el 3 de marzo. Validaron el caso de uso con automatizaciones.'},created_at:ago(15)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'stage_change',data:{from:'activa',to:'propuesta'},created_at:ago(15)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'email_sent',data:{to:'d.general@seguridadshatter.com',subject:'Propuesta Uniamos CRM — Plan Equipo 8 usuarios'},created_at:ago(14)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:seguridad.id,type:'note',data:{subtype:'tarea',text:'Llamar la próxima semana para hacer seguimiento de la propuesta'},created_at:ago(3)},
+
+        // Optimus — negociacion activa
+        {user_id:currentUser.id,entity_type:'lead',entity_id:optimus.id,type:'created',data:{empresa:'Optimus',lead:'Miquel Molas / JP Lao'},created_at:ago(25)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:optimus.id,type:'note',data:{subtype:'reunion',text:'Reunión en oficina Girona el 5 de marzo. Muy buena química. Miquel ya usó HubSpot antes.'},created_at:ago(18)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:optimus.id,type:'calendar_event',data:{title:'Follow-up Optimus — llamada con JP Lao',date:'2026-03-23'},created_at:ago(10)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:optimus.id,type:'note',data:{subtype:'llamada',text:'Llamada 23 mar con JP Lao. Quieren integración con Google Calendar y Gmail. Confirmado.'},created_at:ago(9)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:optimus.id,type:'email_sent',data:{to:'mmolas@optimus.es',subject:'Resumen integración Google Workspace + Uniamos'},created_at:ago(8)},
+
+        // Berlingo — reunion reciente
+        {user_id:currentUser.id,entity_type:'lead',entity_id:berlingo.id,type:'created',data:{empresa:'Grupo Berlingo'},created_at:ago(20)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:berlingo.id,type:'note',data:{subtype:'reunion',text:'Reunión 10 mar. Yvonne muy entusiasmada. Oleopardi pidió comparativa con Salesforce.'},created_at:ago(12)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:berlingo.id,type:'email_sent',data:{to:'oleopardi@berlingo.com.mx',subject:'Comparativa Uniamos vs Salesforce'},created_at:ago(10)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:berlingo.id,type:'note',data:{subtype:'tarea',text:'Preparar caso de éxito para empresa similar en retail LATAM'},created_at:ago(5)},
+
+        // Gabor — urgente, cierre inminente
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'created',data:{empresa:'Gabor',lead:'Ahmed Becerril'},created_at:ago(22)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'note',data:{subtype:'llamada',text:'Primer contacto con Ahmed. Tienen 3 decisores: Ahmed, Elizabeth y Arturo. Hay presupuesto aprobado.'},created_at:ago(18)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'note',data:{subtype:'reunion',text:'Presentación IA vía Teams el 17 mar. Los tres decisores presentes. Preguntas técnicas muy específicas.'},created_at:ago(10)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'stage_change',data:{from:'activa',to:'propuesta'},created_at:ago(10)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'email_sent',data:{to:'ahmed.becerril@gabor.com.mx',subject:'Propuesta Gabor — Implementación IA + CRM'},created_at:ago(9)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'calendar_event',data:{title:'Cierre contractual Gabor',date:'2026-04-10'},created_at:ago(2)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:gabor.id,type:'field_change',data:{field:'prioridad',from:'alta',to:'urgente'},created_at:ago(1)},
+
+        // CCB — reunion + tickets pendientes
+        {user_id:currentUser.id,entity_type:'lead',entity_id:ccb.id,type:'created',data:{empresa:'CCB (Call Center Barcelona)',lead:'Eva Lui'},created_at:ago(16)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:ccb.id,type:'note',data:{subtype:'reunion',text:'Reunión 24 mar con Eva. Le interesa especialmente el PRM para gestionar prospectos entrantes.'},created_at:ago(7)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:ccb.id,type:'note',data:{subtype:'tarea',text:'Recordar enviar tickets de soporte el 31 de marzo'},created_at:ago(6)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:ccb.id,type:'email_sent',data:{to:'eva.lui@callcenterbarcelona.es',subject:'Material adicional + próximos pasos'},created_at:ago(4)},
+
+        // Nextech — reunion confirmada
+        {user_id:currentUser.id,entity_type:'lead',entity_id:nextech.id,type:'created',data:{empresa:'Nextech',lead:'Pedro Gallardo'},created_at:ago(10)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:nextech.id,type:'note',data:{subtype:'llamada',text:'Llamada de calificación. Pedro es el Director Comercial, tiene autonomía para decidir.'},created_at:ago(8)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:nextech.id,type:'calendar_event',data:{title:'Demo Nextech — Pedro Gallardo',date:'2026-03-27'},created_at:ago(6)},
+        {user_id:currentUser.id,entity_type:'lead',entity_id:nextech.id,type:'note',data:{subtype:'reunion',text:'Demo confirmada 27 mar. Muy bien. Equipo de 12 vendedores en México y USA.'},created_at:ago(5)},
+      ];
+      await supabase.from('activities').insert(activitiesToInsert);
+    } catch(e) {
+      console.warn('Demo activities seed skipped (table may not exist yet):', e.message);
+    }
+
     showToast(`¡CRM configurado! Se cargaron ${leadsToInsert.length} leads y ${prospectsToInsert.length} prospectos`);
   }catch(e){
     console.error('Auto-setup error:',e);
