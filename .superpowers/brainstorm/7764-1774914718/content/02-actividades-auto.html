@@ -1,0 +1,61 @@
+<h2>¿Qué actividades se auto-registran en el timeline?</h2>
+<p class="subtitle">Seleccioná todas las que querés incluir. Referencia: Clientify, HubSpot, Pipedrive.</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="stage-change" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Cambio de etapa</h3>
+      <p>Auto-log cuando un lead/prospecto se mueve entre columnas del pipeline (ej: "Activa → Propuesta")</p>
+    </div>
+  </div>
+  <div class="option" data-choice="email-sent" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Email enviado</h3>
+      <p>Registrar cuando se usa el botón de Gmail/email del CRM. Se guarda asunto + destinatario.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="calendar-event" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>Evento de calendario</h3>
+      <p>Auto-log cuando se crea un evento de Google Calendar desde el CRM.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="field-change" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>Cambio de campos</h3>
+      <p>Registrar ediciones importantes: prioridad, valor, contacto, estado. Ej: "Prioridad: media → urgente"</p>
+    </div>
+  </div>
+  <div class="option" data-choice="lead-created" onclick="toggleSelect(this)">
+    <div class="letter">5</div>
+    <div class="content">
+      <h3>Creación / Eliminación</h3>
+      <p>Auto-log cuando se crea un nuevo lead/prospecto o se elimina uno existente.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="prm-to-crm" onclick="toggleSelect(this)">
+    <div class="letter">6</div>
+    <div class="content">
+      <h3>Promoción PRM → CRM</h3>
+      <p>Registrar cuando un prospecto se promueve a lead del CRM.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="manual-note" onclick="toggleSelect(this)">
+    <div class="letter">7</div>
+    <div class="content">
+      <h3>Notas manuales</h3>
+      <p>El usuario puede agregar notas libres (texto, tipo de actividad: llamada/reunión/nota). Es la única acción manual.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="automation-run" onclick="toggleSelect(this)">
+    <div class="letter">8</div>
+    <div class="content">
+      <h3>Acciones de automatización</h3>
+      <p>Registrar cuando una regla automática modifica el lead (ej: "Auto-movido a Ghost por inactividad").</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,3 @@
+[      60ms] Identifier 'supabase' has already been declared
+[    9178ms] ReferenceError: switchView is not defined
+    at HTMLDivElement.onclick (http://localhost:3000/app.html:364:67)
