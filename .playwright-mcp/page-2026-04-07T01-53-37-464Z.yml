@@ -1,0 +1,58 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - text: Un
+        - generic [ref=e6]: IA
+        - text: mos
+      - generic [ref=e7]: Sales Hub
+    - generic [ref=e8]:
+      - generic [ref=e9]: Ventas Activas
+      - generic [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]: 📊
+        - text: CRM Pipeline
+        - generic [ref=e12]: "0"
+      - generic [ref=e13] [cursor=pointer]:
+        - generic [ref=e14]: 🎯
+        - text: PRM Prospectos
+        - generic [ref=e15]: "0"
+      - generic [ref=e16]: Herramientas
+      - generic [ref=e17] [cursor=pointer]:
+        - generic [ref=e18]: ⚡
+        - text: Automatizaciones
+      - generic [ref=e19] [cursor=pointer]:
+        - generic [ref=e20]: 🔗
+        - text: Integraciones
+      - generic [ref=e21] [cursor=pointer]:
+        - generic [ref=e22]: 🔌
+        - text: API
+      - generic [ref=e23]: CRM
+      - generic [ref=e24] [cursor=pointer]:
+        - generic [ref=e25]: ➕
+        - text: Nuevo Lead
+      - generic [ref=e26]: PRM
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]: "?"
+        - generic [ref=e31]: Usuario
+      - button "Cerrar sesión" [ref=e32] [cursor=pointer]
+  - generic [ref=e34]:
+    - generic [ref=e35]:
+      - generic [ref=e36]: Ventas › Pipeline
+      - generic [ref=e38]:
+        - generic: 🔍
+        - textbox "Buscar empresa o contacto…" [ref=e39]
+      - button "+ Nuevo Lead" [ref=e41] [cursor=pointer]
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - text: Total
+        - generic [ref=e45]: "0"
+      - generic [ref=e47]:
+        - text: Activos
+        - generic [ref=e49]: "0"
+      - generic [ref=e51]:
+        - text: Con propuesta
+        - generic [ref=e53]: "0"
+      - generic [ref=e55]:
+        - text: 💰 Pipeline
+        - generic [ref=e56]: —

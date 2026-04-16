@@ -383,6 +383,28 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .card-quick-actions a:hover{background:var(--purple);color:#fff}
 .score-badge{display:inline-block;background:var(--purple);color:#fff;padding:2px 8px;border-radius:12px;font-size:.65rem;font-weight:800}
 .days-since{font-size:.68rem;color:var(--orange);font-weight:700}
+/* ROTTING & PRM QUICK ACTIONS */
+.card-rot-strip{height:3px;position:absolute;top:0;left:4px;right:0;border-radius:0 8px 0 0;opacity:.85}
+.card-rot-label{font-size:.69rem;font-weight:700;display:flex;align-items:center;gap:4px;margin:3px 0 5px}
+.fu-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:6px;font-size:.67rem;font-weight:800;white-space:nowrap;background:rgba(196,229,56,.15);color:#C4E538;margin-left:auto}
+.prm-card-actions{display:flex;gap:4px;margin-top:8px;opacity:0;transition:opacity .15s;flex-wrap:wrap}
+.card:hover .prm-card-actions{opacity:1}
+.card-btn{padding:4px 9px;border-radius:6px;font-size:.68rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .14s;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.card-btn-fu{background:rgba(196,229,56,.12);color:#C4E538}.card-btn-fu:hover{background:#C4E538;color:#0A0A0A}
+.card-btn-pos{background:rgba(22,163,74,.15);color:#4ADE80}.card-btn-pos:hover{background:#16A34A;color:#fff}
+.card-btn-neg{background:rgba(220,38,38,.15);color:#F87171}.card-btn-neg:hover{background:#DC2626;color:#fff}
+.card-btn-crm{background:rgba(251,191,36,.12);color:#FCD34D}.card-btn-crm:hover{background:#D97706;color:#fff}
+.prm-tags{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+/* GMAIL PANEL */
+.gmail-item{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:8px;background:#161616;border:1px solid var(--border);margin-bottom:8px;cursor:default;transition:border-color .14s}
+.gmail-item:hover{border-color:rgba(196,229,56,.3)}
+.gmail-item-header{display:flex;align-items:center;gap:8px}
+.gmail-item-from{font-size:.78rem;font-weight:700;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gmail-item-date{font-size:.68rem;color:var(--text-3);white-space:nowrap}
+.gmail-item-subject{font-size:.75rem;font-weight:600;color:var(--text-2)}
+.gmail-item-snippet{font-size:.72rem;color:var(--text-3);line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gmail-loading{color:var(--text-3);font-size:.82rem;text-align:center;padding:30px 0}
+.gmail-no-token{background:rgba(196,229,56,.05);border:1px solid rgba(196,229,56,.2);border-radius:8px;padding:16px;font-size:.82rem;color:var(--text-2);text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
@@ -482,6 +504,10 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
     <div class="panel-tabs">
       <div class="panel-tab active" onclick="crm_switchPanelTab('datos')">Datos</div>
       <div class="panel-tab" onclick="crm_switchPanelTab('actividad')">Actividad</div>
+      <div class="panel-tab" onclick="crm_switchPanelTab('gmail')">📧 Gmail</div>
+    </div>
+    <div id="crm_panel_gmail" style="display:none;flex:1;overflow-y:auto;padding:16px 24px">
+      <div id="crm_gmail_list"><div style="color:var(--text-3);font-size:.82rem;padding:20px 0;text-align:center">Seleccioná un lead para ver emails</div></div>
     </div>
     <div class="panel-body" id="crm_panel_datos">
       <div class="pf-section">
@@ -647,6 +673,10 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
     <div class="panel-tabs">
       <div class="panel-tab active" onclick="prm_switchPanelTab('datos')">Datos</div>
       <div class="panel-tab" onclick="prm_switchPanelTab('actividad')">Actividad</div>
+      <div class="panel-tab" onclick="prm_switchPanelTab('gmail')">📧 Gmail</div>
+    </div>
+    <div id="prm_panel_gmail" style="display:none;flex:1;overflow-y:auto;padding:16px 24px">
+      <div id="prm_gmail_list"><div style="color:var(--text-3);font-size:.82rem;padding:20px 0;text-align:center">Seleccioná un prospecto para ver emails</div></div>
     </div>
     <div class="panel-body" id="prm_panel_datos">
       <div class="pf-section">
@@ -998,7 +1028,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div>
             <div style="font-size:.7rem;color:var(--text-3);font-weight:700;margin-bottom:6px">Base URL</div>
-            <div style="font-family:'Courier New',monospace;font-size:.75rem;color:var(--text);word-break:break-all">https://xhqufddfvwzdptqhohxe.supabase.co/rest/v1</div>
+            <div style="font-family:'Courier New',monospace;font-size:.75rem;color:var(--text);word-break:break-all">https://llleoqfeluptmmbqluab.supabase.co/rest/v1</div>
           </div>
           <div>
             <div style="font-size:.7rem;color:var(--text-3);font-weight:700;margin-bottom:6px">Anon Key</div>
@@ -1015,7 +1045,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
             <h4><span class="api-method get">GET</span> /leads</h4>
             <div class="api-endpoint-desc">Obtiene todos los leads del usuario actual</div>
             <div class="api-code-copy">
-              <div class="code-snippet">curl -X GET "https://xhqufddfvwzdptqhohxe.supabase.co/rest/v1/leads" -H "Authorization: Bearer KEY"</div>
+              <div class="code-snippet">curl -X GET "https://llleoqfeluptmmbqluab.supabase.co/rest/v1/leads" -H "Authorization: Bearer KEY"</div>
               <button class="btn-copy" onclick="api_copyToClipboard(this.previousElementSibling.textContent)">Copiar</button>
             </div>
             <button class="btn-main" style="width:100%;margin-top:8px;padding:8px" onclick="api_testGetLeads()">Probar GET</button>
@@ -1108,9 +1138,9 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 <script>
 
 // SUPABASE CONFIG
-const SUPABASE_URL='https://xhqufddfvwzdptqhohxe.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhocXVmZGRmdnd6ZHB0cWhvaHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODc0MzQsImV4cCI6MjA4OTM2MzQzNH0.GSqA2mfjppfI_Rar59bgs_sSPjLT4aYzusFi-6yI0b4';
-const supabase=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL='https://llleoqfeluptmmbqluab.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsbGVvcWZlbHVwdG1tYnFsdWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTAzODMsImV4cCI6MjA5MTkyNjM4M30.DQ_iD6xcb0kxr3ZyOl2c_eRhpR9RIcRmBi7tYVjNf5U';
+var supabase=window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser=null;
 let leads=[], prospects=[];
@@ -1121,6 +1151,12 @@ async function initSession() {
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){window.location.href='login.html';}
     currentUser=session.user;
+    // Guardar provider_token de Google para Gmail API (se pierde en refresh de sesión)
+    if(session.provider_token){sessionStorage.setItem('gtoken',session.provider_token);}
+    else if(session.user?.app_metadata?.provider==='google'){
+      // Token expiró — limpiar por si era viejo
+      sessionStorage.removeItem('gtoken');
+    }
     const name=session.user.user_metadata?.name||session.user.email?.split('@')[0]||'Usuario';
     const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
     document.getElementById('sb-user-name').textContent=name;
@@ -1295,6 +1331,29 @@ function makeLogoEl(domain,empresa,size=28,radius=6){
 function makeFbLogo(empresa,size=28,radius=6){const d=document.createElement('div');d.className='clogo-fb';d.style.cssText=`width:${size}px;height:${size}px;border-radius:${radius}px;background:${logoColor(empresa||'?')};font-size:${Math.floor(size*.3)}px`;d.textContent=initials(empresa);return d;}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
 
+// ── ROTTING HELPERS ────────────────────────────────────────────────────────
+function daysSince(dateStr){
+  if(!dateStr||dateStr==='—')return null;
+  // Try ISO format first (YYYY-MM-DD), then Spanish format (DD Mon YYYY)
+  let d=new Date(dateStr);
+  if(isNaN(d)){
+    const meses={'ene':0,'feb':1,'mar':2,'abr':3,'may':4,'jun':5,'jul':6,'ago':7,'sep':8,'oct':9,'nov':10,'dic':11};
+    const m=dateStr.toLowerCase().match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+    if(m)d=new Date(parseInt(m[3]),meses[m[2]]||0,parseInt(m[1]));
+  }
+  if(isNaN(d))return null;
+  return Math.floor((Date.now()-d.getTime())/86400000);
+}
+function rotInfo(dateStr,estado){
+  const skipStates=['positivo','negativo','nuevo','cierre'];
+  if(skipStates.includes(estado))return null;
+  const d=daysSince(dateStr);
+  if(d===null)return null;
+  if(d>=14)return{color:'#EF4444',label:`⚠️ ${d}d sin contacto`};
+  if(d>=7) return{color:'#F59E0B',label:`🕐 ${d}d sin contacto`};
+  return null;
+}
+
 // ── VIEW SWITCHER ─────────────────────────────────────────────────────────
 function switchView(view){
   document.getElementById('view-crm').style.display=view==='crm'?'flex':'none';
@@ -1379,7 +1438,10 @@ function crm_renderBoard(searchTerm=''){
     items.forEach(item=>{
       const color=logoColor(item.data.empresa||'?');
       const badgeClass={'urgente':'b-urg','alta':'b-alta','media':'b-media','baja':'b-baja'}[item.data.prioridad]||'b-media';
-      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')"><div class="card-bar" style="background:${stage.color}"></div><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('lead', item.id)}</div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
+      const rot=rotInfo(item.data.ultimoContacto, item.data.estado);
+      const rotStrip=rot?`<div class="card-rot-strip" style="background:${rot.color}"></div>`:'';
+      const rotLabel=rot?`<div class="card-rot-label" style="color:${rot.color}">${rot.label}</div>`:'';
+      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')">${rotStrip}<div class="card-bar" style="background:${stage.color}"></div><div class="card-body" style="margin-top:${rot?'3px':'0'}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}${rotLabel}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('lead', item.id)}</div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
     });
     html+='</div><button class="col-add-btn" onclick="crm_openAddModal()">+ Añadir Lead</button></div>';
   });
@@ -1459,11 +1521,16 @@ function crm_closeDetail(){
 function crm_switchPanelTab(tab) {
   document.getElementById('crm_panel_datos').style.display = tab === 'datos' ? 'block' : 'none';
   document.getElementById('crm_panel_actividad').style.display = tab === 'actividad' ? 'flex' : 'none';
+  document.getElementById('crm_panel_gmail').style.display = tab === 'gmail' ? 'block' : 'none';
   document.querySelectorAll('#crm_detailOverlay .panel-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   if (tab === 'actividad' && crm_editingId) {
     activity_currentFilter = 'todos';
     activity_loadAndRender('lead', crm_editingId);
+  }
+  if (tab === 'gmail' && crm_editingId) {
+    const lead = leads.find(l => l.id === crm_editingId);
+    gmail_loadForContact(lead?.data?.email, 'crm_gmail_list');
   }
 }
 
@@ -1635,15 +1702,35 @@ function prm_renderBoard(searchTerm=''){
       <div class="col-body">`;
     if(items.length===0){html+='<div class="col-empty">Sin prospectos</div>';}
     items.forEach(item=>{
-      html+=`<div class="card" onclick="prm_openDetail('${item.id}')">
+      const prot=rotInfo(item.data.ultimoContacto, item.data.estado);
+      const rotStrip=prot?`<div class="card-rot-strip" style="background:${prot.color}"></div>`:'';
+      const rotLabel=prot?`<div class="card-rot-label" style="color:${prot.color}">${prot.label}</div>`:'';
+      const fuCount=(item.data.fuLog||[]).length;
+      const fuBadge=fuCount>0?`<span class="fu-badge">FU ${fuCount}</span>`:'';
+      const isPos=item.data.estado==='positivo';
+      const isNeg=item.data.estado==='negativo';
+      const tagCanal=item.data.canal?`<span class="tag tag-canal" style="font-size:.63rem">${item.data.canal}</span>`:'';
+      const tagSector=item.data.sector?`<span class="tag tag-sector" style="font-size:.63rem">${item.data.sector}</span>`:'';
+      html+=`<div class="card" onclick="prm_openDetail('${item.id}')">${rotStrip}
         <div class="card-bar" style="background:${stage.color}"></div>
-        <div class="card-body">
-          <div class="card-top">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info">
+        <div class="card-body" style="margin-top:${prot?'3px':'0'}">
+          <div class="card-top" style="align-items:flex-start">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info" style="flex:1;min-width:0">
             <div class="card-co">${item.data.empresa||'?'}</div>
             <div class="card-ct">${item.data.contacto||''}</div>
-          </div></div>
-          ${item.data.canal?'<span class="tag tag-canal">'+item.data.canal+'</span>':''}
-          <div class="card-foot"><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('prospect', item.id)}</div>
+            ${item.data.cargo?`<div style="font-size:.63rem;color:var(--text-3);margin-top:1px">${item.data.cargo}</div>`:''}
+          </div>${fuBadge}</div>
+          ${(tagCanal||tagSector)?`<div class="prm-tags">${tagCanal}${tagSector}</div>`:''}
+          ${rotLabel}
+          <div class="card-foot">
+            <span class="card-date">${item.data.ultimoContacto||'Sin contacto'}</span>
+            ${activity_getBadgeHtml('prospect', item.id)}
+          </div>
+          <div class="prm-card-actions">
+            <button class="card-btn card-btn-fu" onclick="event.stopPropagation();prm_quickFU('${item.id}')">📤 Log FU</button>
+            ${!isPos&&!isNeg?`<button class="card-btn card-btn-pos" onclick="event.stopPropagation();prm_quickPos('${item.id}')">✅ Positivo</button>`:''}
+            ${!isPos&&!isNeg?`<button class="card-btn card-btn-neg" onclick="event.stopPropagation();prm_quickNeg('${item.id}')">❌ No</button>`:''}
+            ${isPos?`<button class="card-btn card-btn-crm" onclick="event.stopPropagation();prm_openDetail('${item.id}');setTimeout(()=>prm_moverAlCRM(),50)">🚀 → CRM</button>`:''}
+          </div>
         </div>
       </div>`;
     });
@@ -1706,11 +1793,16 @@ function prm_closeDetail(){document.getElementById('prm_detailOverlay').classLis
 function prm_switchPanelTab(tab) {
   document.getElementById('prm_panel_datos').style.display = tab === 'datos' ? 'block' : 'none';
   document.getElementById('prm_panel_actividad').style.display = tab === 'actividad' ? 'flex' : 'none';
+  document.getElementById('prm_panel_gmail').style.display = tab === 'gmail' ? 'block' : 'none';
   document.querySelectorAll('#prm_detailOverlay .panel-tab').forEach(t => t.classList.remove('active'));
   event.target.classList.add('active');
   if (tab === 'actividad' && prm_editingId) {
     activity_currentFilter = 'todos';
     activity_loadAndRender('prospect', prm_editingId);
+  }
+  if (tab === 'gmail' && prm_editingId) {
+    const prospect = prospects.find(p => p.id === prm_editingId);
+    gmail_loadForContact(prospect?.data?.email, 'prm_gmail_list');
   }
 }
 
@@ -1766,6 +1858,16 @@ async function prm_saveDetail(){
   }catch(e){console.error('Save error:',e);}
 }
 
+// Guardar prospecto directamente (sin leer del panel — para quick actions)
+async function prm_saveProspect(p){
+  try{
+    const {error}=await supabase.from('prospects').upsert({
+      id:p.id,user_id:currentUser.id,data:p.data,updated_at:new Date().toISOString()
+    });
+    if(error)throw error;
+  }catch(e){console.error('prm_saveProspect error:',e);}
+}
+
 function prm_openAddModal(){document.getElementById('prm_addOverlay').classList.add('open');}
 function prm_closeAddModal(){document.getElementById('prm_addOverlay').classList.remove('open');}
 
@@ -1812,6 +1914,39 @@ async function prm_saveNewProspect(){
 function prm_marcarPositivo(){if(!prm_editingId)return;const p=prospects.find(x=>x.id===prm_editingId);if(p){p.data.estado='positivo';prm_saveDetail();}}
 function prm_marcarNegativo(){if(!prm_editingId)return;const p=prospects.find(x=>x.id===prm_editingId);if(p){p.data.estado='negativo';prm_saveDetail();}}
 function prm_logFollowUp(){alert('Log Follow-up (feature en desarrollo)');}
+
+// ── QUICK ACTIONS (desde card sin abrir panel) ─────────────────────────────
+async function prm_quickFU(id){
+  const text=prompt('¿Qué acción hiciste? (ej: Envié email de follow-up)');
+  if(!text)return;
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  p.data.fuLog=p.data.fuLog||[];
+  p.data.fuLog.unshift({type:'fu',text,date:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})});
+  const fuSteps=['contactado','fu1','fu2','fu3'];
+  const curIdx=fuSteps.indexOf(p.data.estado);
+  if(curIdx>=0&&curIdx<fuSteps.length-1)p.data.estado=fuSteps[curIdx+1];
+  else if(p.data.estado==='nuevo')p.data.estado='contactado';
+  p.data.ultimoContacto=new Date().toISOString().split('T')[0];
+  await prm_saveProspect(p);
+  prm_renderBoard();
+  showToast('📤 Follow-up registrado');
+}
+async function prm_quickPos(id){
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  p.data.estado='positivo';
+  p.data.ultimoContacto=new Date().toISOString().split('T')[0];
+  await prm_saveProspect(p);
+  prm_renderBoard();
+  showToast('✅ Marcado como positivo');
+}
+async function prm_quickNeg(id){
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  p.data.estado='negativo';
+  p.data.ultimoContacto=new Date().toISOString().split('T')[0];
+  await prm_saveProspect(p);
+  prm_renderBoard();
+  showToast('❌ Marcado como negativo');
+}
 
 function prm_moverAlCRM(){
   if(!prm_editingId)return;
@@ -2831,6 +2966,83 @@ function activity_getBadgeHtml(entityType, entityId) {
 // Initialize API webhooks from localStorage
 if (localStorage.getItem('apiWebhooks')) {
   apiWebhooks = JSON.parse(localStorage.getItem('apiWebhooks'));
+}
+
+// ── GMAIL INTEGRATION ─────────────────────────────────────────────────────
+async function gmail_loadForContact(email, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const token = sessionStorage.getItem('gtoken');
+  if (!token) {
+    container.innerHTML = `<div class="gmail-no-token">
+      <div style="font-size:1.4rem;margin-bottom:8px">📧</div>
+      <strong>Gmail no conectado</strong><br>
+      Para ver emails, cerrá sesión y volvé a ingresar con Google.<br>
+      <small style="opacity:.6;margin-top:4px;display:block">El token de Google solo está disponible al iniciar sesión.</small>
+    </div>`;
+    return;
+  }
+
+  if (!email || email === '—') {
+    container.innerHTML = `<div class="gmail-loading">Este contacto no tiene email registrado</div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="gmail-loading">⏳ Buscando emails de ${email}…</div>`;
+
+  try {
+    const q = encodeURIComponent(`from:${email} OR to:${email}`);
+    const listRes = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=15`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (listRes.status === 401) {
+      sessionStorage.removeItem('gtoken');
+      container.innerHTML = `<div class="gmail-no-token">Token de Google expirado. Ingresá nuevamente con Google para ver emails.</div>`;
+      return;
+    }
+
+    const listData = await listRes.json();
+    const messages = listData.messages || [];
+
+    if (messages.length === 0) {
+      container.innerHTML = `<div class="gmail-loading">Sin emails con ${email}</div>`;
+      return;
+    }
+
+    // Fetch metadata for each message in parallel (up to 15)
+    const details = await Promise.all(messages.slice(0, 15).map(m =>
+      fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(r => r.json())
+    ));
+
+    const html = details.map(msg => {
+      const headers = msg.payload?.headers || [];
+      const get = name => headers.find(h => h.name === name)?.value || '';
+      const from = get('From').replace(/<.*>/, '').trim() || get('From');
+      const subject = get('Subject') || '(sin asunto)';
+      const dateRaw = get('Date');
+      const date = dateRaw ? new Date(dateRaw).toLocaleDateString('es-MX', {day:'2-digit',month:'short',year:'numeric'}) : '';
+      const snippet = (msg.snippet || '').replace(/&amp;/g,'&').replace(/&#39;/g,"'");
+      return `<div class="gmail-item">
+        <div class="gmail-item-header">
+          <span class="gmail-item-from">${from}</span>
+          <span class="gmail-item-date">${date}</span>
+        </div>
+        <div class="gmail-item-subject">${subject}</div>
+        <div class="gmail-item-snippet">${snippet}</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = `<div style="font-size:.7rem;color:var(--text-3);margin-bottom:10px">${messages.length} email(s) encontrados con ${email}</div>${html}`;
+
+  } catch (err) {
+    console.error('Gmail fetch error:', err);
+    container.innerHTML = `<div class="gmail-no-token">Error al cargar emails. Verificá la conexión.</div>`;
+  }
 }
 </script>
 </body>

@@ -1,0 +1,4 @@
+[     193ms] [ERROR] Auth error: TypeError: Cannot read properties of null (reading 'user')
+    at initSession (http://localhost:3000/app:1123:25) @ http://localhost:3000/app:1147
+[     337ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/login:0
+[     338ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/login:0

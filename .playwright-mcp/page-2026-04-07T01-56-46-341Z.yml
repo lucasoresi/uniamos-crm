@@ -1,0 +1,24 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e6]: UnIAmos
+    - generic [ref=e7]: Sales Hub · CRM + PRM
+  - generic [ref=e8]:
+    - generic [ref=e9]: ☁️ Cloud · Tus datos se sincronizan en la nube
+    - generic [ref=e10]:
+      - generic [ref=e11] [cursor=pointer]: Iniciar sesión
+      - generic [ref=e12] [cursor=pointer]: Crear cuenta
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: Email
+        - textbox "tu@email.com" [ref=e16]
+      - generic [ref=e17]:
+        - generic [ref=e18]: Contraseña
+        - textbox "········" [ref=e19]
+      - button "Entrar al CRM" [ref=e20] [cursor=pointer]
+      - button "Continuar con Google" [ref=e21] [cursor=pointer]:
+        - img [ref=e22]
+        - text: Continuar con Google
+      - generic [ref=e27]: ¿Olvidaste tu contraseña?
+    - generic [ref=e28]:
+      - text: Acceso seguro con autenticación en la nube.
+      - text: Tus datos están protegidos y sincronizados.

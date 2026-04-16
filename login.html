@@ -116,8 +116,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── SUPABASE INIT ─────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://xhqufddfvwzdptqhohxe.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhocXVmZGRmdnd6ZHB0cWhvaHhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODc0MzQsImV4cCI6MjA4OTM2MzQzNH0.GSqA2mfjppfI_Rar59bgs_sSPjLT4aYzusFi-6yI0b4';
+const SUPABASE_URL = 'https://llleoqfeluptmmbqluab.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsbGVvcWZlbHVwdG1tYnFsdWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTAzODMsImV4cCI6MjA5MTkyNjM4M30.DQ_iD6xcb0kxr3ZyOl2c_eRhpR9RIcRmBi7tYVjNf5U';
 
 const { createClient } = window.supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -236,7 +236,9 @@ async function doGoogleLogin() {
     const { data, error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/app.html'
+        redirectTo: window.location.origin + '/app.html',
+        scopes: 'https://www.googleapis.com/auth/gmail.readonly',
+        queryParams: { access_type: 'offline', prompt: 'consent' }
       }
     });
 
