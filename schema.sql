@@ -96,6 +96,11 @@ CREATE POLICY "Users can upsert their own token"
 
 CREATE POLICY "Users can update their own token"
   ON google_tokens FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own token"
+  ON google_tokens FOR DELETE
   USING (auth.uid() = user_id);
 
 -- ============================================================
