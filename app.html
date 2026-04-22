@@ -3128,6 +3128,156 @@ async function getGoogleToken() {
     return null;
   }
 }
+
+// ── GMAIL INBOX ────────────────────────────────────────────────────────────
+let gmailInboxMessages = [];
+
+async function gmail_loadInbox() {
+  const listEl = document.getElementById('gmail-email-list');
+  const previewEl = document.getElementById('gmail-preview-panel');
+  if (!listEl) return;
+
+  listEl.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-3)">⏳ Cargando inbox…</div>';
+  previewEl.innerHTML = '<div style="color:var(--text-3);font-size:.84rem;margin-top:60px">Seleccioná un email para ver el preview</div>';
+  document.getElementById('gmail-search').value = '';
+
+  const token = await getGoogleToken();
+  if (!token) {
+    listEl.innerHTML = `<div class="gmail-no-token" style="margin:20px">
+      <div style="font-size:1.4rem;margin-bottom:8px">📧</div>
+      <strong>Gmail no conectado</strong><br>
+      Ingresá con tu cuenta de Google para ver tu inbox.<br>
+      <a href="login.html" style="color:#C4E538;display:inline-block;margin-top:10px;font-weight:700">Ir al login →</a>
+    </div>`;
+    return;
+  }
+
+  try {
+    const listRes = await fetch(
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=30',
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (listRes.status === 401) {
+      sessionStorage.removeItem('gtoken');
+      sessionStorage.removeItem('gtoken_expires');
+      listEl.innerHTML = '<div class="gmail-no-token" style="margin:20px">Token de Google expirado. <a href="login.html" style="color:#C4E538">Volvé a ingresar →</a></div>';
+      return;
+    }
+    const listData = await listRes.json();
+    const messages = listData.messages || [];
+
+    if (messages.length === 0) {
+      listEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3)">No hay emails en el inbox</div>';
+      return;
+    }
+
+    const details = await Promise.all(messages.map(m =>
+      fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata` +
+        `&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(r => r.json())
+    ));
+
+    gmailInboxMessages = details;
+    gmail_renderList(details);
+    gmail_updateUnreadBadge(details);
+
+  } catch (err) {
+    listEl.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text-3)">
+      No se pudo cargar Gmail.<br>
+      <button onclick="gmail_loadInbox()" style="margin-top:10px;padding:7px 16px;background:#C4E538;color:#0A0A0A;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit">Reintentar</button>
+    </div>`;
+  }
+}
+
+function gmail_refreshInbox() {
+  sessionStorage.removeItem('gtoken');
+  sessionStorage.removeItem('gtoken_expires');
+  gmail_loadInbox();
+}
+
+function gmail_renderList(messages) {
+  const listEl = document.getElementById('gmail-email-list');
+  if (!messages.length) {
+    listEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3)">Sin resultados</div>';
+    return;
+  }
+  listEl.innerHTML = messages.map(msg => {
+    const headers = msg.payload?.headers || [];
+    const get = name => headers.find(h => h.name === name)?.value || '';
+    const from = get('From');
+    const displayName = from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?';
+    const initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+    const subject = get('Subject') || '(sin asunto)';
+    const dateRaw = get('Date');
+    const date = dateRaw ? new Date(dateRaw).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) : '';
+    const isUnread = (msg.labelIds || []).includes('UNREAD');
+    const snippet = (msg.snippet || '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
+    return `<div class="gmail-msg-item${isUnread ? ' gmail-msg-unread' : ''}" data-msgid="${msg.id}" onclick="gmail_selectMessage('${msg.id}')">
+      <div class="gmail-msg-avatar">${initials}</div>
+      <div class="gmail-msg-body">
+        <div class="gmail-msg-row1">
+          <span class="gmail-msg-name">${displayName}</span>
+          <span class="gmail-msg-date">${date}</span>
+        </div>
+        <div class="gmail-msg-subject">${subject}</div>
+        <div class="gmail-msg-snippet">${snippet}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function gmail_selectMessage(msgId) {
+  const msg = gmailInboxMessages.find(m => m.id === msgId);
+  if (!msg) return;
+
+  document.querySelectorAll('.gmail-msg-item').forEach(el => el.classList.remove('gmail-msg-selected'));
+  const item = document.querySelector(`[data-msgid="${msgId}"]`);
+  if (item) { item.classList.add('gmail-msg-selected'); item.classList.remove('gmail-msg-unread'); }
+
+  const headers = msg.payload?.headers || [];
+  const get = name => headers.find(h => h.name === name)?.value || '';
+  const from = get('From');
+  const subject = get('Subject') || '(sin asunto)';
+  const dateRaw = get('Date');
+  const date = dateRaw
+    ? new Date(dateRaw).toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '';
+  const snippet = (msg.snippet || '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
+  const gmailLink = `https://mail.google.com/mail/#inbox/${msg.id}`;
+
+  document.getElementById('gmail-preview-panel').innerHTML = `
+    <div style="max-width:580px;width:100%">
+      <div style="font-size:.72rem;color:var(--text-3);margin-bottom:4px">${from}</div>
+      <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.3">${subject}</div>
+      <div style="font-size:.72rem;color:var(--text-3);padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px">${date}</div>
+      <div style="font-size:.84rem;color:var(--text-2);line-height:1.75">${snippet}</div>
+      <a href="${gmailLink}" target="_blank"
+        style="display:inline-flex;align-items:center;gap:6px;margin-top:22px;padding:9px 20px;background:#C4E538;color:#0A0A0A;border-radius:6px;font-weight:700;font-size:.82rem;text-decoration:none">
+        Abrir en Gmail ↗
+      </a>
+    </div>`;
+}
+
+function gmail_filterList(q) {
+  if (!q) { gmail_renderList(gmailInboxMessages); return; }
+  const lower = q.toLowerCase();
+  const filtered = gmailInboxMessages.filter(msg => {
+    const headers = msg.payload?.headers || [];
+    const get = name => headers.find(h => h.name === name)?.value || '';
+    return (get('From') + get('Subject') + (msg.snippet || '')).toLowerCase().includes(lower);
+  });
+  gmail_renderList(filtered);
+}
+
+function gmail_updateUnreadBadge(messages) {
+  const count = messages.filter(m => (m.labelIds || []).includes('UNREAD')).length;
+  const badge = document.getElementById('nav-gmail-badge');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? '' : 'none';
+}
 </script>
 </body>
 </html>
