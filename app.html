@@ -3130,12 +3130,13 @@ async function getGoogleToken() {
 }
 
 // ── GMAIL INBOX ────────────────────────────────────────────────────────────
+function escHtml(s){const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};return String(s||'').replace(/[&<>"]/g,c=>m[c]);}
 let gmailInboxMessages = [];
 
 async function gmail_loadInbox() {
   const listEl = document.getElementById('gmail-email-list');
   const previewEl = document.getElementById('gmail-preview-panel');
-  if (!listEl) return;
+  if (!listEl || !previewEl) return;
 
   listEl.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-3)">⏳ Cargando inbox…</div>';
   previewEl.innerHTML = '<div style="color:var(--text-3);font-size:.84rem;margin-top:60px">Seleccioná un email para ver el preview</div>';
@@ -3171,13 +3172,14 @@ async function gmail_loadInbox() {
       return;
     }
 
-    const details = await Promise.all(messages.map(m =>
+    const results = await Promise.allSettled(messages.map(m =>
       fetch(
         `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata` +
         `&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`,
         { headers: { Authorization: `Bearer ${token}` } }
       ).then(r => r.json())
     ));
+    const details = results.filter(r => r.status === 'fulfilled').map(r => r.value);
 
     gmailInboxMessages = details;
     gmail_renderList(details);
@@ -3192,8 +3194,6 @@ async function gmail_loadInbox() {
 }
 
 function gmail_refreshInbox() {
-  sessionStorage.removeItem('gtoken');
-  sessionStorage.removeItem('gtoken_expires');
   gmail_loadInbox();
 }
 
@@ -3213,15 +3213,15 @@ function gmail_renderList(messages) {
     const dateRaw = get('Date');
     const date = dateRaw ? new Date(dateRaw).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) : '';
     const isUnread = (msg.labelIds || []).includes('UNREAD');
-    const snippet = (msg.snippet || '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
+    const snippet = escHtml(msg.snippet || '');
     return `<div class="gmail-msg-item${isUnread ? ' gmail-msg-unread' : ''}" data-msgid="${msg.id}" onclick="gmail_selectMessage('${msg.id}')">
       <div class="gmail-msg-avatar">${initials}</div>
       <div class="gmail-msg-body">
         <div class="gmail-msg-row1">
-          <span class="gmail-msg-name">${displayName}</span>
+          <span class="gmail-msg-name">${escHtml(displayName)}</span>
           <span class="gmail-msg-date">${date}</span>
         </div>
-        <div class="gmail-msg-subject">${subject}</div>
+        <div class="gmail-msg-subject">${escHtml(subject)}</div>
         <div class="gmail-msg-snippet">${snippet}</div>
       </div>
     </div>`;
@@ -3244,14 +3244,14 @@ function gmail_selectMessage(msgId) {
   const date = dateRaw
     ? new Date(dateRaw).toLocaleString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : '';
-  const snippet = (msg.snippet || '').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
+  const snippet = escHtml(msg.snippet || '');
   const gmailLink = `https://mail.google.com/mail/#inbox/${msg.id}`;
 
   document.getElementById('gmail-preview-panel').innerHTML = `
     <div style="max-width:580px;width:100%">
-      <div style="font-size:.72rem;color:var(--text-3);margin-bottom:4px">${from}</div>
-      <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.3">${subject}</div>
-      <div style="font-size:.72rem;color:var(--text-3);padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px">${date}</div>
+      <div style="font-size:.72rem;color:var(--text-3);margin-bottom:4px">${escHtml(from)}</div>
+      <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.3">${escHtml(subject)}</div>
+      <div style="font-size:.72rem;color:var(--text-3);padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px">${escHtml(date)}</div>
       <div style="font-size:.84rem;color:var(--text-2);line-height:1.75">${snippet}</div>
       <a href="${gmailLink}" target="_blank"
         style="display:inline-flex;align-items:center;gap:6px;margin-top:22px;padding:9px 20px;background:#C4E538;color:#0A0A0A;border-radius:6px;font-weight:700;font-size:.82rem;text-decoration:none">
