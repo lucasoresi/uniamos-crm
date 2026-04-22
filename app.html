@@ -3031,7 +3031,7 @@ async function gmail_loadForContact(email, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
-  const token = sessionStorage.getItem('gtoken');
+  const token = await getGoogleToken();
   if (!token) {
     container.innerHTML = `<div class="gmail-no-token">
       <div style="font-size:1.4rem;margin-bottom:8px">📧</div>
@@ -3058,6 +3058,7 @@ async function gmail_loadForContact(email, containerId) {
 
     if (listRes.status === 401) {
       sessionStorage.removeItem('gtoken');
+      sessionStorage.removeItem('gtoken_expires');
       container.innerHTML = `<div class="gmail-no-token">Token de Google expirado. Ingresá nuevamente con Google para ver emails.</div>`;
       return;
     }
