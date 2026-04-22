@@ -923,6 +923,31 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 </div>
 </div><!-- end view-automations -->
 
+<!-- GMAIL VIEW -->
+<div id="view-gmail" class="view">
+<div class="main" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+  <div class="topbar">
+    <div class="topbar-breadcrumb"><span style="color:var(--text-3)">Comunicaciones</span> <span style="color:var(--text-3);margin:0 4px">›</span> <span>Inbox Gmail</span></div>
+    <div class="topbar-divider"></div>
+    <button onclick="gmail_refreshInbox()" style="margin-left:auto;background:none;border:1px solid var(--border);color:var(--text-2);padding:5px 14px;border-radius:6px;font-size:.78rem;cursor:pointer;font-family:inherit">↻ Actualizar</button>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden">
+    <!-- Left: email list -->
+    <div style="width:38%;min-width:260px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border)">
+        <input id="gmail-search" oninput="gmail_filterList(this.value)" placeholder="🔍 Buscar en inbox…"
+          style="width:100%;padding:7px 10px;background:#111;border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.8rem;box-sizing:border-box;font-family:inherit">
+      </div>
+      <div id="gmail-email-list" style="flex:1;overflow-y:auto"></div>
+    </div>
+    <!-- Right: preview panel -->
+    <div id="gmail-preview-panel" style="flex:1;overflow-y:auto;padding:28px 32px;display:flex;align-items:flex-start;justify-content:center">
+      <div style="color:var(--text-3);font-size:.84rem;margin-top:60px">Seleccioná un email para ver el preview</div>
+    </div>
+  </div>
+</div>
+</div><!-- end view-gmail -->
+
 <!-- INTEGRACIONES VIEW -->
 <div id="view-integraciones" class="view">
 <div class="main">
