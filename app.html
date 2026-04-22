@@ -3120,8 +3120,9 @@ async function getGoogleToken() {
     });
     if (!res.ok) return null;
     const { access_token, expires_in } = await res.json();
+    if (!access_token) return null;
     sessionStorage.setItem('gtoken', access_token);
-    sessionStorage.setItem('gtoken_expires', (Date.now() + (expires_in - 60) * 1000).toString());
+    sessionStorage.setItem('gtoken_expires', (Date.now() + ((expires_in ?? 3600) - 60) * 1000).toString());
     return access_token;
   } catch {
     return null;
