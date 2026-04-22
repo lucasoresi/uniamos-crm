@@ -1416,16 +1416,19 @@ function switchView(view){
   document.getElementById('view-automations').style.display=view==='automations'?'flex':'none';
   document.getElementById('view-integraciones').style.display=view==='integraciones'?'flex':'none';
   document.getElementById('view-api').style.display=view==='api'?'flex':'none';
+  document.getElementById('view-gmail').style.display=view==='gmail'?'flex':'none';
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   if(view==='crm')document.getElementById('nav-crm').classList.add('active');
   if(view==='prm')document.getElementById('nav-prm').classList.add('active');
   if(view==='automations')document.getElementById('nav-automations').classList.add('active');
   if(view==='integraciones')document.getElementById('nav-integraciones').classList.add('active');
   if(view==='api')document.getElementById('nav-api').classList.add('active');
+  if(view==='gmail')document.getElementById('nav-gmail').classList.add('active');
   ['sb-crm-new'].forEach(id=>document.getElementById(id).style.display=view==='crm'?'block':'none');
   ['sb-prm-new','sb-prm-export'].forEach(id=>document.getElementById(id).style.display=view==='prm'?'block':'none');
   if(view==='automations')automation_renderDashboard();
   if(view==='integraciones')integraciones_checkStatus();
+  if(view==='gmail')gmail_loadInbox();
 }
 switchView('crm');
 
