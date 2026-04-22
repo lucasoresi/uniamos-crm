@@ -1151,11 +1151,21 @@ async function initSession() {
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){window.location.href='login.html';}
     currentUser=session.user;
-    // Guardar provider_token de Google para Gmail API (se pierde en refresh de sesión)
-    if(session.provider_token){sessionStorage.setItem('gtoken',session.provider_token);}
-    else if(session.user?.app_metadata?.provider==='google'){
-      // Token expiró — limpiar por si era viejo
+    // Persist Google tokens for Gmail API
+    if(session.provider_refresh_token){
+      supabase.from('google_tokens').upsert({
+        user_id:currentUser.id,
+        refresh_token:session.provider_refresh_token,
+        updated_at:new Date().toISOString()
+      }).then(({error})=>{if(error)console.warn('google_tokens upsert:',error.message);});
+    }
+    if(session.provider_token){
+      const exp=Date.now()+55*60*1000; // 55 min (token expires at 60)
+      sessionStorage.setItem('gtoken',session.provider_token);
+      sessionStorage.setItem('gtoken_expires',exp.toString());
+    } else {
       sessionStorage.removeItem('gtoken');
+      sessionStorage.removeItem('gtoken_expires');
     }
     const name=session.user.user_metadata?.name||session.user.email?.split('@')[0]||'Usuario';
     const initials=name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
