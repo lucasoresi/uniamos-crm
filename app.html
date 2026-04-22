@@ -3056,6 +3056,31 @@ async function gmail_loadForContact(email, containerId) {
     container.innerHTML = `<div class="gmail-no-token">Error al cargar emails. Verificá la conexión.</div>`;
   }
 }
+
+// ── GOOGLE TOKEN HELPER ────────────────────────────────────────────────────
+async function getGoogleToken() {
+  const token = sessionStorage.getItem('gtoken');
+  const expires = parseInt(sessionStorage.getItem('gtoken_expires') || '0');
+  if (token && Date.now() < expires) return token;
+
+  // Token missing or expired — ask Edge Function to refresh
+  const {data:{session}} = await supabase.auth.getSession();
+  const jwt = session?.access_token;
+  if (!jwt) return null;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/refresh-google-token`, {
+      headers: { Authorization: `Bearer ${jwt}` }
+    });
+    if (!res.ok) return null;
+    const { access_token, expires_in } = await res.json();
+    sessionStorage.setItem('gtoken', access_token);
+    sessionStorage.setItem('gtoken_expires', (Date.now() + (expires_in - 60) * 1000).toString());
+    return access_token;
+  } catch {
+    return null;
+  }
+}
 </script>
 </body>
 </html>
