@@ -75,6 +75,29 @@ CREATE POLICY "activities_owner" ON activities
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+-- 4. GOOGLE TOKENS (Gmail OAuth refresh tokens)
+-- Almacena el refresh token de Google OAuth por usuario para
+-- poder renovar el access token sin re-autenticar.
+CREATE TABLE IF NOT EXISTS google_tokens (
+  user_id       UUID        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  refresh_token TEXT        NOT NULL,
+  updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE google_tokens ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read their own token"
+  ON google_tokens FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can upsert their own token"
+  ON google_tokens FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own token"
+  ON google_tokens FOR UPDATE
+  USING (auth.uid() = user_id);
+
 -- ============================================================
 -- ÍNDICES
 -- ============================================================
