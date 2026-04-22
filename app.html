@@ -1320,6 +1320,8 @@ async function autoSetupData(){
 }
 
 function doLogout(){
+  sessionStorage.removeItem('gtoken');
+  sessionStorage.removeItem('gtoken_expires');
   supabase.auth.signOut().then(()=>{window.location.href='login.html';});
 }
 
