@@ -192,6 +192,59 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .task-add-btn{padding:6px 11px;background:#C4E538;color:#0A0A0A;border:none;border-radius:6px;font-weight:800;font-size:.72rem;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}
 .task-add-btn:hover{background:#A8C42A}
 .task-empty{font-size:.75rem;color:var(--text-3);text-align:center;padding:12px 0}
+/* CALENDAR */
+.cal-view{display:flex;flex-direction:column;flex:1;overflow:hidden;background:#0A0A0A}
+.cal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 16px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.cal-header h2{font-size:1.15rem;font-weight:800;color:var(--text);margin:0}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cal-nav-btn:hover{border-color:#C4E538;color:#C4E538}
+.cal-today-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;font-size:.72rem;font-weight:700;font-family:inherit;transition:all .15s}
+.cal-today-btn:hover{border-color:#C4E538;color:#C4E538}
+.cal-body{display:flex;flex:1;overflow:hidden}
+.cal-grid-wrap{flex:1;display:flex;flex-direction:column;padding:0;overflow:hidden;border-right:1px solid var(--border)}
+.cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);flex-shrink:0}
+.cal-dow{padding:10px 0;text-align:center;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3)}
+.cal-cells{display:grid;grid-template-columns:repeat(7,1fr);flex:1;overflow:hidden}
+.cal-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 8px 6px;cursor:pointer;transition:background .12s;display:flex;flex-direction:column;gap:4px;position:relative;min-height:0}
+.cal-cell:nth-child(7n){border-right:none}
+.cal-cell:hover{background:rgba(255,255,255,.03)}
+.cal-cell.selected{background:rgba(196,229,56,.05);outline:1px solid rgba(196,229,56,.3);outline-offset:-1px;z-index:1}
+.cal-cell.today .cal-day-num{background:#C4E538;color:#0A0A0A;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:900}
+.cal-cell.other-month{opacity:.3}
+.cal-day-num{font-size:.75rem;font-weight:700;color:var(--text);line-height:1;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.cal-dots{display:flex;gap:3px;flex-wrap:wrap;padding:0 1px}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cal-dot-task{background:#C4E538}
+.cal-dot-overdue{background:#ef4444}
+.cal-dot-today-task{background:#eab308}
+.cal-dot-lead{background:#3b82f6}
+.cal-dot-prospect{background:#a855f7}
+/* Side panel */
+.cal-side{width:280px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
+.cal-side-hd{padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cal-side-date{font-size:.95rem;font-weight:800;color:var(--text)}
+.cal-side-sub{font-size:.68rem;color:var(--text-3);margin-top:2px}
+.cal-side-events{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.cal-ev{display:flex;gap:8px;align-items:flex-start;padding:9px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.cal-ev:hover{background:rgba(255,255,255,.04)}
+.cal-ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.cal-ev-body{flex:1;min-width:0}
+.cal-ev-title{font-size:.78rem;font-weight:600;color:var(--text);line-height:1.3}
+.cal-ev-sub{font-size:.65rem;color:var(--text-3);margin-top:2px}
+.cal-ev-tag{font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:4px;display:inline-block;margin-top:3px}
+.cal-ev.type-task .cal-ev-dot{background:#C4E538}
+.cal-ev.type-task .cal-ev-tag{background:rgba(196,229,56,.15);color:#C4E538}
+.cal-ev.type-overdue .cal-ev-dot{background:#ef4444}
+.cal-ev.type-overdue .cal-ev-tag{background:rgba(239,68,68,.15);color:#f87171}
+.cal-ev.type-lead .cal-ev-dot{background:#3b82f6}
+.cal-ev.type-lead .cal-ev-tag{background:rgba(59,130,246,.15);color:#60a5fa}
+.cal-ev.type-prospect .cal-ev-dot{background:#a855f7}
+.cal-ev.type-prospect .cal-ev-tag{background:rgba(168,85,247,.15);color:#c084fc}
+.cal-empty-day{color:var(--text-3);font-size:.8rem;text-align:center;padding:40px 16px}
+.cal-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.cal-legend-item{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--text-3)}
+.cal-legend-dot{width:7px;height:7px;border-radius:50%}
 /* Global tasks view */
 .tasks-view-wrap{padding:28px 32px;max-width:860px;margin:0 auto}
 .tasks-group-title{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--text-3);margin:22px 0 8px;display:flex;align-items:center;gap:8px}
@@ -492,6 +545,9 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
     <div class="sb-item" id="nav-tasks" onclick="switchView('tasks')">
       <span class="sb-icon">✅</span> Mis Tareas
       <span class="sb-badge" id="nav-tasks-badge" style="display:none">0</span>
+    </div>
+    <div class="sb-item" id="nav-calendar" onclick="switchView('calendar')">
+      <span class="sb-icon">📅</span> Calendario
     </div>
     <div class="sb-group-label" style="margin-top:8px">Herramientas</div>
     <div class="sb-item" id="nav-automations" onclick="switchView('automations')">
@@ -994,6 +1050,45 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
   </div>
 </div>
 </div><!-- end view-automations -->
+
+<!-- CALENDAR VIEW -->
+<div id="view-calendar" style="display:none;flex:1;overflow:hidden">
+  <div class="cal-view">
+    <div class="cal-header">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="cal_navigate(-1)">‹</button>
+        <button class="cal-nav-btn" onclick="cal_navigate(1)">›</button>
+        <button class="cal-today-btn" onclick="cal_goToday()">Hoy</button>
+      </div>
+      <h2 id="cal-month-title">Abril 2026</h2>
+      <div style="width:120px"></div>
+    </div>
+    <div class="cal-body">
+      <div class="cal-grid-wrap">
+        <div class="cal-dow-row">
+          <div class="cal-dow">Lun</div><div class="cal-dow">Mar</div><div class="cal-dow">Mié</div>
+          <div class="cal-dow">Jue</div><div class="cal-dow">Vie</div><div class="cal-dow">Sáb</div><div class="cal-dow">Dom</div>
+        </div>
+        <div class="cal-cells" id="cal-cells"></div>
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#C4E538"></div>Tarea pendiente</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#ef4444"></div>Tarea vencida</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#3b82f6"></div>Contacto CRM</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#a855f7"></div>Contacto PRM</div>
+        </div>
+      </div>
+      <div class="cal-side">
+        <div class="cal-side-hd">
+          <div class="cal-side-date" id="cal-side-date">Seleccioná un día</div>
+          <div class="cal-side-sub" id="cal-side-sub">Hacé click en cualquier día del calendario</div>
+        </div>
+        <div class="cal-side-events" id="cal-side-events">
+          <div class="cal-empty-day">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- TASKS VIEW -->
 <div id="view-tasks" style="display:none;flex:1;overflow-y:auto">
@@ -1503,6 +1598,7 @@ function switchView(view){
   document.getElementById('view-api').style.display=view==='api'?'flex':'none';
   document.getElementById('view-gmail').style.display=view==='gmail'?'flex':'none';
   document.getElementById('view-tasks').style.display=view==='tasks'?'block':'none';
+  document.getElementById('view-calendar').style.display=view==='calendar'?'flex':'none';
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   if(view==='crm')document.getElementById('nav-crm').classList.add('active');
   if(view==='prm')document.getElementById('nav-prm').classList.add('active');
@@ -1511,6 +1607,7 @@ function switchView(view){
   if(view==='api')document.getElementById('nav-api').classList.add('active');
   if(view==='gmail')document.getElementById('nav-gmail').classList.add('active');
   if(view==='tasks'){document.getElementById('nav-tasks').classList.add('active');task_loadGlobal();}
+  if(view==='calendar'){document.getElementById('nav-calendar').classList.add('active');cal_init();}
   ['sb-crm-new'].forEach(id=>document.getElementById(id).style.display=view==='crm'?'block':'none');
   ['sb-prm-new','sb-prm-export'].forEach(id=>document.getElementById(id).style.display=view==='prm'?'block':'none');
   if(view==='automations')automation_renderDashboard();
@@ -2867,6 +2964,201 @@ function crm_quickContact(leadId) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// CALENDAR MODULE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const cal_state = { year: 0, month: 0, selectedDay: null, tasks: [] };
+const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const CAL_MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+async function cal_init() {
+  if (!cal_state.year) {
+    const now = new Date();
+    cal_state.year = now.getFullYear();
+    cal_state.month = now.getMonth();
+  }
+  await cal_fetchTasks();
+  cal_render();
+  // Select today if in current month
+  const now = new Date();
+  if (cal_state.year === now.getFullYear() && cal_state.month === now.getMonth()) {
+    cal_selectDay(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+}
+
+async function cal_fetchTasks() {
+  try {
+    const y = cal_state.year, m = cal_state.month;
+    const from = `${y}-${String(m+1).padStart(2,'0')}-01`;
+    const lastDay = new Date(y, m+1, 0).getDate();
+    const to = `${y}-${String(m+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+    // Also fetch prev/next month days shown in grid
+    const prevLast = new Date(y, m, 0);
+    const nextFirst = new Date(y, m+1, 1);
+    const fromExt = `${prevLast.getFullYear()}-${String(prevLast.getMonth()+1).padStart(2,'0')}-01`;
+    const toExt   = `${nextFirst.getFullYear()}-${String(nextFirst.getMonth()+1).padStart(2,'0')}-${String(new Date(nextFirst.getFullYear(), nextFirst.getMonth()+1, 0).getDate()).padStart(2,'0')}`;
+    const { data } = await supabase.from('tasks').select('*')
+      .eq('user_id', currentUser.id)
+      .gte('due_date', fromExt).lte('due_date', toExt);
+    cal_state.tasks = data || [];
+  } catch(e) { cal_state.tasks = []; }
+}
+
+function cal_getDayEvents(y, m, d) {
+  const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dayDate = new Date(y, m, d);
+  const events = [];
+
+  // Tasks
+  cal_state.tasks.forEach(t => {
+    if (t.due_date !== dateStr) return;
+    const isOverdue = !t.completed && dayDate < now;
+    events.push({
+      type: isOverdue ? 'overdue' : 'task',
+      title: t.title,
+      sub: t.completed ? 'Completada' : (isOverdue ? 'Vencida' : 'Pendiente'),
+      tag: isOverdue ? '⚠ Vencida' : '✅ Tarea',
+      entityType: t.entity_type, entityId: t.entity_id,
+      completed: t.completed
+    });
+  });
+
+  // CRM leads - últimoContacto
+  (leads || []).forEach(l => {
+    const uc = (l.data.ultimoContacto || '').trim();
+    if (!uc) return;
+    // Parse date (can be DD Mon YYYY or YYYY-MM-DD)
+    let parsed = new Date(uc);
+    if (isNaN(parsed)) {
+      const meses = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};
+      const mt = uc.toLowerCase().match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+      if (mt) parsed = new Date(+mt[3], meses[mt[2]]??0, +mt[1]);
+    }
+    if (isNaN(parsed)) return;
+    if (parsed.getFullYear()===y && parsed.getMonth()===m && parsed.getDate()===d) {
+      events.push({ type:'lead', title: l.data.empresa||'Lead', sub: `Último contacto · ${l.data.lead||''}`, tag:'📊 CRM', entityType:'lead', entityId:l.id });
+    }
+  });
+
+  // PRM prospects - últimoContacto
+  (prospects || []).forEach(p => {
+    const uc = (p.data.ultimoContacto || '').trim();
+    if (!uc) return;
+    const parsed = new Date(uc);
+    if (isNaN(parsed)) return;
+    if (parsed.getFullYear()===y && parsed.getMonth()===m && parsed.getDate()===d) {
+      events.push({ type:'prospect', title: p.data.empresa||'Prospecto', sub: `Último contacto · ${p.data.contacto||''}`, tag:'🔍 PRM', entityType:'prospect', entityId:p.id });
+    }
+  });
+
+  return events;
+}
+
+function cal_render() {
+  const { year, month, selectedDay } = cal_state;
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  document.getElementById('cal-month-title').textContent = `${CAL_MONTHS[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  // Monday=0 offset
+  let startDow = firstDay.getDay(); // 0=Sun
+  startDow = startDow === 0 ? 6 : startDow - 1; // convert to Mon=0
+
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrev  = new Date(year, month, 0).getDate();
+  const totalCells  = Math.ceil((startDow + daysInMonth) / 7) * 7;
+
+  let html = '';
+  for (let i = 0; i < totalCells; i++) {
+    let d, m2, y2, isOther = false;
+    if (i < startDow) {
+      d = daysInPrev - startDow + i + 1; m2 = month - 1; y2 = year; isOther = true;
+      if (m2 < 0) { m2 = 11; y2--; }
+    } else if (i >= startDow + daysInMonth) {
+      d = i - startDow - daysInMonth + 1; m2 = month + 1; y2 = year; isOther = true;
+      if (m2 > 11) { m2 = 0; y2++; }
+    } else {
+      d = i - startDow + 1; m2 = month; y2 = year;
+    }
+
+    const cellDate = new Date(y2, m2, d);
+    const isToday = cellDate.getTime() === now.getTime();
+    const isSelected = selectedDay && selectedDay.y===y2 && selectedDay.m===m2 && selectedDay.d===d;
+
+    const events = cal_getDayEvents(y2, m2, d);
+    const dots = [...new Set(events.map(e => e.type))].slice(0,4).map(type => {
+      const cls = { task:'cal-dot-task', overdue:'cal-dot-overdue', lead:'cal-dot-lead', prospect:'cal-dot-prospect' }[type]||'cal-dot-task';
+      return `<div class="cal-dot ${cls}"></div>`;
+    }).join('');
+
+    html += `<div class="cal-cell${isOther?' other-month':''}${isToday?' today':''}${isSelected?' selected':''}" onclick="cal_selectDay(${y2},${m2},${d})">
+      <div class="cal-day-num">${d}</div>
+      ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+    </div>`;
+  }
+
+  document.getElementById('cal-cells').innerHTML = html;
+}
+
+function cal_selectDay(y, m, d) {
+  cal_state.selectedDay = { y, m, d };
+  cal_render();
+
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dayDate = new Date(y, m, d);
+  const isToday = dayDate.getTime() === now.getTime();
+  const dayOfWeek = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][dayDate.getDay()];
+
+  document.getElementById('cal-side-date').textContent = `${dayOfWeek} ${d} ${CAL_MONTHS_SHORT[m]}`;
+  document.getElementById('cal-side-sub').textContent = isToday ? '— Hoy' : `${y}`;
+
+  const events = cal_getDayEvents(y, m, d);
+  const sideEl = document.getElementById('cal-side-events');
+
+  if (events.length === 0) {
+    sideEl.innerHTML = '<div class="cal-empty-day">Sin eventos este día</div>';
+    return;
+  }
+
+  sideEl.innerHTML = events.map(ev => {
+    const onClick = ev.entityType === 'lead'
+      ? `switchView('crm');setTimeout(()=>crm_openDetail('${ev.entityId}'),100)`
+      : `switchView('prm');setTimeout(()=>prm_openDetail('${ev.entityId}'),100)`;
+    return `<div class="cal-ev type-${ev.type}" onclick="${onClick}">
+      <div class="cal-ev-dot"></div>
+      <div class="cal-ev-body">
+        <div class="cal-ev-title">${task_esc(ev.title)}</div>
+        <div class="cal-ev-sub">${task_esc(ev.sub)}</div>
+        <span class="cal-ev-tag">${ev.tag}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function cal_navigate(delta) {
+  cal_state.month += delta;
+  if (cal_state.month > 11) { cal_state.month = 0; cal_state.year++; }
+  if (cal_state.month < 0)  { cal_state.month = 11; cal_state.year--; }
+  cal_state.selectedDay = null;
+  document.getElementById('cal-side-date').textContent = 'Seleccioná un día';
+  document.getElementById('cal-side-sub').textContent = 'Hacé click en cualquier día del calendario';
+  document.getElementById('cal-side-events').innerHTML = '<div class="cal-empty-day">—</div>';
+  await cal_fetchTasks();
+  cal_render();
+}
+
+async function cal_goToday() {
+  const now = new Date();
+  cal_state.year = now.getFullYear();
+  cal_state.month = now.getMonth();
+  await cal_fetchTasks();
+  cal_render();
+  cal_selectDay(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // TASKS MODULE
 // ═══════════════════════════════════════════════════════════════════════════════
