@@ -155,6 +155,52 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .tl-input-row button:hover{background:#A8C42A}
 .card-activity-badge{font-size:.62rem;color:var(--text-3);display:inline-flex;align-items:center;gap:3px}
 
+/* TASKS */
+.task-section{margin-top:8px;padding-top:18px;border-top:1px solid var(--border)}
+.task-section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.task-section-title{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--text-3);display:flex;align-items:center;gap:6px}
+.task-section-title::after{content:'';display:inline-block;width:60px;height:1px;background:var(--border-light)}
+.task-count-badge{background:rgba(196,229,56,.15);color:#C4E538;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:8px;min-width:16px;text-align:center}
+.task-list{display:flex;flex-direction:column;gap:1px;margin-bottom:8px}
+.task-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;cursor:default;transition:background .12s;position:relative;group:true}
+.task-item:hover{background:rgba(255,255,255,.04)}
+.task-check{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;overflow:hidden}
+.task-check::after{content:'✓';font-size:.6rem;font-weight:900;color:#0A0A0A;opacity:0;transition:opacity .15s}
+.task-check:hover{border-color:rgba(196,229,56,.5);background:rgba(196,229,56,.08)}
+.task-item.done .task-check{background:#C4E538;border-color:#C4E538}
+.task-item.done .task-check::after{opacity:1}
+.task-prio{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.task-prio-urgente{background:#ef4444}
+.task-prio-alta{background:#f97316}
+.task-prio-media{background:#eab308}
+.task-prio-baja{background:rgba(255,255,255,.25)}
+.task-title{flex:1;font-size:.8rem;color:var(--text);line-height:1.3;min-width:0;word-break:break-word}
+.task-item.done .task-title{text-decoration:line-through;color:var(--text-3);font-style:italic}
+.task-due{font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;flex-shrink:0}
+.task-due-overdue{background:rgba(239,68,68,.15);color:#f87171}
+.task-due-today{background:rgba(234,179,8,.15);color:#fbbf24}
+.task-due-soon{background:rgba(196,229,56,.12);color:#C4E538}
+.task-due-future{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+.task-del{width:20px;height:20px;border-radius:4px;border:none;background:transparent;color:rgba(255,255,255,.2);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;opacity:0;transition:all .12s;flex-shrink:0;padding:0}
+.task-item:hover .task-del{opacity:1}
+.task-del:hover{background:rgba(239,68,68,.15);color:#f87171}
+.task-add-row{display:flex;gap:5px;margin-top:4px}
+.task-add-input{flex:1;padding:6px 9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#fff;font-size:.78rem;outline:none;font-family:inherit;transition:border-color .15s}
+.task-add-input:focus{border-color:#C4E538;box-shadow:0 0 0 3px rgba(196,229,56,.15)}
+.task-add-date{padding:6px 7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:rgba(255,255,255,.5);font-size:.75rem;outline:none;font-family:inherit;cursor:pointer;flex-shrink:0;width:32px;transition:border-color .15s}
+.task-add-date:focus{border-color:#C4E538;width:130px;color:#fff}
+.task-add-btn{padding:6px 11px;background:#C4E538;color:#0A0A0A;border:none;border-radius:6px;font-weight:800;font-size:.72rem;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}
+.task-add-btn:hover{background:#A8C42A}
+.task-empty{font-size:.75rem;color:var(--text-3);text-align:center;padding:12px 0}
+/* Global tasks view */
+.tasks-view-wrap{padding:28px 32px;max-width:860px;margin:0 auto}
+.tasks-group-title{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--text-3);margin:22px 0 8px;display:flex;align-items:center;gap:8px}
+.tasks-group-title::after{content:'';flex:1;height:1px;background:var(--border-light)}
+.tasks-global-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;background:#111;border:1px solid var(--border);margin-bottom:5px;transition:border-color .15s;cursor:default}
+.tasks-global-item:hover{border-color:rgba(255,255,255,.15)}
+.tasks-global-item .task-lead-link{font-size:.7rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;cursor:pointer}
+.tasks-global-item .task-lead-link:hover{color:#C4E538}
+
 /* DETAIL PANEL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:flex-start;justify-content:flex-end}
 .overlay.open{display:flex}
@@ -443,6 +489,10 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <span class="sb-icon">📧</span> Gmail
       <span class="sb-badge" id="nav-gmail-badge" style="display:none">0</span>
     </div>
+    <div class="sb-item" id="nav-tasks" onclick="switchView('tasks')">
+      <span class="sb-icon">✅</span> Mis Tareas
+      <span class="sb-badge" id="nav-tasks-badge" style="display:none">0</span>
+    </div>
     <div class="sb-group-label" style="margin-top:8px">Herramientas</div>
     <div class="sb-item" id="nav-automations" onclick="switchView('automations')">
       <span class="sb-icon">⚡</span> Automatizaciones
@@ -570,6 +620,17 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
         <div class="pf-grid">
           <div class="pf-group full"><label class="pf-label">Resumen conversación</label><textarea class="pf-textarea" id="crm_m-resumen" rows="3"></textarea></div>
           <div class="pf-group full"><label class="pf-label">Próxima acción</label><textarea class="pf-textarea" id="crm_m-accion" rows="2"></textarea></div>
+        </div>
+      </div>
+      <div class="task-section">
+        <div class="task-section-hd">
+          <div class="task-section-title">Tareas <span class="task-count-badge" id="crm_task_count" style="display:none">0</span></div>
+        </div>
+        <div class="task-list" id="crm_task_list"><div class="task-empty">Sin tareas pendientes</div></div>
+        <div class="task-add-row">
+          <input class="task-add-input" id="crm_task_input" placeholder="Nueva tarea..." onkeydown="if(event.key==='Enter')task_add('lead',crm_editingId,'crm')">
+          <input class="task-add-date" id="crm_task_date" type="date" title="Fecha límite">
+          <button class="task-add-btn" onclick="task_add('lead',crm_editingId,'crm')">+</button>
         </div>
       </div>
     </div>
@@ -756,6 +817,17 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
         <div class="fu-log-title">Log de Follow-ups</div>
         <div id="prm_m-fu-log"></div>
       </div>
+      <div class="task-section">
+        <div class="task-section-hd">
+          <div class="task-section-title">Tareas <span class="task-count-badge" id="prm_task_count" style="display:none">0</span></div>
+        </div>
+        <div class="task-list" id="prm_task_list"><div class="task-empty">Sin tareas pendientes</div></div>
+        <div class="task-add-row">
+          <input class="task-add-input" id="prm_task_input" placeholder="Nueva tarea..." onkeydown="if(event.key==='Enter')task_add('prospect',prm_editingId,'prm')">
+          <input class="task-add-date" id="prm_task_date" type="date" title="Fecha límite">
+          <button class="task-add-btn" onclick="task_add('prospect',prm_editingId,'prm')">+</button>
+        </div>
+      </div>
     </div>
     <div class="timeline-wrap" id="prm_panel_actividad" style="display:none">
       <div class="timeline-filters">
@@ -922,6 +994,18 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
   </div>
 </div>
 </div><!-- end view-automations -->
+
+<!-- TASKS VIEW -->
+<div id="view-tasks" style="display:none;flex:1;overflow-y:auto">
+  <div class="tasks-view-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <h2 style="font-size:1.35rem;font-weight:800;color:var(--text);margin:0">Mis Tareas</h2>
+      <button onclick="task_loadGlobal()" style="background:none;border:1px solid var(--border);color:var(--text-2);padding:5px 14px;border-radius:6px;font-size:.78rem;cursor:pointer;font-family:inherit;transition:border-color .15s" onmouseover="this.style.borderColor='#C4E538'" onmouseout="this.style.borderColor=''">↻ Actualizar</button>
+    </div>
+    <p style="font-size:.8rem;color:var(--text-3);margin:0 0 20px">Todas las tareas pendientes de leads y prospectos</p>
+    <div id="tasks_global_list"><div style="color:var(--text-3);font-size:.82rem;text-align:center;padding:60px 0">Cargando tareas…</div></div>
+  </div>
+</div>
 
 <!-- GMAIL VIEW -->
 <div id="view-gmail" class="view">
@@ -1232,6 +1316,7 @@ async function initSession() {
     }
     
     await activity_loadLastActivities();
+    task_updateNavBadge();
     crm_renderBoard();
     prm_renderBoard();
   }catch(e){console.error('Auth error:',e);window.location.href='login.html';}
@@ -1417,6 +1502,7 @@ function switchView(view){
   document.getElementById('view-integraciones').style.display=view==='integraciones'?'flex':'none';
   document.getElementById('view-api').style.display=view==='api'?'flex':'none';
   document.getElementById('view-gmail').style.display=view==='gmail'?'flex':'none';
+  document.getElementById('view-tasks').style.display=view==='tasks'?'block':'none';
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
   if(view==='crm')document.getElementById('nav-crm').classList.add('active');
   if(view==='prm')document.getElementById('nav-prm').classList.add('active');
@@ -1424,6 +1510,7 @@ function switchView(view){
   if(view==='integraciones')document.getElementById('nav-integraciones').classList.add('active');
   if(view==='api')document.getElementById('nav-api').classList.add('active');
   if(view==='gmail')document.getElementById('nav-gmail').classList.add('active');
+  if(view==='tasks'){document.getElementById('nav-tasks').classList.add('active');task_loadGlobal();}
   ['sb-crm-new'].forEach(id=>document.getElementById(id).style.display=view==='crm'?'block':'none');
   ['sb-prm-new','sb-prm-export'].forEach(id=>document.getElementById(id).style.display=view==='prm'?'block':'none');
   if(view==='automations')automation_renderDashboard();
@@ -1540,6 +1627,7 @@ function crm_openDetail(id){
   if (datosPanel) datosPanel.style.display = 'block';
   if (actPanel) actPanel.style.display = 'none';
   document.querySelectorAll('#crm_detailOverlay .panel-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  task_load('lead', id, 'crm');
   const lead=leads.find(l=>l.id===id);
   if(!lead)return;
   const d=lead.data;
@@ -1816,6 +1904,7 @@ function prm_openDetail(id){
   if (datosPanel) datosPanel.style.display = 'block';
   if (actPanel) actPanel.style.display = 'none';
   document.querySelectorAll('#prm_detailOverlay .panel-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  task_load('prospect', id, 'prm');
   const p=prospects.find(x=>x.id===id);
   if(!p)return;
   const d=p.data;
@@ -2778,6 +2867,182 @@ function crm_quickContact(leadId) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// TASKS MODULE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function task_esc(s){const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};return String(s||'').replace(/[&<>"]/g,c=>m[c]);}
+
+function task_formatDue(dateStr) {
+  if (!dateStr) return null;
+  const due = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+  const diff = Math.round((dueDay - today) / 86400000);
+  const label = due.toLocaleDateString('es', { day: 'numeric', month: 'short' });
+  if (diff < 0)  return { label: `⚠ ${label}`, cls: 'task-due-overdue' };
+  if (diff === 0) return { label: 'Hoy', cls: 'task-due-today' };
+  if (diff <= 3)  return { label: label, cls: 'task-due-soon' };
+  return { label: label, cls: 'task-due-future' };
+}
+
+function task_renderList(tasks, listId, entityType, entityId, prefix) {
+  const el = document.getElementById(listId);
+  if (!el) return;
+  const pending = tasks.filter(t => !t.completed);
+  const done    = tasks.filter(t => t.completed);
+  const sorted  = [...pending.sort((a,b) => (a.due_date||'9')<(b.due_date||'9')?-1:1),
+                   ...done.sort((a,b) => new Date(b.completed_at)-new Date(a.completed_at)).slice(0,3)];
+  const badge = document.getElementById(prefix + '_task_count');
+  if (badge) {
+    if (pending.length > 0) { badge.textContent = pending.length; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  }
+  if (sorted.length === 0) { el.innerHTML = '<div class="task-empty">Sin tareas pendientes</div>'; return; }
+  el.innerHTML = sorted.map(t => {
+    const due = task_formatDue(t.due_date);
+    const prioCls = { urgente:'task-prio-urgente', alta:'task-prio-alta', media:'task-prio-media', baja:'task-prio-baja' }[t.priority] || 'task-prio-media';
+    return `<div class="task-item${t.completed ? ' done' : ''}" data-id="${t.id}">
+      <div class="task-check" onclick="task_toggle('${t.id}','${listId}','${entityType}','${entityId}','${prefix}')"></div>
+      <div class="task-prio ${prioCls}"></div>
+      <div class="task-title">${task_esc(t.title)}</div>
+      ${due ? `<div class="task-due ${due.cls}">${due.label}</div>` : ''}
+      <button class="task-del" onclick="task_delete('${t.id}','${listId}','${entityType}','${entityId}','${prefix}')" title="Eliminar">✕</button>
+    </div>`;
+  }).join('');
+}
+
+async function task_load(entityType, entityId, prefix) {
+  try {
+    const { data, error } = await supabase.from('tasks').select('*')
+      .eq('entity_type', entityType).eq('entity_id', entityId)
+      .order('completed').order('due_date', { ascending: true, nullsFirst: false });
+    if (error) throw error;
+    const listId = prefix + '_task_list';
+    task_renderList(data || [], listId, entityType, entityId, prefix);
+  } catch(e) { console.warn('task_load failed:', e); }
+}
+
+async function task_add(entityType, entityId, prefix) {
+  const input = document.getElementById(prefix + '_task_input');
+  const dateEl = document.getElementById(prefix + '_task_date');
+  if (!input) return;
+  const title = input.value.trim();
+  if (!title) { input.focus(); return; }
+  const due_date = dateEl?.value || null;
+  try {
+    const { error } = await supabase.from('tasks').insert([{
+      user_id: currentUser.id, entity_type: entityType, entity_id: entityId,
+      title, due_date: due_date || null, priority: 'media', completed: false
+    }]);
+    if (error) throw error;
+    input.value = '';
+    if (dateEl) dateEl.value = '';
+    await task_load(entityType, entityId, prefix);
+    task_updateNavBadge();
+    showToast('Tarea agregada');
+  } catch(e) { console.warn('task_add failed:', e); showToast('Error al guardar tarea', null, true); }
+}
+
+async function task_toggle(taskId, listId, entityType, entityId, prefix) {
+  const el = document.querySelector(`[data-id="${taskId}"]`);
+  if (!el) return;
+  const isDone = el.classList.contains('done');
+  try {
+    const { error } = await supabase.from('tasks').update({
+      completed: !isDone,
+      completed_at: isDone ? null : new Date().toISOString()
+    }).eq('id', taskId);
+    if (error) throw error;
+    await task_load(entityType, entityId, prefix);
+    task_updateNavBadge();
+  } catch(e) { console.warn('task_toggle failed:', e); }
+}
+
+async function task_delete(taskId, listId, entityType, entityId, prefix) {
+  try {
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+    if (error) throw error;
+    await task_load(entityType, entityId, prefix);
+    task_updateNavBadge();
+  } catch(e) { console.warn('task_delete failed:', e); }
+}
+
+async function task_updateNavBadge() {
+  try {
+    const { count } = await supabase.from('tasks').select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id).eq('completed', false);
+    const badge = document.getElementById('nav-tasks-badge');
+    if (!badge) return;
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  } catch(e) {}
+}
+
+async function task_loadGlobal() {
+  const el = document.getElementById('tasks_global_list');
+  if (!el) return;
+  el.innerHTML = '<div style="color:var(--text-3);font-size:.82rem;text-align:center;padding:60px 0">Cargando…</div>';
+  try {
+    const { data, error } = await supabase.from('tasks').select('*')
+      .eq('user_id', currentUser.id).eq('completed', false)
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    const tasks = data || [];
+    if (tasks.length === 0) {
+      el.innerHTML = '<div style="color:var(--text-3);font-size:.85rem;text-align:center;padding:80px 0">🎉 Sin tareas pendientes</div>';
+      return;
+    }
+    const overdue = tasks.filter(t => t.due_date && new Date(t.due_date+'T00:00:00') < new Date().setHours(0,0,0,0));
+    const today   = tasks.filter(t => { if(!t.due_date) return false; const d=new Date(t.due_date+'T00:00:00'); const n=new Date(); return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate(); });
+    const rest    = tasks.filter(t => !overdue.includes(t) && !today.includes(t));
+
+    function renderGroup(title, list) {
+      if (!list.length) return '';
+      const rows = list.map(t => {
+        const due = task_formatDue(t.due_date);
+        const prioCls = { urgente:'task-prio-urgente', alta:'task-prio-alta', media:'task-prio-media', baja:'task-prio-baja' }[t.priority] || 'task-prio-media';
+        const entityLabel = t.entity_type === 'lead' ? '📊 Lead' : '🔍 Prospecto';
+        const entityId = t.entity_id;
+        const onClick = t.entity_type === 'lead'
+          ? `crm_openDetail('${entityId}')`
+          : `prm_openDetail('${entityId}')`;
+        return `<div class="tasks-global-item" data-id="${t.id}">
+          <div class="task-check" onclick="task_toggleGlobal('${t.id}',this)"></div>
+          <div class="task-prio ${prioCls}"></div>
+          <div class="task-title" style="flex:1">${task_esc(t.title)}</div>
+          ${due ? `<div class="task-due ${due.cls}">${due.label}</div>` : ''}
+          <div class="task-lead-link" onclick="switchView('crm');setTimeout(()=>${onClick},100)" title="Abrir ${entityLabel}">${entityLabel}</div>
+          <button class="task-del" onclick="task_deleteGlobal('${t.id}',this)" title="Eliminar">✕</button>
+        </div>`;
+      }).join('');
+      return `<div class="tasks-group-title">${title}</div>${rows}`;
+    }
+
+    el.innerHTML = renderGroup('⚠ Vencidas', overdue) + renderGroup('🔥 Hoy', today) + renderGroup('Próximas', rest);
+  } catch(e) { el.innerHTML = '<div style="color:#f87171;font-size:.82rem;text-align:center;padding:40px 0">Error al cargar tareas</div>'; }
+}
+
+async function task_toggleGlobal(taskId, checkEl) {
+  try {
+    await supabase.from('tasks').update({ completed: true, completed_at: new Date().toISOString() }).eq('id', taskId);
+    const row = checkEl.closest('.tasks-global-item');
+    if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => row.remove(), 300); }
+    task_updateNavBadge();
+  } catch(e) { console.warn('task_toggleGlobal failed:', e); }
+}
+
+async function task_deleteGlobal(taskId, btn) {
+  try {
+    await supabase.from('tasks').delete().eq('id', taskId);
+    const row = btn.closest('.tasks-global-item');
+    if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .25s'; setTimeout(() => row.remove(), 250); }
+    task_updateNavBadge();
+  } catch(e) { console.warn('task_deleteGlobal failed:', e); }
+}
+
 // ACTIVITY TIMELINE MODULE
 // ═══════════════════════════════════════════════════════════════════════════════
 
