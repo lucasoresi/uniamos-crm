@@ -220,6 +220,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .cal-dot-today-task{background:#eab308}
 .cal-dot-lead{background:#3b82f6}
 .cal-dot-prospect{background:#a855f7}
+.cal-dot-gcal{background:#0ea5e9}
 /* Side panel */
 .cal-side{width:280px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
 .cal-side-hd{padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -241,6 +242,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .cal-ev.type-lead .cal-ev-tag{background:rgba(59,130,246,.15);color:#60a5fa}
 .cal-ev.type-prospect .cal-ev-dot{background:#a855f7}
 .cal-ev.type-prospect .cal-ev-tag{background:rgba(168,85,247,.15);color:#c084fc}
+.cal-ev.type-gcal .cal-ev-dot{background:#0ea5e9}
+.cal-ev.type-gcal .cal-ev-tag{background:rgba(14,165,233,.15);color:#38bdf8}
 .cal-empty-day{color:var(--text-3);font-size:.8rem;text-align:center;padding:40px 16px}
 .cal-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 20px;border-top:1px solid var(--border);flex-shrink:0}
 .cal-legend-item{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--text-3)}
@@ -1075,6 +1078,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
           <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#ef4444"></div>Tarea vencida</div>
           <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#3b82f6"></div>Contacto CRM</div>
           <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#a855f7"></div>Contacto PRM</div>
+          <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#0ea5e9"></div>Google Calendar</div>
         </div>
       </div>
       <div class="cal-side">
@@ -2968,7 +2972,7 @@ function crm_quickContact(leadId) {
 // CALENDAR MODULE
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const cal_state = { year: 0, month: 0, selectedDay: null, tasks: [] };
+const cal_state = { year: 0, month: 0, selectedDay: null, tasks: [], googleEvents: [] };
 const CAL_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CAL_MONTHS_SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
@@ -2978,7 +2982,7 @@ async function cal_init() {
     cal_state.year = now.getFullYear();
     cal_state.month = now.getMonth();
   }
-  await cal_fetchTasks();
+  await Promise.all([cal_fetchTasks(), cal_fetchGoogleEvents()]);
   cal_render();
   // Select today if in current month
   const now = new Date();
@@ -2990,11 +2994,7 @@ async function cal_init() {
 async function cal_fetchTasks() {
   try {
     const y = cal_state.year, m = cal_state.month;
-    const from = `${y}-${String(m+1).padStart(2,'0')}-01`;
-    const lastDay = new Date(y, m+1, 0).getDate();
-    const to = `${y}-${String(m+1).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
-    // Also fetch prev/next month days shown in grid
-    const prevLast = new Date(y, m, 0);
+    const prevLast  = new Date(y, m, 0);
     const nextFirst = new Date(y, m+1, 1);
     const fromExt = `${prevLast.getFullYear()}-${String(prevLast.getMonth()+1).padStart(2,'0')}-01`;
     const toExt   = `${nextFirst.getFullYear()}-${String(nextFirst.getMonth()+1).padStart(2,'0')}-${String(new Date(nextFirst.getFullYear(), nextFirst.getMonth()+1, 0).getDate()).padStart(2,'0')}`;
@@ -3003,6 +3003,23 @@ async function cal_fetchTasks() {
       .gte('due_date', fromExt).lte('due_date', toExt);
     cal_state.tasks = data || [];
   } catch(e) { cal_state.tasks = []; }
+}
+
+async function cal_fetchGoogleEvents() {
+  try {
+    const token = await getGoogleToken();
+    if (!token) { cal_state.googleEvents = []; return; }
+    const y = cal_state.year, m = cal_state.month;
+    const timeMin = new Date(y, m, 1).toISOString();
+    const timeMax = new Date(y, m+1, 0, 23, 59, 59).toISOString();
+    const res = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime&maxResults=100`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) { cal_state.googleEvents = []; return; }
+    const data = await res.json();
+    cal_state.googleEvents = data.items || [];
+  } catch(e) { cal_state.googleEvents = []; }
 }
 
 function cal_getDayEvents(y, m, d) {
@@ -3053,6 +3070,20 @@ function cal_getDayEvents(y, m, d) {
     }
   });
 
+  // Google Calendar events
+  (cal_state.googleEvents || []).forEach(ev => {
+    if (ev.status === 'cancelled') return;
+    const start = ev.start?.date || ev.start?.dateTime || '';
+    if (!start) return;
+    const evDate = new Date(start);
+    if (evDate.getFullYear()===y && evDate.getMonth()===m && evDate.getDate()===d) {
+      const timeStr = ev.start?.dateTime
+        ? new Date(ev.start.dateTime).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' })
+        : 'Todo el día';
+      events.push({ type:'gcal', title: ev.summary||'Sin título', sub: timeStr, tag:'📅 Google Calendar', link: ev.htmlLink });
+    }
+  });
+
   return events;
 }
 
@@ -3090,7 +3121,7 @@ function cal_render() {
 
     const events = cal_getDayEvents(y2, m2, d);
     const dots = [...new Set(events.map(e => e.type))].slice(0,4).map(type => {
-      const cls = { task:'cal-dot-task', overdue:'cal-dot-overdue', lead:'cal-dot-lead', prospect:'cal-dot-prospect' }[type]||'cal-dot-task';
+      const cls = { task:'cal-dot-task', overdue:'cal-dot-overdue', lead:'cal-dot-lead', prospect:'cal-dot-prospect', gcal:'cal-dot-gcal' }[type]||'cal-dot-task';
       return `<div class="cal-dot ${cls}"></div>`;
     }).join('');
 
@@ -3124,10 +3155,15 @@ function cal_selectDay(y, m, d) {
   }
 
   sideEl.innerHTML = events.map(ev => {
-    const onClick = ev.entityType === 'lead'
-      ? `switchView('crm');setTimeout(()=>crm_openDetail('${ev.entityId}'),100)`
-      : `switchView('prm');setTimeout(()=>prm_openDetail('${ev.entityId}'),100)`;
-    return `<div class="cal-ev type-${ev.type}" onclick="${onClick}">
+    let onClick;
+    if (ev.type === 'gcal') {
+      onClick = ev.link ? `window.open('${ev.link}','_blank')` : '';
+    } else if (ev.entityType === 'lead') {
+      onClick = `switchView('crm');setTimeout(()=>crm_openDetail('${ev.entityId}'),100)`;
+    } else {
+      onClick = `switchView('prm');setTimeout(()=>prm_openDetail('${ev.entityId}'),100)`;
+    }
+    return `<div class="cal-ev type-${ev.type}" onclick="${onClick}" style="${ev.type==='gcal'?'cursor:pointer':''}">
       <div class="cal-ev-dot"></div>
       <div class="cal-ev-body">
         <div class="cal-ev-title">${task_esc(ev.title)}</div>
@@ -3146,7 +3182,7 @@ async function cal_navigate(delta) {
   document.getElementById('cal-side-date').textContent = 'Seleccioná un día';
   document.getElementById('cal-side-sub').textContent = 'Hacé click en cualquier día del calendario';
   document.getElementById('cal-side-events').innerHTML = '<div class="cal-empty-day">—</div>';
-  await cal_fetchTasks();
+  await Promise.all([cal_fetchTasks(), cal_fetchGoogleEvents()]);
   cal_render();
 }
 
@@ -3154,7 +3190,7 @@ async function cal_goToday() {
   const now = new Date();
   cal_state.year = now.getFullYear();
   cal_state.month = now.getMonth();
-  await cal_fetchTasks();
+  await Promise.all([cal_fetchTasks(), cal_fetchGoogleEvents()]);
   cal_render();
   cal_selectDay(now.getFullYear(), now.getMonth(), now.getDate());
 }
