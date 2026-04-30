@@ -7,13 +7,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
+const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
+
+const CLAUDE_MODEL = 'claude-haiku-4-5-20251001'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !ANTHROPIC_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
   }
 
   const authHeader = req.headers.get('Authorization')
@@ -53,11 +61,15 @@ serve(async (req) => {
     })
   }
 
+  const safeSubject = subject.slice(0, 200)
+  const safeSnippet = snippet.slice(0, 500)
+  const safeLeadName = lead_name.slice(0, 100)
+
   const prompt = `Eres un asistente de CRM. Basándote en este email, clasificá la etapa de ventas del lead.
 
-Lead: ${lead_name}
-Asunto del email: ${subject}
-Fragmento del email: ${snippet}
+Lead: ${safeLeadName}
+Asunto del email: ${safeSubject}
+Fragmento del email: ${safeSnippet}
 Etapa actual: ${current_stage}
 
 Etapas disponibles: cierre, propuesta, activa, ghost, frio, sininfo
@@ -87,7 +99,7 @@ Reglas:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: CLAUDE_MODEL,
         max_tokens: 150,
         messages: [{ role: 'user', content: prompt }],
       }),
