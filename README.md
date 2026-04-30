@@ -13,11 +13,14 @@ CRM y PRM (Prospect Relationship Management) con integración GSuite, automatiza
 
 | Archivo | Descripción |
 |---------|-------------|
-| index.html | Landing page (uniamoscrm.com) |
-| login.html | Login/registro con email y Google OAuth |
-| app.html | CRM principal (kanban, PRM, automations, API) |
-| cargar_contactos.html | Importador de contactos LinkedIn |
-| schema.sql | Schema de Supabase (leads + prospects + RLS) |
+| `index.html` | Landing page (uniamoscrm.com) |
+| `login.html` | Login/registro con email y Google OAuth |
+| `app.html` | CRM principal — Home Dashboard, Kanban, PRM, Gmail, Tasks, Calendar |
+| `cargar_contactos.html` | Importador de contactos LinkedIn |
+| `reset-password.html` | Reset de contraseña (linked desde email Supabase) |
+| `schema.sql` | Schema de Supabase (leads + prospects + RLS) |
+| `supabase/functions/refresh-google-token/` | Edge Function: refresca Google OAuth token |
+| `supabase/functions/classify-email-lead/` | Edge Function: clasifica etapa de lead por email via Claude AI |
 
 ## Deploy
 
