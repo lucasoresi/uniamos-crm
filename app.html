@@ -547,8 +547,11 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
     <div class="sb-logo-sub">Sales Hub</div>
   </div>
   <div class="sb-nav">
+    <div class="sb-item active" id="nav-home" onclick="switchView('home')">
+      <span class="sb-icon">🏠</span> Inicio
+    </div>
     <div class="sb-group-label">Ventas Activas</div>
-    <div class="sb-item active" id="nav-crm" onclick="switchView('crm')">
+    <div class="sb-item" id="nav-crm" onclick="switchView('crm')">
       <span class="sb-icon">📊</span> CRM Pipeline
       <span class="sb-badge" id="nav-crm-badge">0</span>
     </div>
@@ -1900,6 +1903,7 @@ function home_render(classifications, allLeads) {
 
 // ── VIEW SWITCHER ─────────────────────────────────────────────────────────
 function switchView(view){
+  document.getElementById('view-home').style.display=view==='home'?'flex':'none';
   document.getElementById('view-crm').style.display=view==='crm'?'flex':'none';
   document.getElementById('view-prm').style.display=view==='prm'?'flex':'none';
   document.getElementById('view-automations').style.display=view==='automations'?'flex':'none';
@@ -1909,21 +1913,21 @@ function switchView(view){
   document.getElementById('view-tasks').style.display=view==='tasks'?'block':'none';
   document.getElementById('view-calendar').style.display=view==='calendar'?'flex':'none';
   document.querySelectorAll('.sb-item').forEach(el=>el.classList.remove('active'));
+  if(view==='home'){document.getElementById('nav-home').classList.add('active');home_load();}
   if(view==='crm')document.getElementById('nav-crm').classList.add('active');
   if(view==='prm')document.getElementById('nav-prm').classList.add('active');
   if(view==='automations')document.getElementById('nav-automations').classList.add('active');
   if(view==='integraciones')document.getElementById('nav-integraciones').classList.add('active');
   if(view==='api')document.getElementById('nav-api').classList.add('active');
-  if(view==='gmail')document.getElementById('nav-gmail').classList.add('active');
+  if(view==='gmail'){document.getElementById('nav-gmail').classList.add('active');gmail_loadInbox();}
   if(view==='tasks'){document.getElementById('nav-tasks').classList.add('active');task_loadGlobal();}
   if(view==='calendar'){document.getElementById('nav-calendar').classList.add('active');cal_init();}
   ['sb-crm-new'].forEach(id=>document.getElementById(id).style.display=view==='crm'?'block':'none');
   ['sb-prm-new','sb-prm-export'].forEach(id=>document.getElementById(id).style.display=view==='prm'?'block':'none');
   if(view==='automations')automation_renderDashboard();
   if(view==='integraciones')integraciones_checkStatus();
-  if(view==='gmail')gmail_loadInbox();
 }
-switchView('crm');
+switchView('home');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CRM MODULE
