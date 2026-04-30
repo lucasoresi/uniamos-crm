@@ -1,157 +1,130 @@
-# Sesión de desarrollo — Dashboard CRM
-**Fecha:** 2026-04-16  
-**Objetivo:** Mejorar vistas CRM y PRM para que se parezcan al prototipo `Uniamos_Todo/Uniamos_Dashboard.html`, con datos reales de Supabase y Gmail integrado.
+# Sesión de desarrollo — Uniamos CRM
+**Fecha:** 2026-04-16
 
 ---
 
 ## Contexto del proyecto
 
-- **App principal:** `/uniamos-crm/app.html` (~2000+ líneas, monolito HTML+CSS+JS)
-- **Backend:** Supabase (URL: `https://xhqufddfvwzdptqhohxe.supabase.co`, MCP: `llleoqfeluptmmbqluab`)
-- **Auth:** Supabase Auth — email/password + Google OAuth (actualmente sin scope de Gmail)
-- **Tablas Supabase:** `leads` y `prospects` (schema JSONB en columna `data`), `activities`
+- **App principal:** `app.html` — monolito HTML+CSS+JS (~2000+ líneas)
+- **Backend:** Supabase — proyecto `llleoqfeluptmmbqluab` → `https://llleoqfeluptmmbqluab.supabase.co`
+- **Auth:** Supabase Auth — email/password + Google OAuth
 - **Stack:** Vanilla HTML/CSS/JS, sin bundler, sin frameworks
-
-## Decisiones de diseño tomadas
-
-- **Opción elegida:** B (mejorar vistas CRM y PRM existentes, NO crear nueva vista Dashboard)
-- **Gmail:** Opción A — tab "📧 Gmail" dentro del panel de detalle de cada lead/prospecto, filtrado por email del contacto
-- **Tablas nuevas:** Ninguna necesaria (datos de rotting calculados desde `ultimoContacto` existente)
+- **Deploy:** Vercel / Netlify (estático)
+- **Dev local:** `npx serve .` en `http://localhost:3000`
 
 ---
 
-## Cambios a realizar
+## Lo que se hizo en esta sesión
 
-### 1. PRM cards — mejoras visuales [PENDIENTE]
-**Archivo:** `app.html` — función `prm_makeCard()` (buscar por `function prm_makeCard`)
+### 1. Migración de base de datos
+- Proyecto anterior: `xhqufddfvwzdptqhohxe` → reemplazado en todos los archivos
+- Proyecto nuevo: `llleoqfeluptmmbqluab`
+- Archivos actualizados: `app.html`, `login.html`, `cargar_contactos.html`, `reset-password.html`
+- Schema creado en el nuevo proyecto: tablas `leads`, `prospects`, `activities` con RLS
 
-Agregar a cada card de prospecto:
-- **Rotting strip** → `<div class="card-rot-strip">` barra 3px arriba de la card
-  - Ámbar `#F59E0B` si 7–13 días sin contacto (campo `ultimoContacto` del JSONB)
+### 2. Mejoras visuales — CRM cards
+- **Rotting strip** → barra de 3px en la parte superior de cada card
+  - Ámbar `#F59E0B` si ≥7 días sin contacto
   - Rojo `#EF4444` si ≥14 días sin contacto
-  - Invisible si estado es `positivo`, `negativo`, o `nuevo`
-- **FU badge** → contar entradas en `historial[]` con tipo follow-up → "FU 2"
-- **Tags** → canal, sector, país (ya en datos Supabase)
-- **Rot label** → "⚠️ 14d sin contacto" debajo de tags
-- **Quick actions en hover** (event.stopPropagation):
-  - `📤 Log FU` → llama `prm_logFollowUp(id)`
-  - `✅ Positivo` → llama `prm_marcarPositivo(id)` 
-  - `❌ No` → llama `prm_marcarNegativo(id)`
-  - `🚀 → CRM` → solo si estado === 'positivo', llama `prm_moverAlCRM(id)`
+  - Se omite en etapas `cierre` y `positivo`
+- **Rot label** → texto "⚠️ Xd sin contacto" dentro de la card
 
-CSS a agregar (dark theme, lima):
-```css
-.card-rot-strip{height:3px;position:absolute;top:0;left:4px;right:0;border-radius:0 8px 0 0;opacity:.85}
-.card-rot-label{font-size:.69rem;font-weight:700;display:flex;align-items:center;gap:4px;margin-bottom:5px}
-.fu-badge{flex-shrink:0;padding:2px 7px;border-radius:6px;font-size:.68rem;font-weight:800;white-space:nowrap;background:rgba(196,229,56,.15);color:#C4E538}
-.card-actions{display:flex;gap:4px;margin-top:8px;opacity:0;transition:opacity .15s}
-.card:hover .card-actions{opacity:1}
-.card-btn{padding:4px 9px;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .14s;display:flex;align-items:center;gap:4px}
-.card-btn-fu{background:rgba(196,229,56,.15);color:#C4E538}
-.card-btn-fu:hover{background:#C4E538;color:#0A0A0A}
-.card-btn-pos{background:rgba(22,163,74,.15);color:#4ADE80}
-.card-btn-pos:hover{background:#16A34A;color:#fff}
-.card-btn-neg{background:rgba(220,38,38,.15);color:#F87171}
-.card-btn-neg:hover{background:#DC2626;color:#fff}
-.card-btn-crm{background:rgba(251,191,36,.15);color:#FCD34D;font-size:.7rem}
-.card-btn-crm:hover{background:#D97706;color:#fff}
-```
+### 3. Mejoras visuales — PRM cards (cambio principal)
+- **Rotting strip + label** — misma lógica que CRM
+- **FU badge** — "FU 2" en esquina mostrando cantidad de follow-ups
+- **Tags** — canal (LinkedIn, Email frío, etc.) y sector visibles en la card
+- **Cargo del contacto** visible debajo del nombre
+- **Quick actions en hover** (sin abrir el panel):
+  - `📤 Log FU` → registra follow-up, avanza el estado, actualiza fecha
+  - `✅ Positivo` → marca como positivo en Supabase
+  - `❌ No` → marca como negativo en Supabase
+  - `🚀 → CRM` → solo visible si estado es `positivo`
 
-### 2. CRM cards — rotting strip [PENDIENTE]
-**Archivo:** `app.html` — función `crm_makeCard()` (buscar por `function crm_makeCard`)
+### 4. Funciones JS nuevas
+- `daysSince(dateStr)` — calcula días desde una fecha (soporta `YYYY-MM-DD` y `DD Mon YYYY`)
+- `rotInfo(dateStr, estado)` — retorna color y label de rotting según días
+- `prm_quickFU(id)` — log de follow-up desde card sin abrir panel
+- `prm_quickPos(id)` — marcar positivo desde card
+- `prm_quickNeg(id)` — marcar negativo desde card
+- `prm_saveProspect(p)` — guardar prospecto directo a Supabase (sin leer del panel)
 
-- Agregar rotting strip solo para etapas: `ghost`, `frio`, `sininfo`
-- Misma lógica de días (ámbar ≥7, rojo ≥14)
-- El campo en CRM es `ultimoContacto` dentro del JSONB `data`
+### 5. Tab Gmail en panel de detalle
+- Nuevo tab "📧 Gmail" en los paneles de CRM y PRM
+- Al hacer click, busca emails de/hacia el email del contacto via Gmail API
+- Muestra: remitente, asunto, snippet, fecha
+- Maneja errores: token expirado, sin email registrado, sin resultados
+- `gmail_loadForContact(email, containerId)` — fetch a `gmail.googleapis.com`
+- `provider_token` de Google guardado en `sessionStorage` al iniciar sesión
 
-### 3. Gmail tab en panel de detalle [PENDIENTE]
-**Archivos:** `app.html` (panel HTML + JS) + `login.html` (scope OAuth)
+### 6. Scope Gmail en OAuth
+- `login.html` actualizado: scope `gmail.readonly` + `access_type: offline` + `prompt: consent`
+- El token de Google queda disponible en `session.provider_token` tras login con Google
 
-#### login.html
-Agregar scope a `signInWithOAuth`:
-```js
-options: {
-  redirectTo: window.location.origin + '/app.html',
-  scopes: 'https://www.googleapis.com/auth/gmail.readonly'
-}
-```
+### 7. Configuración Supabase (via MCP)
+- Email confirmation desactivado
+- Site URL: `http://localhost:3000`
+- Redirect URL: `http://localhost:3000/**`
+- Usuario `lucasoresi10@gmail.com` confirmado manualmente
 
-#### app.html — Panel HTML
-En ambos paneles (CRM y PRM), agregar tabs:
-```html
-<div class="panel-tabs" id="crm_panel-tabs">
-  <div class="panel-tab active" onclick="crm_switchTab('datos')">📋 Datos</div>
-  <div class="panel-tab" onclick="crm_switchTab('gmail')">📧 Gmail</div>
-  <div class="panel-tab" onclick="crm_switchTab('timeline')">📅 Timeline</div>
-</div>
-<div id="crm_tab-datos"><!-- contenido actual del panel --></div>
-<div id="crm_tab-gmail" style="display:none">
-  <div id="crm_gmail-list"><!-- emails cargados via API --></div>
-</div>
-```
-
-#### app.html — Gmail fetch function
-```js
-async function fetchGmailForContact(email, containerId) {
-  const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.provider_token;
-  if (!token) {
-    document.getElementById(containerId).innerHTML = '<p>Iniciá sesión con Google para ver emails.</p>';
-    return;
-  }
-  const query = encodeURIComponent(`from:${email} OR to:${email}`);
-  const res = await fetch(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}&maxResults=15`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  const data = await res.json();
-  // fetch each message snippet...
-}
-```
-
-**Nota:** El `provider_token` solo está disponible en la sesión si el usuario inició sesión con Google Y el scope fue pedido. Se pierde al refrescar la sesión (limitación de Supabase). Se puede guardar en `sessionStorage` al momento del login.
+### 8. Documentación generada
+- `docs/database.md` — schema completo de las 3 tablas con campos y tipos
+- `schema.sql` — actualizado con las 3 tablas + RLS + índices
+- `docs/session-progress.md` — este archivo
 
 ---
 
-## Estado actual de app.html (referencia)
+## Próximos pasos
 
-| Función | Línea aprox | Descripción |
-|---|---|---|
-| `switchView()` | ~1299 | Cambia entre vistas |
-| CRM `makeCard` / `crm_makeCard` | ~1400 | Genera cards del CRM |
-| PRM `makeCard` / `prm_makeCard` | ~1700 | Genera cards del PRM |
-| `crm_openDetail()` | ~1470 | Abre panel de detalle CRM |
-| `prm_openDetail()` | ~1700 | Abre panel de detalle PRM |
-| Gmail section | ~907 | Integraciones deep links (no API real) |
+### A) Integración Gmail — finalizar (PRIORITARIO si se quiere usar el tab Gmail)
 
-## Cambios completados
+El tab Gmail ya está implementado en el frontend. Para que funcione end-to-end:
 
-- [x] Análisis completo de ambos directorios
-- [x] Decisiones de diseño tomadas y aprobadas
-- [x] CSS agregado: `.card-rot-strip`, `.card-rot-label`, `.fu-badge`, `.prm-card-actions`, `.card-btn-*`, `.prm-tags`, `.gmail-item`, `.gmail-no-token`
-- [x] Funciones helper: `daysSince()`, `rotInfo()` — soportan formato `YYYY-MM-DD` e `DD Mon YYYY`
-- [x] CRM cards: rotting strip + rot label (para ghost/frio/sininfo y cualquier etapa con días ≥7)
-- [x] PRM cards: rotting strip + FU badge + tags canal/sector + rot label + quick actions hover (Log FU, Positivo, No, → CRM)
-- [x] Funciones quick action: `prm_quickFU()`, `prm_quickPos()`, `prm_quickNeg()`, `prm_saveProspect()`
-- [x] Tab "📧 Gmail" en panel de detalle CRM y PRM
-- [x] `crm_switchPanelTab` y `prm_switchPanelTab` actualizados para manejar tab gmail
-- [x] `gmail_loadForContact()` — fetch a Gmail API con provider_token, manejo de 401, snippets
-- [x] `provider_token` guardado en `sessionStorage` al iniciar sesión
-- [x] `login.html` — scope `gmail.readonly` agregado al OAuth de Google
+1. **Google Cloud Console** → OAuth consent screen → Scopes
+   - Agregar scope: `https://www.googleapis.com/auth/gmail.readonly`
+   - Si la app está en modo "Testing", agregar `lucasoresi10@gmail.com` como test user
 
-## Pendiente / Próxima sesión
+2. **Volver a loguearse con Google** desde `login.html`
+   - La primera vez pedirá permisos de Gmail — aceptar
+   - El `provider_token` queda en `sessionStorage`
+   - Abrir cualquier lead/prospecto → tab "📧 Gmail" → debería mostrar emails
 
-- [ ] **Supabase Authorized Domains**: Agregar `https://www.googleapis.com` al dashboard de Supabase → Auth → URL Configuration para que el OAuth funcione correctamente con los nuevos scopes
-- [ ] **Google Cloud Console**: Verificar que la app de Google OAuth tiene habilitado el scope `gmail.readonly` en OAuth consent screen → Scopes
-- [ ] Testear rotting en datos reales (verificar formato de fechas `ultimoContacto` en Supabase)
-- [ ] Considerar: stale stat en PRM stats bar (ya existe el elemento HTML `prm_statStale` pero siempre muestra 0 — conectar con `daysSince`)
-- [ ] Considerar: Mostrar datos reales en `autoSetupData()` si la BD tiene datos en otra tabla
+3. **Limitación conocida:** el `provider_token` se pierde al refrescar la sesión (limitación de Supabase). El usuario necesita volver a loguearse con Google para renovarlo. Solución futura: guardar el token en Supabase o usar refresh token.
+
+### B) PRM stats bar — conectar "Sin respuesta >7d"
+
+El elemento `prm_statStale` existe en el HTML pero siempre muestra `0`. Conectarlo con la lógica de `daysSince`:
+
+```js
+// En prm_updateStats()
+const stale = filtered.filter(p => {
+  const d = daysSince(p.data.ultimoContacto);
+  return d !== null && d >= 7 && !['positivo','negativo'].includes(p.data.estado);
+}).length;
+document.getElementById('prm_statStale').textContent = stale;
+```
+
+### C) Ajustes visuales (opcional)
+- Revisar espaciado y tamaño de fuentes en PRM cards con los nuevos elementos
+- Considerar mostrar país en la card además de canal/sector
+- Animación de entrada a las quick actions más suave
+
+### D) Deploy a producción
+Cuando el proyecto esté listo para subir:
+1. Actualizar en Supabase → Auth → URL Configuration:
+   - Site URL: `https://tu-dominio.vercel.app`
+   - Redirect URLs: `https://tu-dominio.vercel.app/**`
+2. En Google Cloud Console → OAuth → Authorized redirect URIs: agregar el dominio de producción
+3. `vercel deploy` o conectar repo a Vercel
 
 ---
 
-## Notas técnicas importantes
+## Notas técnicas
 
-1. **JSONB schema**: Los datos de leads/prospects están en columna `data` como JSONB. El campo `ultimoContacto` es string en formato `"DD Mon YYYY"` (ej: `"10 Mar 2026"`) — parsear con `new Date(str)` puede fallar. Usar regex o `Date.parse()` con cuidado.
-2. **provider_token**: El token de Google (para Gmail API) está en `session.provider_token` pero se pierde al refresh. Guardar en `sessionStorage` al cargar la app.
-3. **Prefijos de funciones**: Todas las funciones CRM tienen prefijo `crm_`, PRM tienen `prm_`. Respetar este patrón.
-4. **Supabase MCP**: El archivo `.mcp.json` apunta a proyecto `llleoqfeluptmmbqluab` pero app.html usa `xhqufddfvwzdptqhohxe`. Pueden ser proyectos distintos (dev vs prod).
+| Tema | Detalle |
+|---|---|
+| JSONB schema | Datos en columna `data`. Agregar campos no requiere migraciones |
+| Fechas `ultimoContacto` | Puede ser `YYYY-MM-DD` (PRM) o `DD Mon YYYY` (CRM legacy). `daysSince()` maneja ambos |
+| Prefijos de funciones | CRM → `crm_`, PRM → `prm_`, Gmail → `gmail_`, actividades → `activity_` |
+| `provider_token` | Solo disponible en `session.provider_token` al hacer login con Google. Se guarda en `sessionStorage` |
+| Auto-setup | Si BD vacía al primer login → siembra datos demo automáticamente |
+| MCP Playwright | Agregado a `.mcp.json` — requiere reinicio de Claude Code para activarse |

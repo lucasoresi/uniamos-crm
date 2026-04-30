@@ -1,0 +1,86 @@
+<h2>¿Qué features de EspoCRM implementamos primero?</h2>
+<p class="subtitle">Seleccioná las que más valor le dan al CRM ahora. Podés elegir varias.</p>
+
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="tasks" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Tasks — Tareas vinculadas a leads</h3>
+      <p>Crear tareas con fecha límite, estado (pendiente/completada) y prioridad, vinculadas a un lead o prospecto. Aparecen en el panel de detalle y en un inbox global de tareas.</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(196,229,56,.15);color:#C4E538;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700">Alta prioridad</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">Nueva tabla Supabase</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">~2 días</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="activities-split" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Activities / History — Separar próximas vs pasadas</h3>
+      <p>En el panel de detalle: sección "Próximas actividades" (reuniones/tareas pendientes) + sección "Historial" (completadas). Igual que EspoCRM: el timeline actual se convierte en History, se agrega una sección Activities arriba.</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(196,229,56,.15);color:#C4E538;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700">Alta prioridad</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">Solo app.html</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">~1 día</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="accounts" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Accounts — Empresas como entidad propia</h3>
+      <p>Las empresas tienen su propio perfil (sector, país, sitio web, logo) y agrupan todos los leads/prospectos relacionados. Vista de "ficha de empresa" con todos sus contactos y el historial consolidado.</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(251,146,60,.15);color:#FB923C;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700">Medio plazo</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">Nueva tabla + vista</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">~4 días</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="convert" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Convert — Flujo de conversión mejorado</h3>
+      <p>Mejorar el flujo PRM→CRM actual. Modal guiado que permite elegir qué datos copiar, crear el lead en una etapa específica, y registrar el evento en ambos timelines con más contexto.</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(251,146,60,.15);color:#FB923C;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700">Medio plazo</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">Solo app.html</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">~1 día</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="reports" onclick="toggleSelect(this)">
+    <div class="letter">E</div>
+    <div class="content">
+      <h3>Reports — Reportes y analytics</h3>
+      <p>Dashboard de métricas: leads por etapa, tasa de conversión, actividad por período, leads por fuente. Gráficos de barras y líneas con filtros por fecha. Complementa la vista de Automatizaciones actual.</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700">Largo plazo</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">Solo app.html</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">~3 días</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="multiuser" onclick="toggleSelect(this)">
+    <div class="letter">F</div>
+    <div class="content">
+      <h3>Multi-usuario — Equipos de ventas</h3>
+      <p>Asignar leads y prospectos a distintos usuarios del equipo. Ver el "Assigned User" en cada card del kanban. Filtrar el board por vendedor. Requiere invitación de usuarios y RLS por equipo.</p>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <span style="background:rgba(220,38,38,.15);color:#f87171;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:700">Complejo</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">Auth + RLS + invite</span>
+        <span style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);padding:2px 8px;border-radius:4px;font-size:.72rem">~1 semana</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px">Seleccioná las que te interesan y confirmá en el terminal.</p>

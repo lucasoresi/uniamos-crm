@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - img [ref=e13]
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Username
+          - combobox [ref=e19]:
+            - option "Administrator" [selected]
+        - generic [ref=e20]:
+          - generic [ref=e21]: Language
+          - combobox "Language" [ref=e22]:
+            - option "English (US)" [selected]
+            - option "Arabic"
+            - option "Bulgarian"
+            - option "English (UK)"
+            - option "Spanish (Mexico)"
+            - option "Czech"
+            - option "Danish"
+            - option "German"
+            - option "Spanish (Spain)"
+            - option "Greek"
+            - option "Croatian"
+            - option "Hungarian"
+            - option "Persian"
+            - option "French (France)"
+            - option "Japanese"
+            - option "Indonesian"
+            - option "Italian"
+            - option "Lithuanian"
+            - option "Latvian"
+            - option "Norwegian Bokmål"
+            - option "Dutch"
+            - option "Thai"
+            - option "Turkish"
+            - option "Slovak"
+            - option "Slovene"
+            - option "Serbian"
+            - option "Swedish"
+            - option "Romanian"
+            - option "Russian"
+            - option "Polish"
+            - option "Portuguese (Brazil)"
+            - option "Portuguese (Portugal)"
+            - option "Ukrainian"
+            - option "Urdu (India)"
+            - option "Vietnamese"
+            - option "Simplified Chinese (China)"
+            - option "Traditional Chinese (Taiwan)"
+        - button "Login" [disabled] [ref=e24]
+    - generic [ref=e25]:
+      - paragraph [ref=e26]: "This demo includes:"
+      - list [ref=e27]:
+        - listitem [ref=e28]:
+          - link "Advanced Pack" [ref=e29] [cursor=pointer]:
+            - /url: https://www.espocrm.com/extensions/advanced-pack/
+        - listitem [ref=e30]:
+          - link "Sales Pack" [ref=e31] [cursor=pointer]:
+            - /url: https://www.espocrm.com/extensions/sales-pack/
+        - listitem [ref=e32]:
+          - link "Project Management" [ref=e33] [cursor=pointer]:
+            - /url: https://www.espocrm.com/extensions/project-management/
+      - paragraph [ref=e34]:
+        - text: This is a shared demo, it can be used simultaneously by many people. You can also get
+        - generic [ref=e35]:
+          - text: a
+          - link "personal demo" [ref=e36] [cursor=pointer]:
+            - /url: https://www.espocrm.com/cloud-registration/?plan=demo
+        - text: .
+  - contentinfo [ref=e37]:
+    - paragraph [ref=e38]:
+      - text: © 2026
+      - link "EspoCRM, Inc." [ref=e39] [cursor=pointer]:
+        - /url: https://www.espocrm.com

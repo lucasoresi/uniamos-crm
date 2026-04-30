@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0A0A; color: #fff; font-family: 'Inter', sans-serif; padding: 24px; }
+  h2 { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; color: #fff; }
+  .subtitle { font-size: .8rem; color: rgba(255,255,255,.4); margin-bottom: 28px; }
+
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .opt { border: 2px solid rgba(255,255,255,.1); border-radius: 12px; padding: 16px; cursor: pointer; transition: border-color .2s; }
+  .opt:hover { border-color: rgba(196,229,56,.4); }
+  .opt.selected { border-color: #C4E538; background: rgba(196,229,56,.05); }
+  .opt-label { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.4); margin-bottom: 10px; }
+  .opt-title { font-size: .88rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .opt-desc { font-size: .72rem; color: rgba(255,255,255,.45); line-height: 1.5; margin-bottom: 12px; }
+
+  /* === OPCIÓN A: Calendario mensual clásico === */
+  .cal-a { background: #111; border-radius: 8px; overflow: hidden; }
+  .cal-a-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .cal-a-hd span { font-size: .82rem; font-weight: 700; }
+  .cal-a-hd button { background: none; border: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.5); border-radius: 4px; width: 22px; height: 22px; cursor: pointer; font-size: .75rem; }
+  .cal-a-grid { display: grid; grid-template-columns: repeat(7,1fr); }
+  .cal-a-dow { font-size: .58rem; font-weight: 700; text-transform: uppercase; color: rgba(255,255,255,.3); text-align: center; padding: 6px 0; }
+  .cal-a-day { padding: 5px 3px; min-height: 46px; border-right: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05); font-size: .68rem; color: rgba(255,255,255,.5); }
+  .cal-a-day.today { background: rgba(196,229,56,.06); }
+  .cal-a-day .num { color: #C4E538; font-weight: 800; font-size: .72rem; margin-bottom: 3px; }
+  .cal-a-day .num.other { color: rgba(255,255,255,.2); }
+  .dot-row { display: flex; gap: 2px; flex-wrap: wrap; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-task { background: #C4E538; }
+  .dot-overdue { background: #ef4444; }
+  .dot-contact { background: #3b82f6; }
+  .dot-prm { background: #a855f7; }
+  .chip { font-size: .54rem; background: rgba(196,229,56,.15); color: #C4E538; padding: 1px 4px; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; margin-top: 1px; }
+  .chip.red { background: rgba(239,68,68,.15); color: #f87171; }
+  .chip.blue { background: rgba(59,130,246,.15); color: #60a5fa; }
+
+  /* === OPCIÓN B: Agenda list === */
+  .agenda { display: flex; flex-direction: column; gap: 0; background: #111; border-radius: 8px; overflow: hidden; }
+  .agenda-day { display: flex; gap: 12px; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.05); align-items: flex-start; }
+  .agenda-day.today-row { background: rgba(196,229,56,.04); }
+  .agenda-date { width: 28px; flex-shrink: 0; text-align: center; }
+  .agenda-date .dd { font-size: .9rem; font-weight: 800; color: rgba(255,255,255,.7); line-height: 1; }
+  .agenda-date .dow { font-size: .56rem; text-transform: uppercase; color: rgba(255,255,255,.3); margin-top: 1px; }
+  .agenda-date.today-d .dd { color: #C4E538; }
+  .agenda-events { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  .ag-ev { font-size: .7rem; padding: 4px 8px; border-radius: 5px; display: flex; align-items: center; gap: 6px; }
+  .ag-ev.task { background: rgba(196,229,56,.1); color: #C4E538; }
+  .ag-ev.overdue { background: rgba(239,68,68,.1); color: #f87171; }
+  .ag-ev.contact { background: rgba(59,130,246,.1); color: #60a5fa; }
+  .ag-ev .ev-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .agenda-empty { font-size: .65rem; color: rgba(255,255,255,.2); padding: 5px 0; }
+
+  /* === OPCIÓN C: Split vista === */
+  .split-cal { display: grid; grid-template-columns: 1fr 200px; gap: 0; background: #111; border-radius: 8px; overflow: hidden; min-height: 220px; }
+  .split-left { border-right: 1px solid rgba(255,255,255,.08); }
+  .split-right { padding: 10px; }
+  .split-right-title { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: rgba(255,255,255,.3); margin-bottom: 8px; }
+  .split-ev { font-size: .68rem; padding: 5px 8px; border-radius: 5px; margin-bottom: 4px; }
+  .split-ev.t { background: rgba(196,229,56,.1); color: #C4E538; }
+  .split-ev.o { background: rgba(239,68,68,.1); color: #f87171; }
+  .split-ev.c { background: rgba(59,130,246,.1); color: #60a5fa; }
+
+  .sel-indicator { position: fixed; bottom: 20px; right: 20px; background: #C4E538; color: #000; font-weight: 800; font-size: .78rem; padding: 8px 16px; border-radius: 8px; display: none; }
+  .sel-indicator.show { display: block; }
+</style>
+</head>
+<body>
+<h2>¿Qué layout para el Calendario?</h2>
+<p class="subtitle">Hacé click en la opción que más te guste</p>
+
+<div class="options-grid">
+
+  <!-- OPCIÓN A -->
+  <div class="opt" onclick="select(this,'A')">
+    <div class="opt-label">Opción A</div>
+    <div class="opt-title">Calendario mensual clásico</div>
+    <div class="opt-desc">Grid de 7 columnas con los días del mes. Dots de colores por tipo de evento. Click en día para ver detalle.</div>
+    <div class="cal-a">
+      <div class="cal-a-hd">
+        <button>‹</button>
+        <span>Abril 2026</span>
+        <button>›</button>
+      </div>
+      <div class="cal-a-grid">
+        <div class="cal-a-dow">L</div><div class="cal-a-dow">M</div><div class="cal-a-dow">X</div><div class="cal-a-dow">J</div><div class="cal-a-dow">V</div><div class="cal-a-dow">S</div><div class="cal-a-dow">D</div>
+        <!-- Week 1 -->
+        <div class="cal-a-day"><div class="num other">31</div></div>
+        <div class="cal-a-day"><div class="num">1</div></div>
+        <div class="cal-a-day"><div class="num">2</div><div class="dot-row"><div class="dot dot-task"></div><div class="dot dot-contact"></div></div></div>
+        <div class="cal-a-day"><div class="num">3</div></div>
+        <div class="cal-a-day"><div class="num">4</div><div class="dot-row"><div class="dot dot-overdue"></div></div></div>
+        <div class="cal-a-day"><div class="num">5</div></div>
+        <div class="cal-a-day"><div class="num">6</div></div>
+        <!-- Week 2 -->
+        <div class="cal-a-day"><div class="num">7</div><div class="dot-row"><div class="dot dot-task"></div></div></div>
+        <div class="cal-a-day"><div class="num">8</div></div>
+        <div class="cal-a-day"><div class="num">9</div><div class="dot-row"><div class="dot dot-contact"></div><div class="dot dot-prm"></div></div></div>
+        <div class="cal-a-day"><div class="num">10</div></div>
+        <div class="cal-a-day"><div class="num">11</div></div>
+        <div class="cal-a-day"><div class="num">12</div></div>
+        <div class="cal-a-day"><div class="num">13</div></div>
+        <!-- Week 3 -->
+        <div class="cal-a-day"><div class="num">14</div></div>
+        <div class="cal-a-day"><div class="num">15</div><div class="dot-row"><div class="dot dot-task"></div><div class="dot dot-task"></div></div></div>
+        <div class="cal-a-day"><div class="num">16</div></div>
+        <div class="cal-a-day"><div class="num">17</div></div>
+        <div class="cal-a-day"><div class="num">18</div></div>
+        <div class="cal-a-day"><div class="num">19</div></div>
+        <div class="cal-a-day"><div class="num">20</div></div>
+        <!-- Week 4 today -->
+        <div class="cal-a-day"><div class="num">21</div></div>
+        <div class="cal-a-day"><div class="num">22</div></div>
+        <div class="cal-a-day today"><div class="num">23</div><div class="dot-row"><div class="dot dot-task"></div><div class="dot dot-overdue"></div></div></div>
+        <div class="cal-a-day"><div class="num">24</div></div>
+        <div class="cal-a-day"><div class="num">25</div><div class="dot-row"><div class="dot dot-contact"></div></div></div>
+        <div class="cal-a-day"><div class="num">26</div></div>
+        <div class="cal-a-day"><div class="num">27</div></div>
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <span style="font-size:.62rem;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:50%;background:#C4E538;display:inline-block"></span> Tarea</span>
+      <span style="font-size:.62rem;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block"></span> Vencida</span>
+      <span style="font-size:.62rem;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:50%;background:#3b82f6;display:inline-block"></span> Contacto CRM</span>
+      <span style="font-size:.62rem;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:3px"><span style="width:7px;height:7px;border-radius:50%;background:#a855f7;display:inline-block"></span> Prospecto</span>
+    </div>
+  </div>
+
+  <!-- OPCIÓN B -->
+  <div class="opt" onclick="select(this,'B')">
+    <div class="opt-label">Opción B</div>
+    <div class="opt-title">Agenda semanal</div>
+    <div class="opt-desc">Lista de los próximos 14 días con los eventos de cada día. Más denso en información, más fácil de leer.</div>
+    <div class="agenda">
+      <div class="agenda-day">
+        <div class="agenda-date"><div class="dd" style="color:rgba(255,255,255,.25)">21</div><div class="dow">Lun</div></div>
+        <div class="agenda-events"><div class="agenda-empty">Sin eventos</div></div>
+      </div>
+      <div class="agenda-day">
+        <div class="agenda-date"><div class="dd" style="color:rgba(255,255,255,.25)">22</div><div class="dow">Mar</div></div>
+        <div class="agenda-events">
+          <div class="ag-ev overdue"><div class="ev-dot"></div>Llamar a Acme Corp — vencida</div>
+        </div>
+      </div>
+      <div class="agenda-day today-row">
+        <div class="agenda-date today-d"><div class="dd">23</div><div class="dow">Mié</div></div>
+        <div class="agenda-events">
+          <div class="ag-ev task"><div class="ev-dot"></div>Enviar propuesta — Nacional</div>
+          <div class="ag-ev task"><div class="ev-dot"></div>Follow-up email — Stop & Shop</div>
+          <div class="ag-ev contact"><div class="ev-dot"></div>Último contacto: AFP Supply</div>
+        </div>
+      </div>
+      <div class="agenda-day">
+        <div class="agenda-date"><div class="dd">24</div><div class="dow">Jue</div></div>
+        <div class="agenda-events"><div class="agenda-empty">Sin eventos</div></div>
+      </div>
+      <div class="agenda-day">
+        <div class="agenda-date"><div class="dd">25</div><div class="dow">Vie</div></div>
+        <div class="agenda-events">
+          <div class="ag-ev task"><div class="ev-dot"></div>Preparar presentación</div>
+          <div class="ag-ev contact"><div class="ev-dot"></div>Último contacto: Janeville</div>
+        </div>
+      </div>
+      <div class="agenda-day">
+        <div class="agenda-date"><div class="dd">28</div><div class="dow">Lun</div></div>
+        <div class="agenda-events">
+          <div class="ag-ev task"><div class="ev-dot"></div>Reunión de seguimiento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C -->
+  <div class="opt" onclick="select(this,'C')">
+    <div class="opt-label">Opción C — Recomendada</div>
+    <div class="opt-title">Calendario + panel lateral</div>
+    <div class="opt-desc">Grilla mensual a la izquierda. Al hacer click en un día, el panel derecho muestra los eventos de ese día con links para abrir el lead.</div>
+    <div class="split-cal">
+      <div class="split-left">
+        <div class="cal-a-hd" style="padding:8px 12px">
+          <button style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:.7rem">‹</button>
+          <span style="font-size:.78rem;font-weight:700">Abril 2026</span>
+          <button style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:.7rem">›</button>
+        </div>
+        <div class="cal-a-grid" style="font-size:.62rem">
+          <div class="cal-a-dow" style="font-size:.52rem">L</div><div class="cal-a-dow" style="font-size:.52rem">M</div><div class="cal-a-dow" style="font-size:.52rem">X</div><div class="cal-a-dow" style="font-size:.52rem">J</div><div class="cal-a-dow" style="font-size:.52rem">V</div><div class="cal-a-dow" style="font-size:.52rem">S</div><div class="cal-a-dow" style="font-size:.52rem">D</div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num other" style="font-size:.6rem">31</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">1</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">2</div><div class="dot-row"><div class="dot dot-task"></div></div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">3</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">4</div><div class="dot-row"><div class="dot dot-overdue"></div></div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">5</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">6</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">7</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">8</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">9</div><div class="dot-row"><div class="dot dot-contact"></div></div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">10</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">11</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">12</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">13</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">14</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">15</div><div class="dot-row"><div class="dot dot-task"></div><div class="dot dot-task"></div></div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">16</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">17</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">18</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">19</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">20</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">21</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">22</div></div>
+          <div class="cal-a-day today" style="min-height:34px;outline:1px solid #C4E538;outline-offset:-1px"><div class="num" style="font-size:.6rem;color:#C4E538">23</div><div class="dot-row"><div class="dot dot-task"></div><div class="dot dot-overdue"></div></div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">24</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">25</div><div class="dot-row"><div class="dot dot-contact"></div></div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">26</div></div>
+          <div class="cal-a-day" style="min-height:34px"><div class="num" style="font-size:.6rem">27</div></div>
+        </div>
+      </div>
+      <div class="split-right">
+        <div class="split-right-title">23 Abril — Hoy</div>
+        <div class="split-ev t">✅ Enviar propuesta</div>
+        <div class="split-ev o">⚠ Llamar Acme — vencida</div>
+        <div class="split-ev c">📊 AFP Supply: contacto</div>
+        <div style="font-size:.6rem;color:rgba(255,255,255,.2);margin-top:8px">Click en día para ver sus eventos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPCIÓN D -->
+  <div class="opt" onclick="select(this,'D')">
+    <div class="opt-label">Opción D</div>
+    <div class="opt-title">Mini-calendario + lista debajo</div>
+    <div class="opt-desc">Calendario compacto arriba. Debajo una lista cronológica de todos los eventos del mes ordenados por fecha.</div>
+    <div style="background:#111;border-radius:8px;overflow:hidden">
+      <div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.78rem;font-weight:700">Abril 2026</span>
+        <div style="display:flex;gap:4px">
+          <button style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:.7rem">‹</button>
+          <button style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:4px;width:20px;height:20px;cursor:pointer;font-size:.7rem">›</button>
+        </div>
+      </div>
+      <div style="padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08)">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">L</span>
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">M</span>
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">X</span>
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">J</span>
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">V</span>
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">S</span>
+          <span style="font-size:.5rem;color:rgba(255,255,255,.3);font-weight:700">D</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.2)">31</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">1</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">2</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">3</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">4</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">5</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">6</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">7</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">8</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">9</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">10</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">11</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">12</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">13</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">14</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">15</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">16</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">17</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">18</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">19</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">20</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">21</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">22</span>
+          <span style="font-size:.6rem;background:#C4E538;color:#000;border-radius:3px;font-weight:800">23</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">24</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">25</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">26</span>
+          <span style="font-size:.6rem;color:rgba(255,255,255,.5)">27</span>
+        </div>
+      </div>
+      <div style="padding:8px 10px;display:flex;flex-direction:column;gap:3px">
+        <div style="font-size:.58rem;color:rgba(255,255,255,.3);margin-bottom:2px">PRÓXIMOS EVENTOS</div>
+        <div style="font-size:.68rem;display:flex;gap:6px;align-items:center;padding:3px 6px;border-radius:4px;background:rgba(239,68,68,.1);color:#f87171"><span>⚠</span> Abr 20 · Llamar Acme Corp</div>
+        <div style="font-size:.68rem;display:flex;gap:6px;align-items:center;padding:3px 6px;border-radius:4px;background:rgba(234,179,8,.1);color:#fbbf24"><span>✅</span> Hoy · Enviar propuesta</div>
+        <div style="font-size:.68rem;display:flex;gap:6px;align-items:center;padding:3px 6px;border-radius:4px;background:rgba(196,229,56,.08);color:#C4E538"><span>✅</span> Abr 25 · Reunión de seguimiento</div>
+        <div style="font-size:.68rem;display:flex;gap:6px;align-items:center;padding:3px 6px;border-radius:4px;background:rgba(59,130,246,.08);color:#60a5fa"><span>📊</span> Abr 25 · AFP Supply: último contacto</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="sel-indicator" id="sel-ind">Seleccionado: <span id="sel-val"></span></div>
+
+<script>
+function select(el, val) {
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('sel-val').textContent = val;
+  document.getElementById('sel-ind').classList.add('show');
+  if(window.recordChoice) window.recordChoice(val, el.querySelector('.opt-title').textContent);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+- generic [active] [ref=e1]:
+  - banner:
+    - navigation [ref=e2518]:
+      - generic [ref=e2519]:
+        - text: 
+        - button "" [ref=e2520] [cursor=pointer]:
+          - generic [ref=e2521]: 
+      - generic [ref=e2522]:
+        - generic [ref=e2523]:
+          - list [ref=e2524]:
+            - listitem [ref=e2525]:
+              - link "" [ref=e2526] [cursor=pointer]:
+                - /url: "#"
+                - generic "Home" [ref=e2527]:
+                  - generic [ref=e2528]: 
+            - listitem [ref=e2529]
+            - listitem [ref=e2531]:
+              - link "" [ref=e2532] [cursor=pointer]:
+                - /url: "#Account"
+                - generic "Accounts" [ref=e2533]:
+                  - generic [ref=e2534]: 
+            - listitem [ref=e2535]:
+              - link "" [ref=e2536] [cursor=pointer]:
+                - /url: "#Contact"
+                - generic "Contacts" [ref=e2537]:
+                  - generic [ref=e2538]: 
+            - listitem [ref=e2539]:
+              - link "" [ref=e2540] [cursor=pointer]:
+                - /url: "#Lead"
+                - generic "Leads" [ref=e2541]:
+                  - generic [ref=e2542]: 
+            - listitem [ref=e2543]:
+              - link "$" [ref=e2544] [cursor=pointer]:
+                - /url: "#Opportunity"
+                - generic "Opportunities" [ref=e2545]:
+                  - generic [ref=e2546]: $
+            - listitem [ref=e2547]
+            - listitem [ref=e2549]:
+              - link "" [ref=e2550] [cursor=pointer]:
+                - /url: "#Email"
+                - generic "Emails" [ref=e2551]:
+                  - generic [ref=e2552]: 
+            - listitem [ref=e2553]:
+              - link "" [ref=e2554] [cursor=pointer]:
+                - /url: "#Calendar"
+                - generic "Calendar" [ref=e2555]:
+                  - generic [ref=e2556]: 
+            - listitem [ref=e2557]:
+              - link "" [ref=e2558] [cursor=pointer]:
+                - /url: "#Meeting"
+                - generic "Meetings" [ref=e2559]:
+                  - generic [ref=e2560]: 
+            - listitem [ref=e2561]:
+              - link "" [ref=e2562] [cursor=pointer]:
+                - /url: "#Call"
+                - generic "Calls" [ref=e2563]:
+                  - generic [ref=e2564]: 
+            - listitem [ref=e2565]:
+              - link "" [ref=e2566] [cursor=pointer]:
+                - /url: "#Task"
+                - generic "Tasks" [ref=e2567]:
+                  - generic [ref=e2568]: 
+            - listitem [ref=e2569]
+            - listitem [ref=e2571]:
+              - link "" [ref=e2572] [cursor=pointer]:
+                - /url: "#Case"
+                - generic "Cases" [ref=e2573]:
+                  - generic [ref=e2574]: 
+            - listitem [ref=e2575]:
+              - link "" [ref=e2576] [cursor=pointer]:
+                - /url: "#KnowledgeBaseArticle"
+                - generic "Knowledge Base" [ref=e2577]:
+                  - generic [ref=e2578]: 
+            - listitem [ref=e2579]
+            - listitem [ref=e2581]:
+              - link "" [ref=e2582] [cursor=pointer]:
+                - /url: "#Document"
+                - generic "Documents" [ref=e2583]:
+                  - generic [ref=e2584]: 
+            - listitem [ref=e2585]:
+              - button "S " [ref=e2586] [cursor=pointer]:
+                - generic "Sales & Purchases" [ref=e2587]:
+                  - generic [ref=e2588]: S
+                - generic [ref=e2589]: 
+              - text:                    
+            - listitem [ref=e2590]:
+              - button "" [ref=e2591] [cursor=pointer]:
+                - generic [ref=e2592]: 
+              - text:                 
+          - button "" [ref=e2593] [cursor=pointer]:
+            - generic [ref=e2594]: 
+            - text: 
+        - list [ref=e2595]:
+          - listitem [ref=e2596]:
+            - generic [ref=e2597]:
+              - searchbox "Search" [ref=e2598]
+              - generic "Search" [ref=e2600] [cursor=pointer]:
+                - generic [ref=e2601]: 
+          - listitem [ref=e2602]:
+            - button "+" [ref=e2603] [cursor=pointer]:
+              - generic [ref=e2604]: +
+          - listitem [ref=e2605]:
+            - button "" [ref=e2606] [cursor=pointer]:
+              - generic [ref=e2607]: 
+          - listitem [ref=e2608]:
+            - button "" [ref=e2609] [cursor=pointer]:
+              - generic [ref=e2610]: 
+  - contentinfo [ref=e2612]:
+    - paragraph [ref=e2613]:
+      - text: © 2026
+      - link "EspoCRM, Inc." [ref=e2614] [cursor=pointer]:
+        - /url: https://www.espocrm.com

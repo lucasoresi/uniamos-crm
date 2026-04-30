@@ -1,0 +1,405 @@
+- generic [ref=e1]:
+  - banner:
+    - navigation [ref=e1226]:
+      - generic [ref=e1227]:
+        - text: 
+        - button "" [ref=e1228] [cursor=pointer]:
+          - generic [ref=e1229]: 
+      - generic [ref=e1230]:
+        - generic [ref=e1231]:
+          - list [ref=e1232]:
+            - listitem [ref=e1233]:
+              - link "" [ref=e1234] [cursor=pointer]:
+                - /url: "#"
+                - generic "Home" [ref=e1235]:
+                  - generic [ref=e1236]: 
+            - listitem [ref=e1237]
+            - listitem [ref=e1239]:
+              - link "" [ref=e1240] [cursor=pointer]:
+                - /url: "#Account"
+                - generic "Accounts" [ref=e1241]:
+                  - generic [ref=e1242]: 
+            - listitem [ref=e1243]:
+              - link "" [ref=e1244] [cursor=pointer]:
+                - /url: "#Contact"
+                - generic "Contacts" [ref=e1245]:
+                  - generic [ref=e1246]: 
+            - listitem [ref=e1247]:
+              - link "" [ref=e1248] [cursor=pointer]:
+                - /url: "#Lead"
+                - generic "Leads" [ref=e1249]:
+                  - generic [ref=e1250]: 
+            - listitem [ref=e1251]:
+              - link "$" [ref=e1252] [cursor=pointer]:
+                - /url: "#Opportunity"
+                - generic "Opportunities" [ref=e1253]:
+                  - generic [ref=e1254]: $
+            - listitem [ref=e1255]
+            - listitem [ref=e1257]:
+              - link "" [ref=e1258] [cursor=pointer]:
+                - /url: "#Email"
+                - generic "Emails" [ref=e1259]:
+                  - generic [ref=e1260]: 
+            - listitem [ref=e1261]:
+              - link "" [ref=e1262] [cursor=pointer]:
+                - /url: "#Calendar"
+                - generic "Calendar" [ref=e1263]:
+                  - generic [ref=e1264]: 
+            - listitem [ref=e1265]:
+              - link "" [ref=e1266] [cursor=pointer]:
+                - /url: "#Meeting"
+                - generic "Meetings" [ref=e1267]:
+                  - generic [ref=e1268]: 
+            - listitem [ref=e1269]:
+              - link "" [ref=e1270] [cursor=pointer]:
+                - /url: "#Call"
+                - generic "Calls" [ref=e1271]:
+                  - generic [ref=e1272]: 
+            - listitem [ref=e1273]:
+              - link "" [ref=e1274] [cursor=pointer]:
+                - /url: "#Task"
+                - generic "Tasks" [ref=e1275]:
+                  - generic [ref=e1276]: 
+            - listitem [ref=e1277]
+            - listitem [ref=e1279]:
+              - link "" [ref=e1280] [cursor=pointer]:
+                - /url: "#Case"
+                - generic "Cases" [ref=e1281]:
+                  - generic [ref=e1282]: 
+            - listitem [ref=e1283]:
+              - link "" [ref=e1284] [cursor=pointer]:
+                - /url: "#KnowledgeBaseArticle"
+                - generic "Knowledge Base" [ref=e1285]:
+                  - generic [ref=e1286]: 
+            - listitem [ref=e1287]
+            - listitem [ref=e1289]:
+              - link "" [ref=e1290] [cursor=pointer]:
+                - /url: "#Document"
+                - generic "Documents" [ref=e1291]:
+                  - generic [ref=e1292]: 
+            - listitem [ref=e1293]:
+              - button "S " [ref=e1294] [cursor=pointer]:
+                - generic "Sales & Purchases" [ref=e1295]:
+                  - generic [ref=e1296]: S
+                - generic [ref=e1297]: 
+              - text:                    
+            - listitem [ref=e1298]:
+              - button "" [ref=e1299] [cursor=pointer]:
+                - generic [ref=e1300]: 
+              - text:                 
+          - button "" [ref=e1301] [cursor=pointer]:
+            - generic [ref=e1302]: 
+            - text: 
+        - list [ref=e1303]:
+          - listitem [ref=e1304]:
+            - generic [ref=e1305]:
+              - searchbox "Search" [ref=e1306]
+              - generic "Search" [ref=e1308] [cursor=pointer]:
+                - generic [ref=e1309]: 
+          - listitem [ref=e1310]:
+            - button "+" [ref=e1311] [cursor=pointer]:
+              - generic [ref=e1312]: +
+          - listitem [ref=e1313]:
+            - button "" [ref=e1314] [cursor=pointer]:
+              - generic [ref=e1315]: 
+          - listitem [ref=e1316]:
+            - button "" [ref=e1317] [cursor=pointer]:
+              - generic [ref=e1318]: 
+  - generic [active] [ref=e1320]:
+    - generic [ref=e1322]:
+      - heading " Opportunities" [level=3] [ref=e1324]:
+        - generic "Click to refresh" [ref=e1327] [cursor=pointer]:
+          - generic [ref=e1328]: 
+          - text: Opportunities
+      - link "+ Create Opportunity" [ref=e1331] [cursor=pointer]:
+        - /url: "#Opportunity/create"
+        - generic [ref=e1332]: +
+        - text: Create Opportunity
+    - generic [ref=e1333]:
+      - generic [ref=e1334]:
+        - generic [ref=e1336]:
+          - generic [ref=e1337]:
+            - button "All" [ref=e1338] [cursor=pointer]: All
+            - text: 
+          - searchbox [ref=e1340]
+          - button "" [ref=e1342] [cursor=pointer]:
+            - generic [ref=e1343]: 
+          - button "" [ref=e1345] [cursor=pointer]:
+            - generic [ref=e1346]: 
+        - generic [ref=e1348]:
+          - button "" [ref=e1349] [cursor=pointer]:
+            - generic [ref=e1350]: 
+          - button "" [ref=e1351] [cursor=pointer]:
+            - generic [ref=e1352]: 
+      - text: 
+    - generic [ref=e1359]:
+      - generic [ref=e1360]:
+        - generic [ref=e1361]: "42"
+        - generic [ref=e1363]:
+          - button [ref=e1364] [cursor=pointer]
+          - text:    
+      - generic [ref=e1367]:
+        - table [ref=e1369]:
+          - rowgroup [ref=e1370]:
+            - row "Prospecting Qualification Proposal Negotiation Closed Won" [ref=e1371]:
+              - columnheader "Prospecting" [ref=e1372]:
+                - generic [ref=e1373]:
+                  - generic [ref=e1374]: Prospecting
+                  - text: +
+              - columnheader "Qualification" [ref=e1375]:
+                - generic [ref=e1376]:
+                  - generic [ref=e1377]: Qualification
+                  - text: +
+              - columnheader "Proposal" [ref=e1378]:
+                - generic [ref=e1379]:
+                  - generic [ref=e1380]: Proposal
+                  - text: +
+              - columnheader "Negotiation" [ref=e1381]:
+                - generic [ref=e1382]:
+                  - generic [ref=e1383]: Negotiation
+                  - text: +
+              - columnheader "Closed Won" [ref=e1384]:
+                - generic [ref=e1385]:
+                  - generic [ref=e1386]: Closed Won
+                  - text: +
+        - table [ref=e1388]:
+          - rowgroup [ref=e1389]:
+            - row [ref=e1390]:
+              - 'cell "15 Tablets Purchase $2,250.00  Janeville Apr 21 Laptop Bulk Purchase & Installation $61,250.00  National Lumber Today Monitors+Laptops Bulk Order $36,675.00  Win''s Private Hospital Apr 20 Office Equipment Purchase & Installation $3,045.00  MoneyIntro Apr 20 Bulk Order #519 $23,900.00  National Lumber Feb 14 " [ref=e1391]':
+                - generic [ref=e1392]:
+                  - generic [ref=e1393]:
+                    - generic [ref=e1396]:
+                      - link "15 Tablets Purchase" [ref=e1402] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f630682cd9da29ef"
+                      - generic "$2,250.00" [ref=e1406]
+                      - generic [ref=e1409]:
+                        - generic [ref=e1410]: 
+                        - link "Janeville" [ref=e1411] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1fcec41c41354"
+                      - generic [ref=e1414]: Apr 21
+                    - generic [ref=e1417]:
+                      - link "Laptop Bulk Purchase & Installation" [ref=e1423] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f630614bfd8af9f2"
+                      - generic "$61,250.00" [ref=e1427]
+                      - generic [ref=e1430]:
+                        - generic [ref=e1431]: 
+                        - link "National Lumber" [ref=e1432] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b40d0cb9449fb6"
+                      - generic [ref=e1435]: Today
+                    - generic [ref=e1438]:
+                      - link "Monitors+Laptops Bulk Order" [ref=e1444] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f63003f506f1b138"
+                      - generic "$36,675.00" [ref=e1448]
+                      - generic [ref=e1451]:
+                        - generic [ref=e1452]: 
+                        - link "Win's Private Hospital" [ref=e1453] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b3f733670098a0"
+                      - generic [ref=e1456]: Apr 20
+                    - generic [ref=e1459]:
+                      - link "Office Equipment Purchase & Installation" [ref=e1465] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f61d845a86768bf6"
+                      - generic "$3,045.00" [ref=e1469]
+                      - generic [ref=e1472]:
+                        - generic [ref=e1473]: 
+                        - link "MoneyIntro" [ref=e1474] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1b06d2bad8db2"
+                      - generic [ref=e1477]: Apr 20
+                    - generic [ref=e1480]:
+                      - 'link "Bulk Order #519" [ref=e1486] [cursor=pointer]':
+                        - /url: "#Opportunity/view/67dd34f235e8a5681"
+                      - generic "$23,900.00" [ref=e1490]
+                      - generic [ref=e1493]:
+                        - generic [ref=e1494]: 
+                        - link "National Lumber" [ref=e1495] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b40d0cb9449fb6"
+                      - generic [ref=e1498]: Feb 14
+                  - generic "Show more" [ref=e1500] [cursor=pointer]:
+                    - generic [ref=e1501]: 
+              - 'cell "25 Laptops for Stop&Shop $55,030.00  Stop & Shop Apr 09 Call Center Equipment Order $8,200.00  Stratabiz Apr 21 Bulk Order #24 $13,490.00  National Lumber Feb 14" [ref=e1502]':
+                - generic [ref=e1503]:
+                  - generic [ref=e1504]:
+                    - generic [ref=e1507]:
+                      - link "25 Laptops for Stop&Shop" [ref=e1513] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f61da9ab084d47cd"
+                      - generic "$55,030.00" [ref=e1517]
+                      - generic [ref=e1520]:
+                        - generic [ref=e1521]: 
+                        - link "Stop & Shop" [ref=e1522] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1d079f65e5574"
+                      - generic [ref=e1525]: Apr 09
+                    - generic [ref=e1528]:
+                      - generic [ref=e1529]:
+                        - button [ref=e1532] [cursor=pointer]
+                        - link "Call Center Equipment Order" [ref=e1536] [cursor=pointer]:
+                          - /url: "#Opportunity/view/5f63035ce90a031d3"
+                      - generic "$8,200.00" [ref=e1540]
+                      - generic [ref=e1543]:
+                        - generic [ref=e1544]: 
+                        - link "Stratabiz" [ref=e1545] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f145422263770a"
+                      - generic [ref=e1548]: Apr 21
+                    - generic [ref=e1551]:
+                      - 'link "Bulk Order #24" [ref=e1557] [cursor=pointer]':
+                        - /url: "#Opportunity/view/60c306d9589f2e2f0"
+                      - generic "$13,490.00" [ref=e1561]
+                      - generic [ref=e1564]:
+                        - generic [ref=e1565]: 
+                        - link "National Lumber" [ref=e1566] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b40d0cb9449fb6"
+                      - generic [ref=e1569]: Feb 14
+                  - generic: 
+              - 'cell "Speaker Bulk Order #1235 $4,900.00  National Lumber Jan 16 Tablets & Laptops + Installation $8,900.00  MoneyIntro Apr 21 Phone Purchase & Services $6,350.00  Stratabiz Apr 11 16 Items Order & Maintenance $3,650.00  National Lumber Apr 18 Office Electronics & Services $3,510.00  EasyReservations Apr 19 " [ref=e1570]':
+                - generic [ref=e1571]:
+                  - generic [ref=e1572]:
+                    - generic [ref=e1575]:
+                      - 'link "Speaker Bulk Order #1235" [ref=e1581] [cursor=pointer]':
+                        - /url: "#Opportunity/view/60a37d4ee02d8d28f"
+                      - generic "$4,900.00" [ref=e1585]
+                      - generic [ref=e1588]:
+                        - generic [ref=e1589]: 
+                        - link "National Lumber" [ref=e1590] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b40d0cb9449fb6"
+                      - generic [ref=e1593]: Jan 16
+                    - generic [ref=e1596]:
+                      - link "Tablets & Laptops + Installation" [ref=e1602] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f6307e2632d70668"
+                      - generic "$8,900.00" [ref=e1606]
+                      - generic [ref=e1609]:
+                        - generic [ref=e1610]: 
+                        - link "MoneyIntro" [ref=e1611] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1b06d2bad8db2"
+                      - generic [ref=e1614]: Apr 21
+                    - generic [ref=e1617]:
+                      - link "Phone Purchase & Services" [ref=e1623] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f63085c69e8482f1"
+                      - generic "$6,350.00" [ref=e1627]
+                      - generic [ref=e1630]:
+                        - generic [ref=e1631]: 
+                        - link "Stratabiz" [ref=e1632] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f145422263770a"
+                      - generic [ref=e1635]: Apr 11
+                    - generic [ref=e1638]:
+                      - link "16 Items Order & Maintenance" [ref=e1644] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f63016c30524506c"
+                      - generic "$3,650.00" [ref=e1648]
+                      - generic [ref=e1651]:
+                        - generic [ref=e1652]: 
+                        - link "National Lumber" [ref=e1653] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b40d0cb9449fb6"
+                      - generic [ref=e1656]: Apr 18
+                    - generic [ref=e1659]:
+                      - link "Office Electronics & Services" [ref=e1665] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f62ff65dcd297ef6"
+                      - generic "$3,510.00" [ref=e1669]
+                      - generic [ref=e1672]:
+                        - generic [ref=e1673]: 
+                        - link "EasyReservations" [ref=e1674] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f181782e3db1ce"
+                      - generic [ref=e1677]: Apr 19
+                  - generic "Show more" [ref=e1679] [cursor=pointer]:
+                    - generic [ref=e1680]: 
+              - 'cell "Office Equipment Repairs $4,000.00  Stop & Shop Apr 10 Office Equipment Renovation $1,730.00  Intelacard Apr 16 Laptop Maintenance & Repairs $5,000.00  Irving''s Sport Goods Apr 16 Bulk Order #456 $10,000.00  MoneyIntro Apr 18 Accessories Bulk Order $6,450.00  Janeville Apr 09 " [ref=e1681]':
+                - generic [ref=e1682]:
+                  - generic [ref=e1683]:
+                    - generic [ref=e1686]:
+                      - link "Office Equipment Repairs" [ref=e1692] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f6307043e85e4ed6"
+                      - generic "$4,000.00" [ref=e1696]
+                      - generic [ref=e1699]:
+                        - generic [ref=e1700]: 
+                        - link "Stop & Shop" [ref=e1701] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1d079f65e5574"
+                      - generic [ref=e1704]: Apr 10
+                    - generic [ref=e1707]:
+                      - link "Office Equipment Renovation" [ref=e1713] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f6304a2bbab45145"
+                      - generic "$1,730.00" [ref=e1717]
+                      - generic [ref=e1720]:
+                        - generic [ref=e1721]: 
+                        - link "Intelacard" [ref=e1722] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1ecbc217d42bc"
+                      - generic [ref=e1725]: Apr 16
+                    - generic [ref=e1728]:
+                      - link "Laptop Maintenance & Repairs" [ref=e1734] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f6303ed3fe6fce79"
+                      - generic "$5,000.00" [ref=e1738]
+                      - generic [ref=e1741]:
+                        - generic [ref=e1742]: 
+                        - link "Irving's Sport Goods" [ref=e1743] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b2be3355a2388b"
+                      - generic [ref=e1746]: Apr 16
+                    - generic [ref=e1749]:
+                      - 'link "Bulk Order #456" [ref=e1755] [cursor=pointer]':
+                        - /url: "#Opportunity/view/6128a4c140c9f48ca"
+                      - generic "$10,000.00" [ref=e1759]
+                      - generic [ref=e1762]:
+                        - generic [ref=e1763]: 
+                        - link "MoneyIntro" [ref=e1764] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1b06d2bad8db2"
+                      - generic [ref=e1767]: Apr 18
+                    - generic [ref=e1770]:
+                      - link "Accessories Bulk Order" [ref=e1776] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f61dbf43ab457f4a"
+                      - generic "$6,450.00" [ref=e1780]
+                      - generic [ref=e1783]:
+                        - generic [ref=e1784]: 
+                        - link "Janeville" [ref=e1785] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1fcec41c41354"
+                      - generic [ref=e1788]: Apr 09
+                  - generic "Show more" [ref=e1790] [cursor=pointer]:
+                    - generic [ref=e1791]: 
+              - 'cell "Accessories for sports trainers $8,130.00  Irving''s Sport Goods Yesterday Laptops for employees $11,000.00  AFP Supply Today Bulk Order #568 $6,500.00  Janeville Today Speakers Bulk Purchase $8,750.00  Intelacard Today 5 Printers & Installation $3,250.00  Prospa-Palnes Bank Apr 18 " [ref=e1792]':
+                - generic [ref=e1793]:
+                  - generic [ref=e1794]:
+                    - generic [ref=e1797]:
+                      - link "Accessories for sports trainers" [ref=e1803] [cursor=pointer]:
+                        - /url: "#Opportunity/view/67d191a13190d8951"
+                      - generic "$8,130.00" [ref=e1807]
+                      - generic [ref=e1810]:
+                        - generic [ref=e1811]: 
+                        - link "Irving's Sport Goods" [ref=e1812] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b2be3355a2388b"
+                      - generic [ref=e1815]: Yesterday
+                    - generic [ref=e1818]:
+                      - link "Laptops for employees" [ref=e1824] [cursor=pointer]:
+                        - /url: "#Opportunity/view/67d18f9086aa7a74f"
+                      - generic "$11,000.00" [ref=e1828]
+                      - generic [ref=e1831]:
+                        - generic [ref=e1832]: 
+                        - link "AFP Supply" [ref=e1833] [cursor=pointer]:
+                          - /url: "#Account/view/659d2bac33c0ad6be"
+                      - generic [ref=e1836]: Today
+                    - generic [ref=e1839]:
+                      - 'link "Bulk Order #568" [ref=e1845] [cursor=pointer]':
+                        - /url: "#Opportunity/view/6128a5a4d1dd323e9"
+                      - generic "$6,500.00" [ref=e1849]
+                      - generic [ref=e1852]:
+                        - generic [ref=e1853]: 
+                        - link "Janeville" [ref=e1854] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1fcec41c41354"
+                      - generic [ref=e1857]: Today
+                    - generic [ref=e1860]:
+                      - link "Speakers Bulk Purchase" [ref=e1866] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f6301e9c9de11756"
+                      - generic "$8,750.00" [ref=e1870]
+                      - generic [ref=e1873]:
+                        - generic [ref=e1874]: 
+                        - link "Intelacard" [ref=e1875] [cursor=pointer]:
+                          - /url: "#Account/view/5f5f1ecbc217d42bc"
+                      - generic [ref=e1878]: Today
+                    - generic [ref=e1881]:
+                      - link "5 Printers & Installation" [ref=e1887] [cursor=pointer]:
+                        - /url: "#Opportunity/view/5f6300b3e7851b43b"
+                      - generic "$3,250.00" [ref=e1891]
+                      - generic [ref=e1894]:
+                        - generic [ref=e1895]: 
+                        - link "Prospa-Palnes Bank" [ref=e1896] [cursor=pointer]:
+                          - /url: "#Account/view/5f5b42441ce59fc54"
+                      - generic [ref=e1899]: Apr 18
+                  - generic "Show more" [ref=e1901] [cursor=pointer]:
+                    - generic [ref=e1902]: 
+  - contentinfo [ref=e1353]:
+    - paragraph [ref=e1354]:
+      - text: © 2026
+      - link "EspoCRM, Inc." [ref=e1355] [cursor=pointer]:
+        - /url: https://www.espocrm.com
