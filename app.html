@@ -660,7 +660,11 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
     </div>
     <div class="topbar-actions">
       <button class="btn-main" onclick="crm_openAddModal()">+ Nuevo Lead</button>
+      <button id="crm-drawer-btn" onclick="crm_drawer_toggle()" style="background:rgba(196,229,56,.07);color:#C4E538;border:1px solid rgba(196,229,56,.25);padding:5px 12px;border-radius:6px;font-size:.72rem;cursor:pointer;font-family:inherit;margin-left:8px">📧 Emails ▾</button>
     </div>
+  </div>
+  <div id="crm-inbox-drawer" class="drawer-hidden">
+    <div style="font-size:.7rem;color:var(--text-3);padding:4px 8px;flex-shrink:0">Sin emails de leads conocidos</div>
   </div>
   <div class="statsbar">
     <div class="stat-group"><div class="stat-dot" style="background:#C4E538"></div> Total <span class="stat-val" id="crm_statTotal" style="margin-left:4px">0</span></div>
