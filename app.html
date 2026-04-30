@@ -3727,16 +3727,45 @@ async function getGoogleToken() {
 function escHtml(s){const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'};return String(s||'').replace(/[&<>"]/g,c=>m[c]);}
 let gmailInboxMessages = [];
 
+async function gmail_fetchInbox() {
+  const token = await getGoogleToken();
+  if (!token) return { token: null, messages: [] };
+  try {
+    const listRes = await fetch(
+      'https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=30',
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (listRes.status === 401) {
+      sessionStorage.removeItem('gtoken');
+      sessionStorage.removeItem('gtoken_expires');
+      return { token: null, messages: [] };
+    }
+    const listData = await listRes.json();
+    const msgs = listData.messages || [];
+    if (!msgs.length) return { token, messages: [] };
+    const results = await Promise.allSettled(msgs.map(m =>
+      fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata` +
+        `&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(r => r.json())
+    ));
+    return { token, messages: results.filter(r => r.status === 'fulfilled').map(r => r.value) };
+  } catch {
+    return { token, messages: [] };
+  }
+}
+
 async function gmail_loadInbox() {
   const listEl = document.getElementById('gmail-email-list');
   const previewEl = document.getElementById('gmail-preview-panel');
   if (!listEl || !previewEl) return;
-
   listEl.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-3)">⏳ Cargando inbox…</div>';
   previewEl.innerHTML = '<div style="color:var(--text-3);font-size:.84rem;margin-top:60px">Seleccioná un email para ver el preview</div>';
   document.getElementById('gmail-search').value = '';
 
-  const token = await getGoogleToken();
+  const { token, messages } = await gmail_fetchInbox();
+
   if (!token) {
     listEl.innerHTML = `<div class="gmail-no-token" style="margin:20px">
       <div style="font-size:1.4rem;margin-bottom:8px">📧</div>
@@ -3746,45 +3775,13 @@ async function gmail_loadInbox() {
     </div>`;
     return;
   }
-
-  try {
-    const listRes = await fetch(
-      'https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=30',
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (listRes.status === 401) {
-      sessionStorage.removeItem('gtoken');
-      sessionStorage.removeItem('gtoken_expires');
-      listEl.innerHTML = '<div class="gmail-no-token" style="margin:20px">Token de Google expirado. <a href="login.html" style="color:#C4E538">Volvé a ingresar →</a></div>';
-      return;
-    }
-    const listData = await listRes.json();
-    const messages = listData.messages || [];
-
-    if (messages.length === 0) {
-      listEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3)">No hay emails en el inbox</div>';
-      return;
-    }
-
-    const results = await Promise.allSettled(messages.map(m =>
-      fetch(
-        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata` +
-        `&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      ).then(r => r.json())
-    ));
-    const details = results.filter(r => r.status === 'fulfilled').map(r => r.value);
-
-    gmailInboxMessages = details;
-    gmail_renderList(details);
-    gmail_updateUnreadBadge(details);
-
-  } catch (err) {
-    listEl.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text-3)">
-      No se pudo cargar Gmail.<br>
-      <button onclick="gmail_loadInbox()" style="margin-top:10px;padding:7px 16px;background:#C4E538;color:#0A0A0A;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit">Reintentar</button>
-    </div>`;
+  if (!messages.length) {
+    listEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3)">No hay emails en el inbox</div>';
+    return;
   }
+  gmailInboxMessages = messages;
+  gmail_renderList(messages);
+  gmail_updateUnreadBadge(messages);
 }
 
 function gmail_refreshInbox() {
