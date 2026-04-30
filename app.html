@@ -1905,6 +1905,60 @@ function home_render(classifications, allLeads) {
   }
 }
 
+function crm_drawer_render(classifications) {
+  const drawer = document.getElementById('crm-inbox-drawer');
+  if (!drawer) return;
+  if (!classifications || !classifications.length) {
+    drawer.innerHTML = '<div style="font-size:.7rem;color:var(--text-3);padding:4px 8px;flex-shrink:0">Sin emails de leads conocidos</div>';
+    return;
+  }
+  const stageLabels = { cierre: '🔥 Cierre', propuesta: '🟢 Propuesta', activa: '🔵 Activa', ghost: '👻 Ghost', frio: '❄️ Frío', sininfo: '❓ Sin info' };
+  const stageColors = { cierre: '#C4E538', propuesta: '#0284C7', activa: '#16A34A', ghost: '#EA580C', frio: '#6B7280', sininfo: '#444' };
+  const visible = classifications.slice(0, 8);
+  drawer.innerHTML = visible.map(c => {
+    const headers = c.email_msg.payload?.headers || [];
+    const get = name => headers.find(h => h.name === name)?.value || '';
+    const from = get('From');
+    const displayName = from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?';
+    const subject = get('Subject') || '(sin asunto)';
+    const autoHtml = c.changed
+      ? `<span class="crm-drawer-auto">${['activa','propuesta'].includes(c.new_stage) ? '↑' : '✦'} AUTO</span>`
+      : '';
+    const toColor = stageColors[c.new_stage] || '#444';
+    const stageHtml = c.changed
+      ? `<span style="color:#444;font-size:.54rem">${stageLabels[c.original_stage] || c.original_stage} → </span><span style="color:${toColor};font-weight:700;font-size:.54rem">${stageLabels[c.new_stage] || c.new_stage}</span>`
+      : `<span style="color:#444;font-size:.54rem">${stageLabels[c.new_stage] || c.new_stage} (sin cambio)</span>`;
+    const cardCls = c.changed ? 'crm-drawer-card' : 'crm-drawer-card plain';
+    return `<div class="${cardCls}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;gap:4px">
+        <div class="crm-drawer-name${c.changed ? '' : ' dim'}">${escHtml(displayName)}</div>
+        ${autoHtml}
+      </div>
+      <div class="crm-drawer-subj">${escHtml(subject)}</div>
+      <div>${stageHtml}</div>
+    </div>`;
+  }).join('');
+  if (classifications.length > 8) {
+    drawer.innerHTML += `<div style="display:flex;align-items:center;padding:0 8px;font-size:.6rem;color:#555;flex-shrink:0">› ${classifications.length - 8} más</div>`;
+  }
+}
+
+let crmDrawerOpen = false;
+function crm_drawer_toggle() {
+  crmDrawerOpen = !crmDrawerOpen;
+  const drawer = document.getElementById('crm-inbox-drawer');
+  const btn = document.getElementById('crm-drawer-btn');
+  if (!drawer) return;
+  if (crmDrawerOpen) {
+    drawer.classList.remove('drawer-hidden');
+    if (btn) btn.textContent = '📧 Emails ▾';
+    crm_drawer_render(homeClassifications);
+  } else {
+    drawer.classList.add('drawer-hidden');
+    if (btn) btn.textContent = '📧 Emails ▸';
+  }
+}
+
 // ── VIEW SWITCHER ─────────────────────────────────────────────────────────
 function switchView(view){
   document.getElementById('view-home').style.display=view==='home'?'flex':'none';
@@ -2004,7 +2058,7 @@ function crm_renderBoard(searchTerm=''){
       const rot=rotInfo(item.data.ultimoContacto, item.data.estado);
       const rotStrip=rot?`<div class="card-rot-strip" style="background:${rot.color}"></div>`:'';
       const rotLabel=rot?`<div class="card-rot-label" style="color:${rot.color}">${rot.label}</div>`:'';
-      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')">${rotStrip}<div class="card-bar" style="background:${stage.color}"></div><div class="card-body" style="margin-top:${rot?'3px':'0'}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}${rotLabel}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('lead', item.id)}</div><div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
+      html+=`<div class="card" draggable="true" ondragstart="crm_dragStart(event,'${item.id}')" onclick="crm_openDetail('${item.id}')">${rotStrip}<div class="card-bar" style="background:${stage.color}"></div><div class="card-body" style="margin-top:${rot?'3px':'0'}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div class="card-top" style="margin-bottom:0">${makeLogoEl(item.data.domain,item.data.empresa).outerHTML}<div class="card-info"><div class="card-co">${item.data.empresa||'?'}</div><div class="card-ct">${item.data.lead||''}</div></div></div><span class="score-badge">${automation_calculateScore(item.data)}</span></div><div class="card-sep"></div>${item.data.valor?'<div class="card-value">'+item.data.valor+'</div>':''}${item.data.accion?'<div class="card-action">'+item.data.accion+'</div>':''}${rotLabel}<div class="card-foot"><span class="badge ${badgeClass}">${{'urgente':'🔴 Urgente','alta':'🟠 Alta','media':'🟡 Media','baja':'⚪ Baja'}[item.data.prioridad]||'Media'}</span><span class="card-date">${item.data.ultimoContacto||'—'}</span>${activity_getBadgeHtml('lead', item.id)}</div>${homeAutoMovedToday.has(item.id)?'<div style="font-size:.48rem;color:#C4E538;background:rgba(196,229,56,.06);padding:2px 6px;border-radius:3px;margin-top:4px;display:inline-block">✦ movido hoy por IA</div>':''}<div class="card-quick-actions"><a href="javascript:crm_quickCalendar('${item.id}')" title="Agendar">📅</a><a href="javascript:crm_quickEmail('${item.id}')" title="Email">📧</a><a href="javascript:crm_quickDrive('${item.id}')" title="Drive">📁</a><a href="javascript:crm_quickContact('${item.id}')" title="Contacto">👤</a></div></div></div>`;
     });
     html+='</div><button class="col-add-btn" onclick="crm_openAddModal()">+ Añadir Lead</button></div>';
   });
