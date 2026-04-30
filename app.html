@@ -1658,6 +1658,131 @@ function rotInfo(dateStr,estado){
   return null;
 }
 
+// ── HOME DASHBOARD ────────────────────────────────────────────────────────
+function parseDateES(str) {
+  if (!str) return null;
+  const parts = str.split('/');
+  if (parts.length === 3) {
+    const d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function home_matchEmailsToLeads(messages, allLeads) {
+  const leadsByEmail = {};
+  allLeads.forEach(l => {
+    const email = (l.data.email || '').toLowerCase().trim();
+    if (email) leadsByEmail[email] = l;
+  });
+  const matched = [];
+  const seen = new Set();
+  messages.forEach(msg => {
+    const headers = msg.payload?.headers || [];
+    const from = headers.find(h => h.name === 'From')?.value || '';
+    const bracketMatch = from.match(/<([^>]+)>/);
+    const plainMatch = from.match(/([^\s<>"]+@[^\s<>"]+)/);
+    const senderEmail = (bracketMatch ? bracketMatch[1] : plainMatch ? plainMatch[1] : '').toLowerCase().trim();
+    if (!senderEmail || seen.has(senderEmail)) return;
+    const lead = leadsByEmail[senderEmail];
+    if (!lead) return;
+    seen.add(senderEmail);
+    matched.push({ email_msg: msg, lead });
+  });
+  return matched;
+}
+
+async function home_classifyOne(email_msg, lead, jwt) {
+  const headers = email_msg.payload?.headers || [];
+  const get = name => headers.find(h => h.name === name)?.value || '';
+  const subject = get('Subject') || '(sin asunto)';
+  const snippet = email_msg.snippet || '';
+  const current_stage = lead.data.estado || 'sininfo';
+  const lead_name = lead.data.lead || lead.data.empresa || 'Lead';
+  const original_stage = current_stage;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/classify-email-lead`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
+      body: JSON.stringify({ subject, snippet, current_stage, lead_name })
+    });
+    if (!res.ok) return { email_msg, lead, original_stage, new_stage: current_stage, signal: 'neutral', reason: '', changed: false };
+    const { new_stage, signal, reason } = await res.json();
+    const resolved_stage = new_stage || current_stage;
+    return { email_msg, lead, original_stage, new_stage: resolved_stage, signal: signal || 'neutral', reason: reason || '', changed: resolved_stage !== current_stage };
+  } catch {
+    return { email_msg, lead, original_stage, new_stage: current_stage, signal: 'neutral', reason: '', changed: false };
+  }
+}
+
+async function home_load() {
+  const dateEl = document.getElementById('home-date');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  const emailsEl = document.getElementById('home-emails-panel');
+  const movesEl = document.getElementById('home-moves-panel');
+  const fuEl = document.getElementById('home-fu-panel');
+  if (emailsEl) emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Analizando emails con IA…</div>';
+  if (movesEl) movesEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Cargando…</div>';
+  if (fuEl) fuEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Cargando…</div>';
+
+  const [fetchResult, leadsResult] = await Promise.all([
+    gmail_fetchInbox(),
+    supabase.from('leads').select('*').eq('user_id', currentUser.id)
+  ]);
+  const { token, messages } = fetchResult;
+  leads = leadsResult.data || leads;
+
+  if (!token) {
+    if (emailsEl) emailsEl.innerHTML = '<div style="padding:20px;font-size:.82rem;color:var(--text-3)">Gmail no conectado. <a href="login.html" style="color:#C4E538">Iniciar sesión con Google →</a></div>';
+    home_render([], leads);
+    return;
+  }
+
+  gmailInboxMessages = messages;
+  gmail_updateUnreadBadge(messages);
+
+  const matched = home_matchEmailsToLeads(messages, leads);
+  const { data: { session } } = await supabase.auth.getSession();
+  const jwt = session?.access_token;
+
+  const classifyResults = await Promise.allSettled(
+    matched.map(({ email_msg, lead }) => home_classifyOne(email_msg, lead, jwt))
+  );
+
+  homeClassifications = classifyResults.map((r, i) =>
+    r.status === 'fulfilled'
+      ? r.value
+      : { email_msg: matched[i].email_msg, lead: matched[i].lead, original_stage: matched[i].lead.data.estado, new_stage: matched[i].lead.data.estado, signal: 'neutral', reason: '', changed: false }
+  );
+
+  const changed = homeClassifications.filter(c => c.changed);
+  if (changed.length > 0) {
+    await Promise.allSettled(changed.map(c => {
+      homeAutoMovedToday.add(c.lead.id);
+      return supabase.from('leads').upsert({
+        id: c.lead.id,
+        user_id: currentUser.id,
+        data: { ...c.lead.data, estado: c.new_stage },
+        updated_at: new Date().toISOString()
+      });
+    }));
+    const { data: fresh } = await supabase.from('leads').select('*').eq('user_id', currentUser.id);
+    if (fresh) leads = fresh;
+  }
+
+  home_render(homeClassifications, leads);
+  crm_renderBoard();
+  crm_drawer_render(homeClassifications);
+
+  const btn = document.getElementById('crm-drawer-btn');
+  if (btn) {
+    const unread = homeClassifications.filter(c => (c.email_msg.labelIds || []).includes('UNREAD')).length;
+    btn.textContent = unread > 0 ? `📧 Emails (${unread} nuevos) ▾` : '📧 Emails ▾';
+  }
+}
+
 // ── VIEW SWITCHER ─────────────────────────────────────────────────────────
 function switchView(view){
   document.getElementById('view-crm').style.display=view==='crm'?'flex':'none';
@@ -1696,6 +1821,10 @@ const CRM_STAGES=[
   {id:'frio',      label:'❄️ Frío / Desc.',      color:'#6B7280', light:'#F3F4F6'},
   {id:'sininfo',   label:'❓ Sin Info',           color:'#9CA3AF', light:'#161616'},
 ];
+
+// ── HOME STATE ────────────────────────────────────────────────────────────
+let homeClassifications = [];
+let homeAutoMovedToday = new Set();
 
 let crm_editingId=null, crm_dragId=null;
 
