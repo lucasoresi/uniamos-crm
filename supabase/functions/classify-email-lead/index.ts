@@ -47,7 +47,8 @@ serve(async (req) => {
     const body = await req.json()
     subject = body.subject || ''
     snippet = body.snippet || ''
-    current_stage = body.current_stage || 'sininfo'
+    const validStagesInput = ['cierre', 'propuesta', 'activa', 'ghost', 'frio', 'sininfo']
+    current_stage = validStagesInput.includes(body.current_stage) ? body.current_stage : 'sininfo'
     lead_name = body.lead_name || 'Lead'
   } catch {
     return new Response(JSON.stringify({ new_stage: current_stage, signal: 'neutral', reason: '' }), {

@@ -1490,6 +1490,7 @@ async function initSession() {
     task_updateNavBadge();
     crm_renderBoard();
     prm_renderBoard();
+    switchView('home');
   }catch(e){console.error('Auth error:',e);window.location.href='login.html';}
 }
 
@@ -1724,6 +1725,8 @@ async function home_classifyOne(email_msg, lead, jwt) {
 }
 
 async function home_load() {
+  if (homeLoading) return;
+  homeLoading = true;
   const dateEl = document.getElementById('home-date');
   if (dateEl) dateEl.textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -1733,6 +1736,7 @@ async function home_load() {
   if (emailsEl) emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Analizando emails con IA…</div>';
   if (movesEl) movesEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Cargando…</div>';
   if (fuEl) fuEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Cargando…</div>';
+  homeAutoMovedToday.clear();
 
   const [fetchResult, leadsResult] = await Promise.all([
     gmail_fetchInbox(),
@@ -1744,6 +1748,7 @@ async function home_load() {
   if (!token) {
     if (emailsEl) emailsEl.innerHTML = '<div style="padding:20px;font-size:.82rem;color:var(--text-3)">Gmail no conectado. <a href="login.html" style="color:#C4E538">Iniciar sesión con Google →</a></div>';
     home_render([], leads);
+    homeLoading = false;
     return;
   }
 
@@ -1788,12 +1793,13 @@ async function home_load() {
     const unread = homeClassifications.filter(c => (c.email_msg.labelIds || []).includes('UNREAD')).length;
     btn.textContent = unread > 0 ? `📧 Emails (${unread} nuevos) ▾` : '📧 Emails ▾';
   }
+  homeLoading = false;
 }
 
 function home_render(classifications, allLeads) {
   const today = new Date();
-  const stageLabels = { cierre: '🔥 Cierre', propuesta: '🟢 Propuesta', activa: '🔵 Activa', ghost: '👻 Ghost', frio: '❄️ Frío', sininfo: '❓ Sin info' };
-  const stageColors = { cierre: '#C4E538', propuesta: '#0284C7', activa: '#16A34A', ghost: '#EA580C', frio: '#6B7280', sininfo: '#444' };
+  const stageLabels = HOME_STAGE_LABELS;
+  const stageColors = HOME_STAGE_COLORS;
 
   // Stats
   const pipelineVal = allLeads.reduce((sum, l) => {
@@ -1912,8 +1918,8 @@ function crm_drawer_render(classifications) {
     drawer.innerHTML = '<div style="font-size:.7rem;color:var(--text-3);padding:4px 8px;flex-shrink:0">Sin emails de leads conocidos</div>';
     return;
   }
-  const stageLabels = { cierre: '🔥 Cierre', propuesta: '🟢 Propuesta', activa: '🔵 Activa', ghost: '👻 Ghost', frio: '❄️ Frío', sininfo: '❓ Sin info' };
-  const stageColors = { cierre: '#C4E538', propuesta: '#0284C7', activa: '#16A34A', ghost: '#EA580C', frio: '#6B7280', sininfo: '#444' };
+  const stageLabels = HOME_STAGE_LABELS;
+  const stageColors = HOME_STAGE_COLORS;
   const visible = classifications.slice(0, 8);
   drawer.innerHTML = visible.map(c => {
     const headers = c.email_msg.payload?.headers || [];
@@ -1985,8 +1991,6 @@ function switchView(view){
   if(view==='automations')automation_renderDashboard();
   if(view==='integraciones')integraciones_checkStatus();
 }
-switchView('home');
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // CRM MODULE
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2000,8 +2004,11 @@ const CRM_STAGES=[
 ];
 
 // ── HOME STATE ────────────────────────────────────────────────────────────
+const HOME_STAGE_LABELS = { cierre: '🔥 Cierre', propuesta: '🟢 Propuesta', activa: '🔵 Activa', ghost: '👻 Ghost', frio: '❄️ Frío', sininfo: '❓ Sin info' };
+const HOME_STAGE_COLORS = { cierre: '#C4E538', propuesta: '#0284C7', activa: '#16A34A', ghost: '#EA580C', frio: '#6B7280', sininfo: '#444' };
 let homeClassifications = [];
 let homeAutoMovedToday = new Set();
+let homeLoading = false;
 
 let crm_editingId=null, crm_dragId=null;
 
@@ -4123,7 +4130,7 @@ async function gmail_fetchInbox() {
     ));
     return { token, messages: results.filter(r => r.status === 'fulfilled').map(r => r.value) };
   } catch {
-    return { token, messages: [] };
+    return { token, messages: [], error: true };
   }
 }
 
@@ -4135,7 +4142,7 @@ async function gmail_loadInbox() {
   previewEl.innerHTML = '<div style="color:var(--text-3);font-size:.84rem;margin-top:60px">Seleccioná un email para ver el preview</div>';
   document.getElementById('gmail-search').value = '';
 
-  const { token, messages } = await gmail_fetchInbox();
+  const { token, messages, error: fetchError } = await gmail_fetchInbox();
 
   if (!token) {
     listEl.innerHTML = `<div class="gmail-no-token" style="margin:20px">
@@ -4143,6 +4150,13 @@ async function gmail_loadInbox() {
       <strong>Gmail no conectado</strong><br>
       Ingresá con tu cuenta de Google para ver tu inbox.<br>
       <a href="login.html" style="color:#C4E538;display:inline-block;margin-top:10px;font-weight:700">Ir al login →</a>
+    </div>`;
+    return;
+  }
+  if (fetchError) {
+    listEl.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text-3)">
+      No se pudo cargar Gmail.<br>
+      <button onclick="gmail_loadInbox()" style="margin-top:10px;padding:7px 16px;background:#C4E538;color:#0A0A0A;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-family:inherit">Reintentar</button>
     </div>`;
     return;
   }
