@@ -1783,6 +1783,121 @@ async function home_load() {
   }
 }
 
+function home_render(classifications, allLeads) {
+  const today = new Date();
+  const stageLabels = { cierre: '🔥 Cierre', propuesta: '🟢 Propuesta', activa: '🔵 Activa', ghost: '👻 Ghost', frio: '❄️ Frío', sininfo: '❓ Sin info' };
+  const stageColors = { cierre: '#C4E538', propuesta: '#0284C7', activa: '#16A34A', ghost: '#EA580C', frio: '#6B7280', sininfo: '#444' };
+
+  // Stats
+  const pipelineVal = allLeads.reduce((sum, l) => {
+    const v = parseFloat((l.data.valor || '').replace(/[^0-9.]/g, ''));
+    return sum + (isNaN(v) ? 0 : v);
+  }, 0);
+  const activeLeads = allLeads.filter(l => ['cierre', 'propuesta', 'activa'].includes(l.data.estado)).length;
+  const unread = (gmailInboxMessages || []).filter(m => (m.labelIds || []).includes('UNREAD')).length;
+  const fuLeads = allLeads.filter(l => {
+    const d = parseDateES(l.data.ultimoContacto);
+    return d && (today - d) / 86400000 >= 7;
+  });
+  const movedCount = homeAutoMovedToday.size;
+
+  const pEl = document.getElementById('home-stat-pipeline');
+  const aEl = document.getElementById('home-stat-activos');
+  const eEl = document.getElementById('home-stat-emails');
+  const fEl = document.getElementById('home-stat-followups');
+  const mEl = document.getElementById('home-stat-moved');
+  if (pEl) pEl.textContent = pipelineVal > 0 ? '$' + pipelineVal.toLocaleString('es') : '—';
+  if (aEl) aEl.textContent = activeLeads;
+  if (eEl) eEl.textContent = unread;
+  if (fEl) fEl.textContent = fuLeads.length;
+  if (mEl) mEl.textContent = movedCount;
+
+  // Email list
+  const emailsEl = document.getElementById('home-emails-panel');
+  if (emailsEl) {
+    if (!classifications.length) {
+      emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">No hay emails de leads conocidos en el inbox</div>';
+    } else {
+      emailsEl.innerHTML = classifications.map(c => {
+        const headers = c.email_msg.payload?.headers || [];
+        const get = name => headers.find(h => h.name === name)?.value || '';
+        const from = get('From');
+        const displayName = from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?';
+        const initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+        const subject = get('Subject') || '(sin asunto)';
+        const dateRaw = get('Date');
+        const timeStr = dateRaw ? new Date(dateRaw).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
+        const color = stageColors[c.new_stage] || '#444';
+        const isUnread = (c.email_msg.labelIds || []).includes('UNREAD');
+        const tagHtml = c.changed
+          ? `<span style="font-size:.44rem;background:rgba(196,229,56,.1);color:#C4E538;padding:2px 6px;border-radius:3px;margin-top:3px;display:inline-block">✦ Movido a ${stageLabels[c.new_stage] || c.new_stage} automáticamente</span>`
+          : `<span style="font-size:.44rem;color:${color};margin-top:3px;display:inline-block">${stageLabels[c.new_stage] || c.new_stage} — sin cambio</span>`;
+        const avatarBg = c.changed ? 'rgba(196,229,56,.12)' : isUnread ? 'rgba(100,100,100,.15)' : 'rgba(60,60,60,.5)';
+        const avatarColor = c.changed ? '#C4E538' : isUnread ? '#ccc' : '#555';
+        return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:#1a1a1a;border-radius:6px;border-left:3px solid ${color}">
+          <div style="width:28px;height:28px;border-radius:50%;background:${avatarBg};color:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;flex-shrink:0">${escHtml(initials)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:.7rem;font-weight:${c.changed || isUnread ? '700' : '500'};color:${c.changed ? '#eee' : isUnread ? '#ddd' : '#888'}">${escHtml(displayName)}</span>
+              <span style="font-size:.6rem;color:#444;flex-shrink:0;margin-left:8px">${escHtml(timeStr)}</span>
+            </div>
+            <div style="font-size:.63rem;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(subject)}</div>
+            ${tagHtml}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Movements panel
+  const movesEl = document.getElementById('home-moves-panel');
+  if (movesEl) {
+    const moved = classifications.filter(c => c.changed);
+    const notMoved = classifications.filter(c => !c.changed);
+    if (!moved.length) {
+      movesEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Sin movimientos automáticos hoy</div>';
+    } else {
+      movesEl.innerHTML =
+        moved.map(c => {
+          const name = c.lead.data.lead || c.lead.data.empresa || '?';
+          const toColor = stageColors[c.new_stage] || '#aaa';
+          return `<div style="display:flex;align-items:center;gap:6px;padding:5px 7px;background:#1a1a1a;border-radius:4px">
+            <span style="font-size:.68rem;color:#ccc;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</span>
+            <span style="font-size:.6rem;color:#555">${stageLabels[c.original_stage] || c.original_stage}</span>
+            <span style="font-size:.6rem;color:#333">→</span>
+            <span style="font-size:.6rem;font-weight:700;color:${toColor}">${stageLabels[c.new_stage] || c.new_stage}</span>
+            <span style="font-size:.48rem;background:rgba(196,229,56,.08);color:#C4E538;padding:1px 4px;border-radius:2px;flex-shrink:0">IA</span>
+          </div>`;
+        }).join('') +
+        notMoved.map(c => {
+          const name = c.lead.data.lead || c.lead.data.empresa || '?';
+          return `<div style="font-size:.63rem;color:#333;padding:3px 7px">— ${escHtml(name)}: sin cambio</div>`;
+        }).join('');
+    }
+  }
+
+  // Follow-ups panel
+  const fuEl = document.getElementById('home-fu-panel');
+  if (fuEl) {
+    if (!fuLeads.length) {
+      fuEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Sin follow-ups urgentes 🎉</div>';
+    } else {
+      fuEl.innerHTML = fuLeads
+        .map(l => ({ l, days: Math.floor((today - parseDateES(l.data.ultimoContacto)) / 86400000) }))
+        .sort((a, b) => b.days - a.days)
+        .slice(0, 6)
+        .map(({ l, days }) => {
+          const color = days >= 14 ? '#ef4444' : days >= 7 ? '#f59e0b' : '#aaa';
+          const name = l.data.empresa || l.data.lead || '?';
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 7px;border-radius:4px">
+            <span style="font-size:.68rem;color:#ccc;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</span>
+            <span style="font-size:.63rem;font-weight:700;color:${color};flex-shrink:0;margin-left:8px">${days} días</span>
+          </div>`;
+        }).join('');
+    }
+  }
+}
+
 // ── VIEW SWITCHER ─────────────────────────────────────────────────────────
 function switchView(view){
   document.getElementById('view-crm').style.display=view==='crm'?'flex':'none';
