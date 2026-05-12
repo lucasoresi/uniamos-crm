@@ -4134,6 +4134,220 @@ async function gmail_fetchInbox() {
   }
 }
 
+// ── GMAIL SYNC ────────────────────────────────────────────────────────────────
+function gmailSync_parseEmails(headerValue) {
+  if (!headerValue) return [];
+  const results = [];
+  headerValue.split(',').forEach(part => {
+    part = part.trim();
+    const bracketMatch = part.match(/<([^>]+)>/);
+    const nameMatch = part.match(/^([^<]+)</);
+    if (bracketMatch) {
+      results.push({
+        email: bracketMatch[1].toLowerCase().trim(),
+        name: nameMatch ? nameMatch[1].trim().replace(/^"|"$/g, '') : ''
+      });
+    } else {
+      const plain = part.match(/([^\s<>"]+@[^\s<>"]+)/);
+      if (plain) results.push({ email: plain[1].toLowerCase().trim(), name: '' });
+    }
+  });
+  return results;
+}
+
+async function gmailSync_fetchContacts(token) {
+  const NOISE = /noreply|no-reply|mailer-daemon|newsletter|notifications|donotreply|bounce|unsubscribe|postmaster|accounts-noreply|info@google|@googlegroups/i;
+  const PERSONAL_DOMAINS = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com', 'live.com', 'me.com'];
+  const myEmail = (currentUser?.email || '').toLowerCase();
+
+  const [sentData, inboxData] = await Promise.all([
+    fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=SENT&maxResults=50',
+      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({})),
+    fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=30',
+      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({}))
+  ]);
+
+  const allRefs = [
+    ...(sentData.messages || []).map(m => ({ id: m.id, source: 'sent' })),
+    ...(inboxData.messages || []).map(m => ({ id: m.id, source: 'inbox' }))
+  ];
+
+  if (!allRefs.length) return [];
+
+  const msgResults = await Promise.allSettled(
+    allRefs.map(({ id, source }) =>
+      fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=metadata` +
+        `&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(r => r.json()).then(msg => ({ ...msg, _source: source }))
+    )
+  );
+
+  const messages = msgResults
+    .filter(r => r.status === 'fulfilled')
+    .map(r => r.value);
+
+  const contactMap = new Map();
+
+  messages.forEach(msg => {
+    const headers = msg.payload?.headers || [];
+    const get = name => headers.find(h => h.name === name)?.value || '';
+    const subject = get('Subject');
+    const source = msg._source;
+
+    const rawAddresses = source === 'sent'
+      ? get('To') + (get('Cc') ? ',' + get('Cc') : '')
+      : get('From');
+
+    gmailSync_parseEmails(rawAddresses).forEach(({ email, name }) => {
+      if (!email || email === myEmail) return;
+      if (NOISE.test(email)) return;
+
+      const domain = email.split('@')[1] || '';
+
+      if (!contactMap.has(email)) {
+        contactMap.set(email, { email, name: name || '', domain, subjects: [], sent_count: 0, received_count: 0 });
+      }
+
+      const c = contactMap.get(email);
+      if (source === 'sent') c.sent_count++;
+      else c.received_count++;
+      if (subject && c.subjects.length < 3 && !c.subjects.includes(subject)) c.subjects.push(subject);
+      if (!c.name && name) c.name = name;
+    });
+  });
+
+  return Array.from(contactMap.values())
+    .filter(c => {
+      const total = c.sent_count + c.received_count;
+      if (PERSONAL_DOMAINS.includes(c.domain) && total < 3) return false;
+      return true;
+    })
+    .sort((a, b) => (b.sent_count + b.received_count) - (a.sent_count + a.received_count))
+    .slice(0, 40);
+}
+
+async function gmailSync_upsertLeads(enrichedLeads) {
+  let created = 0, updated = 0;
+
+  const existingByEmail = {};
+  leads.forEach(l => {
+    (l.data.email || '').toLowerCase().split(/[,;\s]+/).map(e => e.trim()).filter(Boolean)
+      .forEach(e => { existingByEmail[e] = l; });
+  });
+
+  const toInsert = [];
+  const toUpdate = [];
+
+  enrichedLeads.forEach(newLead => {
+    const key = (newLead.email || '').toLowerCase().trim();
+    const existing = existingByEmail[key];
+
+    if (!existing) {
+      toInsert.push({
+        id: uid(),
+        user_id: currentUser.id,
+        data: newLead,
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      const stateChanged = existing.data.estado !== newLead.estado;
+      const priorityChanged = existing.data.prioridad !== newLead.prioridad;
+      if (stateChanged || priorityChanged) {
+        toUpdate.push({
+          id: existing.id,
+          user_id: currentUser.id,
+          data: {
+            ...existing.data,
+            estado: newLead.estado,
+            prioridad: newLead.prioridad,
+            notas: existing.data.notas || newLead.notas
+          },
+          updated_at: new Date().toISOString()
+        });
+      }
+    }
+  });
+
+  if (toInsert.length) {
+    const { error } = await supabase.from('leads').insert(toInsert);
+    if (!error) {
+      leads.push(...toInsert);
+      created = toInsert.length;
+    } else {
+      console.error('gmailSync insert error:', error);
+    }
+  }
+
+  if (toUpdate.length) {
+    await Promise.allSettled(toUpdate.map(row => supabase.from('leads').upsert(row)));
+    toUpdate.forEach(row => {
+      const idx = leads.findIndex(l => l.id === row.id);
+      if (idx >= 0) leads[idx] = row;
+    });
+    updated = toUpdate.length;
+  }
+
+  return { created, updated };
+}
+
+let gmailSyncRunning = false;
+
+async function gmailSync_run() {
+  if (gmailSyncRunning) return;
+  gmailSyncRunning = true;
+
+  const emailsEl = document.getElementById('home-emails-panel');
+
+  try {
+    const token = await getGoogleToken();
+    if (!token) { gmailSyncRunning = false; return; }
+
+    if (emailsEl) emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Escaneando Gmail…</div>';
+
+    const contacts = await gmailSync_fetchContacts(token);
+    if (!contacts.length) { gmailSyncRunning = false; return; }
+
+    if (emailsEl) emailsEl.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Analizando ${contacts.length} contactos con IA…</div>`;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const jwt = session?.access_token;
+    if (!jwt) { gmailSyncRunning = false; return; }
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/enrich-gmail-contacts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
+      body: JSON.stringify({ contacts })
+    });
+
+    if (!res.ok) {
+      console.error('enrich-gmail-contacts error:', res.status);
+      gmailSyncRunning = false;
+      return;
+    }
+
+    const { leads: enrichedLeads } = await res.json();
+    if (!enrichedLeads?.length) { gmailSyncRunning = false; return; }
+
+    const { created, updated } = await gmailSync_upsertLeads(enrichedLeads);
+
+    crm_renderBoard();
+
+    if (created > 0 || updated > 0) {
+      const parts = [];
+      if (created > 0) parts.push(`${created} leads nuevos`);
+      if (updated > 0) parts.push(`${updated} actualizados`);
+      showToast(`Gmail sincronizado: ${parts.join(', ')}`);
+    }
+
+  } catch (e) {
+    console.error('Gmail sync error:', e);
+  }
+
+  gmailSyncRunning = false;
+}
+
 async function gmail_loadInbox() {
   const listEl = document.getElementById('gmail-email-list');
   const previewEl = document.getElementById('gmail-preview-panel');
