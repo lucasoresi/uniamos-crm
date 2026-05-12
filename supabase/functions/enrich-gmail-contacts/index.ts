@@ -62,7 +62,10 @@ serve(async (req) => {
   let contacts: Contact[] = []
   try {
     const body = await req.json()
-    contacts = (body.contacts || []).slice(0, 40)
+    contacts = (body.contacts || []).slice(0, 40).map((c: Contact) => ({
+      ...c,
+      subjects: Array.isArray(c.subjects) ? c.subjects : [],
+    }))
   } catch {
     return new Response(JSON.stringify({ leads: [] }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -75,9 +78,16 @@ serve(async (req) => {
     })
   }
 
-  const contactLines = contacts.map((c, i) =>
-    `${i + 1}. Email: ${c.email} | Nombre: ${c.name || '?'} | Dominio: ${c.domain} | Enviados: ${c.sent_count} | Recibidos: ${c.received_count} | Asuntos: ${c.subjects.slice(0, 3).join(' / ') || 'sin asuntos'}`
-  ).join('\n')
+  const sanitize = (s: string, max = 100) => String(s || '').replace(/[\n\r]/g, ' ').slice(0, max)
+  const contactLines = contacts.map((c, i) => {
+    const name = sanitize(c.name || '?', 80)
+    const domain = sanitize(c.domain, 80)
+    const subjects = (Array.isArray(c.subjects) ? c.subjects : [])
+      .slice(0, 3)
+      .map(s => sanitize(s, 100))
+      .join(' / ') || 'sin asuntos'
+    return `${i + 1}. Email: ${sanitize(c.email, 150)} | Nombre: ${name} | Dominio: ${domain} | Enviados: ${c.sent_count} | Recibidos: ${c.received_count} | Asuntos: ${subjects}`
+  }).join('\n')
 
   const prompt = `Sos un asistente de CRM experto en ventas B2B.
 
@@ -97,15 +107,17 @@ Para cada lead B2B incluí exactamente este formato:
   "empresa": "nombre de la empresa (inferir del dominio si es necesario, ej: gabor.com.mx → Gabor)",
   "lead": "nombre del contacto",
   "domain": "dominio del email",
-  "estado": "activa|propuesta|sininfo|frio",
+  "estado": "cierre|propuesta|activa|ghost|frio|sininfo",
   "prioridad": "urgente|alta|media|baja",
   "notas": "1 oración corta de contexto basada en los asuntos detectados"
 }
 
 Criterios de estado:
-- "propuesta": asuntos mencionan propuesta, cotización, presupuesto, contrato
+- "cierre": asuntos mencionan firma, contrato firmado, cierre, deal cerrado
+- "propuesta": asuntos mencionan propuesta, cotización, presupuesto
 - "activa": sent_count + received_count >= 3, conversación bidireccional en curso
-- "frio": solo 1 email, sin intercambio bidireccional real
+- "ghost": intercambio previo pero sin respuesta reciente (solo 1 mensaje del contacto)
+- "frio": 1 solo email sin intercambio real, o señal de desinterés
 - "sininfo": poco contexto, asuntos vagos o insuficientes
 
 Criterios de prioridad:
