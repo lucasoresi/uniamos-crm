@@ -4160,12 +4160,26 @@ async function gmailSync_fetchContacts(token) {
   const PERSONAL_DOMAINS = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'icloud.com', 'live.com', 'me.com'];
   const myEmail = (currentUser?.email || '').toLowerCase();
 
+  const fetchLabel = async (label, max) => {
+    const r = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=${label}&maxResults=${max}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).catch(() => null);
+    if (!r) return {};
+    if (r.status === 401) {
+      sessionStorage.removeItem('gtoken');
+      sessionStorage.removeItem('gtoken_expires');
+      return null;
+    }
+    return r.json().catch(() => ({}));
+  };
+
   const [sentData, inboxData] = await Promise.all([
-    fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=SENT&maxResults=50',
-      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({})),
-    fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=30',
-      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()).catch(() => ({}))
+    fetchLabel('SENT', 50),
+    fetchLabel('INBOX', 30)
   ]);
+
+  if (sentData === null || inboxData === null) return [];
 
   const allRefs = [
     ...(sentData.messages || []).map(m => ({ id: m.id, source: 'sent' })),
@@ -4281,12 +4295,14 @@ async function gmailSync_upsertLeads(enrichedLeads) {
   }
 
   if (toUpdate.length) {
-    await Promise.allSettled(toUpdate.map(row => supabase.from('leads').upsert(row)));
-    toUpdate.forEach(row => {
-      const idx = leads.findIndex(l => l.id === row.id);
-      if (idx >= 0) leads[idx] = row;
+    const results = await Promise.allSettled(toUpdate.map(row => supabase.from('leads').upsert(row)));
+    results.forEach((result, i) => {
+      if (result.status === 'fulfilled' && !result.value?.error) {
+        const idx = leads.findIndex(l => l.id === toUpdate[i].id);
+        if (idx >= 0) leads[idx] = toUpdate[i];
+        updated++;
+      }
     });
-    updated = toUpdate.length;
   }
 
   return { created, updated };
@@ -4333,6 +4349,7 @@ async function gmailSync_run() {
     const { created, updated } = await gmailSync_upsertLeads(enrichedLeads);
 
     crm_renderBoard();
+    home_load();
 
     if (created > 0 || updated > 0) {
       const parts = [];
