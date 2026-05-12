@@ -4162,7 +4162,7 @@ async function gmailSync_upsertLeads(enrichedLeads) {
   });
 
   if (toInsert.length) {
-    const { error } = await supabase.from('leads').insert(toInsert);
+    const { error } = await supabase.from('leads').upsert(toInsert);
     if (!error) {
       leads.push(...toInsert);
       created = toInsert.length;
@@ -4195,18 +4195,18 @@ async function gmailSync_run() {
 
   try {
     const token = await getGoogleToken();
-    if (!token) { gmailSyncRunning = false; return; }
+    if (!token) return;
 
     if (emailsEl) emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Escaneando Gmail…</div>';
 
     const contacts = await gmailSync_fetchContacts(token);
-    if (!contacts.length) { gmailSyncRunning = false; return; }
+    if (!contacts.length) return;
 
     if (emailsEl) emailsEl.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Analizando ${contacts.length} contactos con IA…</div>`;
 
     const { data: { session } } = await supabase.auth.getSession();
     const jwt = session?.access_token;
-    if (!jwt) { gmailSyncRunning = false; return; }
+    if (!jwt) return;
 
     const res = await fetch(`${SUPABASE_URL}/functions/v1/enrich-gmail-contacts`, {
       method: 'POST',
@@ -4214,19 +4214,14 @@ async function gmailSync_run() {
       body: JSON.stringify({ contacts })
     });
 
-    if (!res.ok) {
-      console.error('enrich-gmail-contacts error:', res.status);
-      gmailSyncRunning = false;
-      return;
-    }
+    if (!res.ok) { console.error('enrich-gmail-contacts error:', res.status); return; }
 
     const { leads: enrichedLeads } = await res.json();
-    if (!enrichedLeads?.length) { gmailSyncRunning = false; return; }
+    if (!enrichedLeads?.length) return;
 
     const { created, updated } = await gmailSync_upsertLeads(enrichedLeads);
 
     crm_renderBoard();
-    home_load();
 
     if (created > 0 || updated > 0) {
       const parts = [];
@@ -4237,9 +4232,9 @@ async function gmailSync_run() {
 
   } catch (e) {
     console.error('Gmail sync error:', e);
+  } finally {
+    gmailSyncRunning = false;
   }
-
-  gmailSyncRunning = false;
 }
 
 async function gmail_loadInbox() {
