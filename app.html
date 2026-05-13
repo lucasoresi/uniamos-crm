@@ -4307,9 +4307,12 @@ function gmail_renderList(messages) {
   }).join('');
 }
 
+let currentGmailMsg = null;
+
 function gmail_selectMessage(msgId) {
   const msg = gmailInboxMessages.find(m => m.id === msgId);
   if (!msg) return;
+  currentGmailMsg = msg;
 
   document.querySelectorAll('.gmail-msg-item').forEach(el => el.classList.remove('gmail-msg-selected'));
   const item = document.querySelector(`[data-msgid="${msgId}"]`);
@@ -4342,13 +4345,13 @@ function gmail_selectMessage(msgId) {
       </div>
       <div style="border-top:1px solid var(--border);padding-top:14px;padding-bottom:8px">
         <div style="display:flex;gap:10px;align-items:flex-end">
-          <textarea id="${replyId}" placeholder="Responder a ${senderName}…"
+          <textarea id="gmail-reply-textarea" placeholder="Responder a ${senderName}…"
             style="flex:1;background:#1c1c1e;border:1px solid var(--border);border-radius:16px;padding:10px 16px;color:var(--text);font-size:.84rem;font-family:inherit;resize:none;line-height:1.5;min-height:44px;max-height:140px;outline:none;transition:border-color .15s;box-sizing:border-box"
             rows="1"
             oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'"
             onfocus="this.style.borderColor='rgba(196,229,56,.4)'"
             onblur="this.style.borderColor='var(--border)'"></textarea>
-          <button onclick="gmail_sendReplyFromPanel('${msg.id}','${replyId}')"
+          <button id="gmail-reply-btn" onclick="gmail_sendReplyFromPanel()"
             style="width:40px;height:40px;border-radius:50%;background:#C4E538;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s"
             title="Enviar respuesta">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -4380,16 +4383,16 @@ function gmail_updateUnreadBadge(messages) {
   badge.style.display = count > 0 ? '' : 'none';
 }
 
-async function gmail_sendReplyFromPanel(msgId, textareaId) {
-  const msg = gmailInboxMessages.find(m => m.id === msgId);
-  const textarea = document.getElementById(textareaId);
+async function gmail_sendReplyFromPanel() {
+  const msg = currentGmailMsg;
+  const textarea = document.getElementById('gmail-reply-textarea');
+  const btn = document.getElementById('gmail-reply-btn');
   if (!msg || !textarea) return;
 
   const replyText = textarea.value.trim();
   if (!replyText) return;
 
-  const btn = textarea.nextElementSibling;
-  if (btn) btn.style.opacity = '0.4';
+  if (btn) { btn.style.opacity = '0.4'; btn.disabled = true; }
   textarea.disabled = true;
 
   const ok = await gmail_sendReply(msg, replyText);
@@ -4397,13 +4400,14 @@ async function gmail_sendReplyFromPanel(msgId, textareaId) {
     textarea.value = '';
     textarea.style.height = 'auto';
   }
-  if (btn) btn.style.opacity = '1';
+  if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
   textarea.disabled = false;
 }
 
 async function gmail_sendReply(originalMsg, replyText) {
   const token = await getGoogleToken();
   if (!token) { showToast('Gmail no conectado', 'global_toast', true); return false; }
+  if (!currentUser?.email) { showToast('Sesión no válida', 'global_toast', true); return false; }
 
   const headers = originalMsg.payload?.headers || [];
   const get = name => headers.find(h => h.name === name)?.value || '';
@@ -4434,7 +4438,8 @@ async function gmail_sendReply(originalMsg, replyText) {
   });
 
   if (!res.ok) {
-    console.error('Gmail send error:', res.status);
+    const errBody = await res.json().catch(() => ({}));
+    console.error('Gmail send error:', res.status, errBody);
     showToast('Error al enviar el email', 'global_toast', true);
     return false;
   }
