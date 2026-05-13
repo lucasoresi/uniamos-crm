@@ -4325,17 +4325,39 @@ function gmail_selectMessage(msgId) {
     : '';
   const snippet = escHtml(msg.snippet || '');
   const gmailLink = `https://mail.google.com/mail/#inbox/${msg.id}`;
+  const senderName = escHtml(from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?');
+  const replyId = `reply-${msg.id}`;
 
   document.getElementById('gmail-preview-panel').innerHTML = `
-    <div style="max-width:580px;width:100%">
-      <div style="font-size:.72rem;color:var(--text-3);margin-bottom:4px">${escHtml(from)}</div>
-      <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.3">${escHtml(subject)}</div>
-      <div style="font-size:.72rem;color:var(--text-3);padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px">${escHtml(date)}</div>
-      <div style="font-size:.84rem;color:var(--text-2);line-height:1.75">${snippet}</div>
-      <a href="${gmailLink}" target="_blank"
-        style="display:inline-flex;align-items:center;gap:6px;margin-top:22px;padding:9px 20px;background:#C4E538;color:#0A0A0A;border-radius:6px;font-weight:700;font-size:.82rem;text-decoration:none">
-        Abrir en Gmail ↗
-      </a>
+    <div style="max-width:580px;width:100%;display:flex;flex-direction:column">
+      <div style="padding:28px 0 16px">
+        <div style="font-size:.72rem;color:var(--text-3);margin-bottom:4px">${escHtml(from)}</div>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.3">${escHtml(subject)}</div>
+        <div style="font-size:.72rem;color:var(--text-3);padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px">${escHtml(date)}</div>
+        <div style="font-size:.84rem;color:var(--text-2);line-height:1.75">${snippet}</div>
+        <a href="${gmailLink}" target="_blank"
+          style="display:inline-flex;align-items:center;gap:6px;margin-top:22px;padding:9px 20px;background:#C4E538;color:#0A0A0A;border-radius:6px;font-weight:700;font-size:.82rem;text-decoration:none">
+          Abrir en Gmail ↗
+        </a>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;padding-bottom:8px">
+        <div style="display:flex;gap:10px;align-items:flex-end">
+          <textarea id="${replyId}" placeholder="Responder a ${senderName}…"
+            style="flex:1;background:#1c1c1e;border:1px solid var(--border);border-radius:16px;padding:10px 16px;color:var(--text);font-size:.84rem;font-family:inherit;resize:none;line-height:1.5;min-height:44px;max-height:140px;outline:none;transition:border-color .15s;box-sizing:border-box"
+            rows="1"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'"
+            onfocus="this.style.borderColor='rgba(196,229,56,.4)'"
+            onblur="this.style.borderColor='var(--border)'"></textarea>
+          <button onclick="gmail_sendReplyFromPanel('${msg.id}','${replyId}')"
+            style="width:40px;height:40px;border-radius:50%;background:#C4E538;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s"
+            title="Enviar respuesta">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -4356,6 +4378,69 @@ function gmail_updateUnreadBadge(messages) {
   if (!badge) return;
   badge.textContent = count;
   badge.style.display = count > 0 ? '' : 'none';
+}
+
+async function gmail_sendReplyFromPanel(msgId, textareaId) {
+  const msg = gmailInboxMessages.find(m => m.id === msgId);
+  const textarea = document.getElementById(textareaId);
+  if (!msg || !textarea) return;
+
+  const replyText = textarea.value.trim();
+  if (!replyText) return;
+
+  const btn = textarea.nextElementSibling;
+  if (btn) btn.style.opacity = '0.4';
+  textarea.disabled = true;
+
+  const ok = await gmail_sendReply(msg, replyText);
+  if (ok) {
+    textarea.value = '';
+    textarea.style.height = 'auto';
+  }
+  if (btn) btn.style.opacity = '1';
+  textarea.disabled = false;
+}
+
+async function gmail_sendReply(originalMsg, replyText) {
+  const token = await getGoogleToken();
+  if (!token) { showToast('Gmail no conectado', 'global_toast', true); return false; }
+
+  const headers = originalMsg.payload?.headers || [];
+  const get = name => headers.find(h => h.name === name)?.value || '';
+  const to = get('From');
+  const rawSubject = get('Subject') || '';
+  const subject = rawSubject.toLowerCase().startsWith('re:') ? rawSubject : `Re: ${rawSubject}`;
+  const messageId = get('Message-ID');
+  const threadId = originalMsg.threadId;
+
+  const emailLines = [
+    `From: ${currentUser.email}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    ...(messageId ? [`In-Reply-To: ${messageId}`, `References: ${messageId}`] : []),
+    `Content-Type: text/plain; charset=utf-8`,
+    ``,
+    replyText
+  ];
+
+  const raw = emailLines.join('\r\n');
+  const encoded = btoa(unescape(encodeURIComponent(raw)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+  const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ raw: encoded, ...(threadId ? { threadId } : {}) })
+  });
+
+  if (!res.ok) {
+    console.error('Gmail send error:', res.status);
+    showToast('Error al enviar el email', 'global_toast', true);
+    return false;
+  }
+
+  showToast('Email enviado ✓');
+  return true;
 }
 </script>
 </body>
