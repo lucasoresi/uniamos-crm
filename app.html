@@ -1654,8 +1654,7 @@ async function home_load() {
   const msgResults = await Promise.allSettled(
     allRefs.map(({ id, type }) =>
       fetch(
-        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=metadata` +
-        `&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`,
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=minimal`,
         { headers: { Authorization: `Bearer ${token}` } }
       ).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(msg => ({ ...msg, _type: type }))
@@ -1697,6 +1696,8 @@ async function home_load() {
   home_render(allMessages, leads);
   } catch(e) {
     console.error('home_load error:', e);
+    const emailsEl = document.getElementById('home-emails-panel');
+    if (emailsEl) emailsEl.innerHTML = '<div style="padding:20px;font-size:.82rem;color:var(--text-3)">Error al cargar. <a href="#" onclick="home_load();return false;" style="color:#C4E538">Intentar de nuevo →</a></div>';
   } finally {
     homeLoading = false;
   }
@@ -4308,7 +4309,7 @@ function gmail_renderList(messages) {
     const date = dateRaw ? new Date(dateRaw).toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }) : '';
     const isUnread = (msg.labelIds || []).includes('UNREAD');
     const snippet = escHtml(msg.snippet || '');
-    return `<div class="gmail-msg-item${isUnread ? ' gmail-msg-unread' : ''}" data-msgid="${msg.id}" onclick="gmail_selectMessage('${msg.id}')">
+    return `<div class="gmail-msg-item${isUnread ? ' gmail-msg-unread' : ''}" data-msgid="${msg.id}" onclick="gmail_selectMessage(this.dataset.msgid)">
       <div class="gmail-msg-avatar">${initials}</div>
       <div class="gmail-msg-body">
         <div class="gmail-msg-row1">
