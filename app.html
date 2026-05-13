@@ -1610,16 +1610,13 @@ async function home_load() {
   const emailsEl = document.getElementById('home-emails-panel');
   const movesEl = document.getElementById('home-moves-panel');
   const fuEl = document.getElementById('home-fu-panel');
-  if (emailsEl) emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Analizando emails con IA…</div>';
+  if (emailsEl) emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">⏳ Cargando comunicaciones…</div>';
   if (movesEl) movesEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Cargando…</div>';
   if (fuEl) fuEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Cargando…</div>';
   homeAutoMovedToday.clear();
 
-  const [fetchResult, leadsResult] = await Promise.all([
-    gmail_fetchInbox(),
-    supabase.from('leads').select('*').eq('user_id', currentUser.id)
-  ]);
-  const { token, messages } = fetchResult;
+  const token = await getGoogleToken();
+  const leadsResult = await supabase.from('leads').select('*').eq('user_id', currentUser.id);
   leads = leadsResult.data || leads;
 
   if (!token) {
@@ -1629,56 +1626,82 @@ async function home_load() {
     return;
   }
 
-  gmailInboxMessages = messages;
-  gmail_updateUnreadBadge(messages);
+  const [inboxData, sentData] = await Promise.all([
+    fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX&maxResults=30',
+      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.status === 401 ? null : r.json()).catch(() => ({})),
+    fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?labelIds=SENT&maxResults=20',
+      { headers: { Authorization: `Bearer ${token}` } }).then(r => r.status === 401 ? null : r.json()).catch(() => ({}))
+  ]);
 
-  const matched = home_matchEmailsToLeads(messages, leads);
-  const { data: { session } } = await supabase.auth.getSession();
-  const jwt = session?.access_token;
-
-  const classifyResults = await Promise.allSettled(
-    matched.map(({ email_msg, lead }) => home_classifyOne(email_msg, lead, jwt))
-  );
-
-  homeClassifications = classifyResults.map((r, i) =>
-    r.status === 'fulfilled'
-      ? r.value
-      : { email_msg: matched[i].email_msg, lead: matched[i].lead, original_stage: matched[i].lead.data.estado, new_stage: matched[i].lead.data.estado, signal: 'neutral', reason: '', changed: false }
-  );
-
-  const changed = homeClassifications.filter(c => c.changed);
-  if (changed.length > 0) {
-    await Promise.allSettled(changed.map(c => {
-      homeAutoMovedToday.add(c.lead.id);
-      return supabase.from('leads').upsert({
-        id: c.lead.id,
-        user_id: currentUser.id,
-        data: { ...c.lead.data, estado: c.new_stage },
-        updated_at: new Date().toISOString()
-      });
-    }));
-    const { data: fresh } = await supabase.from('leads').select('*').eq('user_id', currentUser.id);
-    if (fresh) leads = fresh;
+  if (inboxData === null || sentData === null) {
+    sessionStorage.removeItem('gtoken');
+    sessionStorage.removeItem('gtoken_expires');
+    if (emailsEl) emailsEl.innerHTML = '<div style="padding:20px;font-size:.82rem;color:var(--text-3)">Sesión de Gmail expirada. <a href="login.html" style="color:#C4E538">Reconectar →</a></div>';
+    home_render([], leads);
+    homeLoading = false;
+    return;
   }
 
-  home_render(homeClassifications, leads);
-  crm_renderBoard();
+  const allRefs = [
+    ...(inboxData.messages || []).map(m => ({ id: m.id, type: 'inbox' })),
+    ...(sentData.messages || []).map(m => ({ id: m.id, type: 'sent' }))
+  ];
+
+  if (!allRefs.length) {
+    home_render([], leads);
+    homeLoading = false;
+    return;
+  }
+
+  const msgResults = await Promise.allSettled(
+    allRefs.map(({ id, type }) =>
+      fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=metadata` +
+        `&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).then(r => r.json()).then(msg => ({ ...msg, _type: type }))
+    )
+  );
+
+  const allMessages = msgResults
+    .filter(r => r.status === 'fulfilled')
+    .map(r => r.value)
+    .sort((a, b) => {
+      const d = m => {
+        const h = m.payload?.headers || [];
+        const s = h.find(x => x.name === 'Date')?.value || '';
+        return s ? new Date(s).getTime() : 0;
+      };
+      return d(b) - d(a);
+    })
+    .slice(0, 30);
+
+  const inboxMessages = allMessages.filter(m => m._type === 'inbox');
+  gmailInboxMessages = inboxMessages;
+  gmail_updateUnreadBadge(inboxMessages);
+
+  const matched = home_matchEmailsToLeads(inboxMessages, leads);
+  homeClassifications = matched.map(({ email_msg, lead }) => ({
+    email_msg, lead,
+    original_stage: lead.data.estado,
+    new_stage: lead.data.estado,
+    signal: 'neutral', reason: '', changed: false
+  }));
   crm_drawer_render(homeClassifications);
 
   const btn = document.getElementById('crm-drawer-btn');
   if (btn) {
-    const unread = homeClassifications.filter(c => (c.email_msg.labelIds || []).includes('UNREAD')).length;
+    const unread = inboxMessages.filter(m => (m.labelIds || []).includes('UNREAD')).length;
     btn.textContent = unread > 0 ? `📧 Emails (${unread} nuevos) ▾` : '📧 Emails ▾';
   }
+
+  home_render(allMessages, leads);
   homeLoading = false;
 }
 
-function home_render(classifications, allLeads) {
+function home_render(allMessages, allLeads) {
   const today = new Date();
-  const stageLabels = HOME_STAGE_LABELS;
-  const stageColors = HOME_STAGE_COLORS;
 
-  // Stats
   const pipelineVal = allLeads.reduce((sum, l) => {
     const v = parseFloat((l.data.valor || '').replace(/[^0-9.]/g, ''));
     return sum + (isNaN(v) ? 0 : v);
@@ -1689,7 +1712,6 @@ function home_render(classifications, allLeads) {
     const d = parseDateES(l.data.ultimoContacto);
     return d && (today - d) / 86400000 >= 7;
   });
-  const movedCount = homeAutoMovedToday.size;
 
   const pEl = document.getElementById('home-stat-pipeline');
   const aEl = document.getElementById('home-stat-activos');
@@ -1700,73 +1722,63 @@ function home_render(classifications, allLeads) {
   if (aEl) aEl.textContent = activeLeads;
   if (eEl) eEl.textContent = unread;
   if (fEl) fEl.textContent = fuLeads.length;
-  if (mEl) mEl.textContent = movedCount;
+  if (mEl) mEl.textContent = homeAutoMovedToday.size;
 
-  // Email list
   const emailsEl = document.getElementById('home-emails-panel');
   if (emailsEl) {
-    if (!classifications.length) {
-      emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">No hay emails de leads conocidos en el inbox</div>';
+    if (!allMessages.length) {
+      emailsEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-3);font-size:.82rem">Sin comunicaciones recientes</div>';
     } else {
-      emailsEl.innerHTML = classifications.map(c => {
-        const headers = c.email_msg.payload?.headers || [];
+      emailsEl.innerHTML = allMessages.map(msg => {
+        const headers = msg.payload?.headers || [];
         const get = name => headers.find(h => h.name === name)?.value || '';
-        const from = get('From');
-        const displayName = from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?';
-        const initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
-        const subject = get('Subject') || '(sin asunto)';
+        const isSent = msg._type === 'sent';
         const dateRaw = get('Date');
         const timeStr = dateRaw ? new Date(dateRaw).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '';
-        const color = stageColors[c.new_stage] || '#444';
-        const isUnread = (c.email_msg.labelIds || []).includes('UNREAD');
-        const tagHtml = c.changed
-          ? `<span style="font-size:.44rem;background:rgba(196,229,56,.1);color:#C4E538;padding:2px 6px;border-radius:3px;margin-top:3px;display:inline-block">✦ Movido a ${stageLabels[c.new_stage] || c.new_stage} automáticamente</span>`
-          : `<span style="font-size:.44rem;color:${color};margin-top:3px;display:inline-block">${stageLabels[c.new_stage] || c.new_stage} — sin cambio</span>`;
-        const avatarBg = c.changed ? 'rgba(196,229,56,.12)' : isUnread ? 'rgba(100,100,100,.15)' : 'rgba(60,60,60,.5)';
-        const avatarColor = c.changed ? '#C4E538' : isUnread ? '#ccc' : '#555';
-        return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:#1a1a1a;border-radius:6px;border-left:3px solid ${color}">
+        const subject = get('Subject') || '(sin asunto)';
+        const isUnread = !isSent && (msg.labelIds || []).includes('UNREAD');
+
+        let displayName, initials;
+        if (isSent) {
+          const to = get('To');
+          displayName = to.replace(/<[^>]+>/, '').trim() || to.split('@')[0] || '?';
+          initials = '→';
+        } else {
+          const from = get('From');
+          displayName = from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?';
+          initials = displayName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+        }
+
+        const badgeHtml = isSent
+          ? `<span style="font-size:.62rem;color:#555;margin-top:2px;display:inline-block">📤 Enviado</span>`
+          : `<span style="font-size:.62rem;color:#555;margin-top:2px;display:inline-block">📧 Recibido</span>`;
+
+        const avatarBg = isSent ? 'rgba(60,60,60,.3)' : isUnread ? 'rgba(196,229,56,.12)' : 'rgba(60,60,60,.5)';
+        const avatarColor = isSent ? '#444' : isUnread ? '#C4E538' : '#555';
+        const nameWeight = isUnread ? '700' : '500';
+        const nameColor = isUnread ? '#ddd' : '#888';
+        const leftBorder = isSent ? '#222' : isUnread ? 'rgba(196,229,56,.3)' : '#1a1a1a';
+
+        return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 10px;background:#1a1a1a;border-radius:6px;border-left:3px solid ${leftBorder}">
           <div style="width:28px;height:28px;border-radius:50%;background:${avatarBg};color:${avatarColor};display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;flex-shrink:0">${escHtml(initials)}</div>
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;justify-content:space-between">
-              <span style="font-size:.7rem;font-weight:${c.changed || isUnread ? '700' : '500'};color:${c.changed ? '#eee' : isUnread ? '#ddd' : '#888'}">${escHtml(displayName)}</span>
+              <span style="font-size:.7rem;font-weight:${nameWeight};color:${nameColor}">${escHtml(displayName)}</span>
               <span style="font-size:.6rem;color:#444;flex-shrink:0;margin-left:8px">${escHtml(timeStr)}</span>
             </div>
             <div style="font-size:.63rem;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(subject)}</div>
-            ${tagHtml}
+            ${badgeHtml}
           </div>
         </div>`;
       }).join('');
     }
   }
 
-  // Movements panel
   const movesEl = document.getElementById('home-moves-panel');
   if (movesEl) {
-    const moved = classifications.filter(c => c.changed);
-    const notMoved = classifications.filter(c => !c.changed);
-    if (!moved.length) {
-      movesEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Sin movimientos automáticos hoy</div>';
-    } else {
-      movesEl.innerHTML =
-        moved.map(c => {
-          const name = c.lead.data.lead || c.lead.data.empresa || '?';
-          const toColor = stageColors[c.new_stage] || '#aaa';
-          return `<div style="display:flex;align-items:center;gap:6px;padding:5px 7px;background:#1a1a1a;border-radius:4px">
-            <span style="font-size:.68rem;color:#ccc;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</span>
-            <span style="font-size:.6rem;color:#555">${stageLabels[c.original_stage] || c.original_stage}</span>
-            <span style="font-size:.6rem;color:#333">→</span>
-            <span style="font-size:.6rem;font-weight:700;color:${toColor}">${stageLabels[c.new_stage] || c.new_stage}</span>
-            <span style="font-size:.48rem;background:rgba(196,229,56,.08);color:#C4E538;padding:1px 4px;border-radius:2px;flex-shrink:0">IA</span>
-          </div>`;
-        }).join('') +
-        notMoved.map(c => {
-          const name = c.lead.data.lead || c.lead.data.empresa || '?';
-          return `<div style="font-size:.63rem;color:#333;padding:3px 7px">— ${escHtml(name)}: sin cambio</div>`;
-        }).join('');
-    }
+    movesEl.innerHTML = '<div style="font-size:.72rem;color:var(--text-3);padding:8px 4px">Los movimientos automáticos ocurren al sincronizar Gmail al iniciar sesión</div>';
   }
 
-  // Follow-ups panel
   const fuEl = document.getElementById('home-fu-panel');
   if (fuEl) {
     if (!fuLeads.length) {
