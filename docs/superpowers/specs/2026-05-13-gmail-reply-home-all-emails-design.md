@@ -101,50 +101,77 @@ Extraer el cuerpo del `payload.parts` (buscar `text/plain` primero, fallback a `
 
 ---
 
-## Feature 2: Home — mostrar todos los emails del inbox
+## Feature 2: Home "Emails recientes" — feed de actividad de comunicaciones
 
-### Cambio de lógica
+### Concepto
 
-**Antes**: `home_matchEmailsToLeads()` filtra y solo devuelve emails cuyo remitente existe como lead en el CRM.
+La sección "Emails recientes" del Inicio se convierte en un **feed de actividad de comunicaciones**, similar a HubSpot/Pipedrive. Muestra todos los emails recientes (recibidos + enviados) sin filtrar por leads del CRM.
 
-**Después**: `home_render()` muestra **todos** los emails del inbox (hasta 30). Para cada email:
-- Si el remitente coincide con un lead → muestra el badge de etapa CRM + resultado de clasificación IA (lógica actual)
-- Si no coincide → muestra igualmente el email sin badge, con label "Nuevo contacto"
+**Por qué también los enviados**: en los CRM reales el Home muestra toda la actividad reciente — enviar un email es una acción comercial igual de importante que recibirlo. Da contexto completo de qué está pasando.
 
-### Cambio en `home_load()`
+**Diseñado para escalar**: la arquitectura del feed acepta futuras fuentes (LinkedIn recibidos, Instagram enviados/recibidos) agregando un nuevo tipo de ítem sin cambiar la estructura base.
 
-La clasificación IA (`home_classifyOne`) solo se llama para emails que tienen match con un lead existente. Los demás se muestran sin clasificar (no tiene sentido gastar tokens en clasificar emails de desconocidos).
+### Cambio de lógica en `home_load()`
+
+**Antes**:
+1. Fetch inbox (30 mensajes)
+2. Filtrar solo los que matchean leads del CRM
+3. Clasificar con IA los matches
+4. Mostrar solo los clasificados
+
+**Después**:
+1. Fetch inbox (30 recibidos) + fetch sent (20 enviados) en paralelo
+2. Combinar, ordenar por fecha descendente
+3. Para recibidos que matchean un lead: clasificar con IA (lógica existente, opcional)
+4. Mostrar todos — sin filtro
 
 ```
-gmailInboxMessages (30 emails)
+INBOX (30) + SENT (20)
        ↓
-┌─ Tiene match con lead ─────────────────┐
-│  → classifyOne() → badge stage + IA   │
-└────────────────────────────────────────┘
-┌─ No tiene match ───────────────────────┐
-│  → mostrar sin badge, label "Nuevo"   │
-└────────────────────────────────────────┘
+Ordenar por fecha desc → top 30
+       ↓
+Para cada item:
+  ├─ Si recibido y match lead → badge etapa CRM (opcional IA)
+  ├─ Si recibido y no match  → badge "📧 Recibido"
+  └─ Si enviado              → badge "📤 Enviado"
        ↓
 home_render() → muestra todos
 ```
 
-### UI del email sin match en Home
+### UI de cada ítem en el feed
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  [AV]  Ana Velázquez                        10:21 AM │
-│        Re: Reunión del jueves                        │
-│        ● Nuevo contacto                              │
+│ [MA]  María Alejandro (recibido)            10:21 AM │
+│       Re: Reunión del jueves                         │
+│       📧 Recibido                                    │
+└──────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────┐
+│ [→]   Para: cliente@empresa.com (enviado)   09:45 AM │
+│       Propuesta comercial Q2                         │
+│       📤 Enviado                                     │
 └──────────────────────────────────────────────────────┘
 ```
 
-- Badge gris/neutral: `● Nuevo contacto`
-- Sin borde coloreado de etapa CRM
-- Al hacer click: igual abre el email en Gmail (mismo comportamiento actual)
+- Recibidos: avatar del remitente (iniciales)
+- Enviados: avatar con flecha `→`, muestra el destinatario
+- Badge simple: `📧 Recibido` / `📤 Enviado` (sin clasificación IA para no-leads)
+- Al hacer click: abre el email en Gmail (comportamiento actual)
+
+### Eliminación de `home_classifyOne` del flujo principal
+
+La clasificación IA (mover leads de etapa automáticamente) fue diseñada para el flujo "clasificar emails de leads existentes". Con el nuevo enfoque de mostrar todos los emails, esta clasificación automática se convierte en una función opcional que se puede invocar manualmente, no en el flujo de carga del Home.
+
+**Razón**: clasificar con IA hasta 50 emails (30 inbox + 20 sent) sería costoso e innecesario. La auto-clasificación de etapas ya ocurre en `gmailSync_run()` al login.
 
 ### Stat "Emails nuevos" en Home
 
-El contador `home-stat-emails` ya muestra emails no leídos. No cambia.
+El contador `home-stat-emails` sigue mostrando emails no leídos del inbox. No cambia.
+
+### Extensibilidad futura
+
+Cuando se integre LinkedIn/Instagram, cada mensaje nuevo se agrega al mismo feed con su propio badge (`💼 LinkedIn` / `📸 Instagram`). La función `home_render()` recibe un array genérico de items con `{ type, from, to, subject, date, isRead }` — no está acoplada a Gmail.
 
 ---
 
@@ -155,8 +182,8 @@ El contador `home-stat-emails` ya muestra emails no leídos. No cambia.
 | `login.html` | Agregar `gmail.send` al scope OAuth |
 | `app.html` — `gmail_selectMessage()` | Agregar textarea + botón de reply + fetch de body completo |
 | `app.html` — nueva función `gmail_sendReply()` | Enviar reply via Gmail API |
-| `app.html` — `home_load()` | Eliminar filtro exclusivo de leads conocidos |
-| `app.html` — `home_render()` | Renderizar todos los emails, badge diferenciado para no-leads |
+| `app.html` — `home_load()` | Fetch inbox + sent, combinar, ordenar por fecha, eliminar filtro de leads |
+| `app.html` — `home_render()` | Feed genérico de comunicaciones: badge Recibido/Enviado, sin clasificación IA forzada |
 
 ---
 
