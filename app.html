@@ -1604,6 +1604,7 @@ async function home_classifyOne(email_msg, lead, jwt) {
 async function home_load() {
   if (homeLoading) return;
   homeLoading = true;
+  try {
   const dateEl = document.getElementById('home-date');
   if (dateEl) dateEl.textContent = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -1622,7 +1623,6 @@ async function home_load() {
   if (!token) {
     if (emailsEl) emailsEl.innerHTML = '<div style="padding:20px;font-size:.82rem;color:var(--text-3)">Gmail no conectado. <a href="login.html" style="color:#C4E538">Iniciar sesión con Google →</a></div>';
     home_render([], leads);
-    homeLoading = false;
     return;
   }
 
@@ -1638,7 +1638,6 @@ async function home_load() {
     sessionStorage.removeItem('gtoken_expires');
     if (emailsEl) emailsEl.innerHTML = '<div style="padding:20px;font-size:.82rem;color:var(--text-3)">Sesión de Gmail expirada. <a href="login.html" style="color:#C4E538">Reconectar →</a></div>';
     home_render([], leads);
-    homeLoading = false;
     return;
   }
 
@@ -1649,7 +1648,6 @@ async function home_load() {
 
   if (!allRefs.length) {
     home_render([], leads);
-    homeLoading = false;
     return;
   }
 
@@ -1659,7 +1657,8 @@ async function home_load() {
         `https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=metadata` +
         `&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`,
         { headers: { Authorization: `Bearer ${token}` } }
-      ).then(r => r.json()).then(msg => ({ ...msg, _type: type }))
+      ).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(msg => ({ ...msg, _type: type }))
     )
   );
 
@@ -1696,7 +1695,11 @@ async function home_load() {
   }
 
   home_render(allMessages, leads);
-  homeLoading = false;
+  } catch(e) {
+    console.error('home_load error:', e);
+  } finally {
+    homeLoading = false;
+  }
 }
 
 function home_render(allMessages, allLeads) {
@@ -1707,7 +1710,7 @@ function home_render(allMessages, allLeads) {
     return sum + (isNaN(v) ? 0 : v);
   }, 0);
   const activeLeads = allLeads.filter(l => ['cierre', 'propuesta', 'activa'].includes(l.data.estado)).length;
-  const unread = (gmailInboxMessages || []).filter(m => (m.labelIds || []).includes('UNREAD')).length;
+  const unread = allMessages.filter(m => m._type !== 'sent' && (m.labelIds || []).includes('UNREAD')).length;
   const fuLeads = allLeads.filter(l => {
     const d = parseDateES(l.data.ultimoContacto);
     return d && (today - d) / 86400000 >= 7;
