@@ -1,54 +1,70 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="onyx" data-accent="lime">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Uniamos – Acceso</title>
+<title>Uniamos · Acceso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --lime:#C4E538;--lime-dark:#A8C42A;--lime-light:#D4F05A;
-  --bg:#0A0A0A;--bg-2:#111111;--bg-3:#1A1A1A;
-  --surface:#161616;--border:rgba(255,255,255,.08);--border-light:rgba(255,255,255,.08);
-  --text:#FFFFFF;--text-2:rgba(255,255,255,.7);--text-3:rgba(255,255,255,.4);
+  --bg:oklch(0.16 0.006 80);
+  --surface:oklch(0.21 0.006 80);
+  --surface-2:oklch(0.25 0.006 80);
+  --border:oklch(0.32 0.008 80 / 0.55);
+  --text:oklch(0.98 0.005 80);
+  --text-2:oklch(0.78 0.005 80);
+  --text-3:oklch(0.58 0.005 80);
+  --accent:oklch(0.86 0.18 122);
+  --accent-2:oklch(0.72 0.18 122);
+  --accent-ink:oklch(0.20 0.04 122);
+  --accent-soft:oklch(0.86 0.18 122 / 0.14);
+  --p-urg:oklch(0.70 0.20 25);
+  --ok:oklch(0.78 0.16 145);
+  --ff:'Inter Tight','Inter',system-ui,sans-serif;
 }
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:var(--surface);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.4);width:100%;max-width:420px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
-.card-top{background:#0A0A0A;padding:36px 32px 28px;text-align:center}
-.logo-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:#C4E538;margin-right:8px}
-.logo-name{color:#fff;font-size:1.5rem;font-weight:900;letter-spacing:-.5px}
-.logo-sub{color:rgba(255,255,255,.35);font-size:.8rem;margin-top:6px;letter-spacing:.3px}
-.card-body{padding:32px}
-.tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:2px solid var(--border)}
-.tab{flex:1;text-align:center;padding:10px;font-size:.88rem;font-weight:700;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
-.tab.active{color:#C4E538;border-bottom-color:#C4E538}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:.78rem;font-weight:700;color:var(--text-2);margin-bottom:6px}
-.form-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;color:var(--text);background:#1A1A1A;outline:none;transition:all .15s;font-family:inherit}
-.form-input:focus{border-color:#C4E538;box-shadow:0 0 0 3px rgba(196,229,56,.2)}
-.btn-main{width:100%;padding:12px;background:#C4E538;color:#0A0A0A;border:none;border-radius:8px;font-size:.95rem;font-weight:800;cursor:pointer;transition:background .15s;font-family:inherit;margin-top:4px}
-.btn-main:hover{background:#A8C42A;color:#0A0A0A}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;letter-spacing:-0.01em}
+.card{background:var(--surface);border-radius:14px;box-shadow:0 20px 60px -10px rgb(0 0 0 / 0.6);width:100%;max-width:420px;overflow:hidden;border:1px solid var(--border)}
+.card-top{background:var(--bg);padding:32px 32px 24px;text-align:center;border-bottom:1px solid var(--border)}
+.logo{display:inline-flex;align-items:center;gap:10px;color:var(--text);font-size:1.4rem;font-weight:800;letter-spacing:-0.025em}
+.logo em{font-style:normal;color:var(--accent)}
+.logo svg{color:var(--accent)}
+.logo-sub{color:var(--text-3);font-size:.78rem;margin-top:8px;letter-spacing:0.02em}
+.card-body{padding:28px}
+.cloud-badge{background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:8px 12px;font-size:.74rem;font-weight:600;text-align:center;margin-bottom:20px;border:1px solid oklch(0.86 0.18 122 / 0.32)}
+.tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1.5px solid var(--border)}
+.tab{flex:1;text-align:center;padding:10px;font-size:.85rem;font-weight:600;color:var(--text-3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s;font-family:inherit;letter-spacing:-0.01em}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:.74rem;font-weight:600;color:var(--text-2);margin-bottom:6px;letter-spacing:0.01em;text-transform:uppercase}
+.form-input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;color:var(--text);background:var(--bg);outline:none;transition:all .15s;font-family:inherit}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.btn-main{width:100%;padding:11px;background:var(--accent);color:var(--accent-ink);border:none;border-radius:8px;font-size:.92rem;font-weight:700;cursor:pointer;transition:background .15s;font-family:inherit;margin-top:6px;letter-spacing:-0.01em}
+.btn-main:hover{background:var(--accent-2);color:var(--accent-ink)}
 .btn-main:disabled{opacity:.6;cursor:not-allowed}
-.btn-google{width:100%;padding:12px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-google:hover{background:rgba(196,229,56,.05);border-color:#C4E538}
-.btn-google img{width:18px;height:18px}
-.msg{margin-top:16px;padding:10px 14px;border-radius:8px;font-size:.82rem;font-weight:600;text-align:center;display:none}
-.msg.error{background:rgba(220,38,38,.2);color:#EF4444;display:block}
-.msg.success{background:rgba(34,197,94,.2);color:#86EFAC;display:block}
-.footer-note{margin-top:20px;text-align:center;font-size:.75rem;color:var(--text-3);line-height:1.5}
-.cloud-badge{background:rgba(196,229,56,.15);color:#C4E538;border-radius:8px;padding:8px 12px;font-size:.75rem;font-weight:700;text-align:center;margin-bottom:20px;border:1px solid rgba(196,229,56,.3)}
-.forgot-pass{text-align:center;margin-top:16px}
-.forgot-pass a{font-size:.8rem;color:#C4E538;text-decoration:none;cursor:pointer;font-weight:600}
+.btn-google{width:100%;padding:11px;background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:8px;font-size:.92rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-0.01em}
+.btn-google:hover{background:var(--surface-2);border-color:var(--accent)}
+.msg{margin-top:14px;padding:10px 14px;border-radius:8px;font-size:.8rem;font-weight:500;text-align:center;display:none}
+.msg.error{background:oklch(0.70 0.20 25 / 0.18);color:oklch(0.86 0.10 25);border:1px solid oklch(0.70 0.20 25 / 0.35);display:block}
+.msg.success{background:oklch(0.78 0.16 145 / 0.18);color:oklch(0.88 0.10 145);border:1px solid oklch(0.78 0.16 145 / 0.35);display:block}
+.footer-note{margin-top:20px;text-align:center;font-size:.72rem;color:var(--text-3);line-height:1.5}
+.forgot-pass{text-align:center;margin-top:14px}
+.forgot-pass a{font-size:.78rem;color:var(--accent);text-decoration:none;cursor:pointer;font-weight:600}
 .forgot-pass a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="card-top">
-    <div><span class="logo-dot"></span><span class="logo-name">Un<span style="color:#B8FF00">IA</span>mos</span></div>
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M5 7v6a7 7 0 1 0 14 0V7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="12" cy="6" r="1.8" fill="currentColor"/>
+      </svg>
+      <span>Un<em>IA</em>mos</span>
+    </div>
     <div class="logo-sub">Sales Hub · CRM + PRM</div>
   </div>
   <div class="card-body">
@@ -58,7 +74,6 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <div class="tab" id="tab-register" onclick="switchTab('register')">Crear cuenta</div>
     </div>
 
-    <!-- Login -->
     <div id="panel-login">
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -70,7 +85,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       </div>
       <button class="btn-main" id="btn-login" onclick="doLogin()">Entrar al CRM</button>
       <button class="btn-google" id="btn-google-login" onclick="doGoogleLogin()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -82,7 +97,6 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       <div class="forgot-pass"><a onclick="doForgotPassword()">¿Olvidaste tu contraseña?</a></div>
     </div>
 
-    <!-- Register -->
     <div id="panel-register" style="display:none">
       <div class="form-group">
         <label class="form-label">Nombre completo</label>
@@ -98,7 +112,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
       </div>
       <button class="btn-main" id="btn-register" onclick="doRegister()">Crear cuenta</button>
       <button class="btn-google" id="btn-google-register" onclick="doGoogleLogin()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
           <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
           <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -115,26 +129,20 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── SUPABASE INIT ─────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://llleoqfeluptmmbqluab.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsbGVvcWZlbHVwdG1tYnFsdWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTAzODMsImV4cCI6MjA5MTkyNjM4M30.DQ_iD6xcb0kxr3ZyOl2c_eRhpR9RIcRmBi7tYVjNf5U';
-
 const { createClient } = window.supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ── CHECK EXISTING SESSION ON LOAD ────────────────────────────────────────
 (async function() {
   try {
     const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      window.location.href = 'app.html';
-    }
+    if (session) window.location.replace('/app.html');
   } catch (e) {
     console.error('Session check error:', e);
   }
 })();
 
-// ── UI HELPERS ────────────────────────────────────────────────────────────
 function switchTab(tab) {
   document.getElementById('tab-login').classList.toggle('active', tab === 'login');
   document.getElementById('tab-register').classList.toggle('active', tab === 'register');
@@ -151,35 +159,23 @@ function showMsg(id, text, type) {
 function setButtonLoading(btnId, loading) {
   const btn = document.getElementById(btnId);
   btn.disabled = loading;
-  btn.textContent = loading ? 'Cargando...' : (btnId === 'btn-login' ? 'Entrar al CRM' : btnId === 'btn-register' ? 'Crear cuenta' : 'Continuar con Google');
+  const labels = { 'btn-login': 'Entrar al CRM', 'btn-register': 'Crear cuenta' };
+  btn.textContent = loading ? 'Cargando...' : labels[btnId];
 }
 
-// ── AUTH FUNCTIONS ────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
-
-  if (!email || !pass) {
-    showMsg('login-msg', 'Completa todos los campos.', 'error');
-    return;
-  }
-
+  if (!email || !pass) return showMsg('login-msg', 'Completa todos los campos.', 'error');
   setButtonLoading('btn-login', true);
   try {
-    const { data, error } = await sb.auth.signInWithPassword({
-      email,
-      password: pass
-    });
-
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
     if (error) {
       showMsg('login-msg', error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : error.message, 'error');
       setButtonLoading('btn-login', false);
       return;
     }
-
-    if (data.session) {
-      window.location.href = 'app.html';
-    }
+    if (data.session) window.location.href = '/app.html';
   } catch (e) {
     showMsg('login-msg', 'Error al iniciar sesión. Intenta de nuevo.', 'error');
     setButtonLoading('btn-login', false);
@@ -190,35 +186,20 @@ async function doRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const pass = document.getElementById('reg-pass').value;
-
-  if (!name || !email || !pass) {
-    showMsg('register-msg', 'Completa todos los campos.', 'error');
-    return;
-  }
-
-  if (pass.length < 6) {
-    showMsg('register-msg', 'La contraseña debe tener mínimo 6 caracteres.', 'error');
-    return;
-  }
-
+  if (!name || !email || !pass) return showMsg('register-msg', 'Completa todos los campos.', 'error');
+  if (pass.length < 6) return showMsg('register-msg', 'La contraseña debe tener mínimo 6 caracteres.', 'error');
   setButtonLoading('btn-register', true);
   try {
     const { data, error } = await sb.auth.signUp({
       email,
       password: pass,
-      options: {
-        data: {
-          full_name: name
-        }
-      }
+      options: { data: { full_name: name } }
     });
-
     if (error) {
       showMsg('register-msg', error.message || 'Error al crear la cuenta.', 'error');
       setButtonLoading('btn-register', false);
       return;
     }
-
     showMsg('register-msg', '¡Cuenta creada! Revisa tu email para confirmar. Luego inicia sesión.', 'success');
     setTimeout(() => {
       switchTab('login');
@@ -233,7 +214,7 @@ async function doRegister() {
 
 async function doGoogleLogin() {
   try {
-    const { data, error } = await sb.auth.signInWithOAuth({
+    const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: window.location.origin + '/app.html',
@@ -241,11 +222,9 @@ async function doGoogleLogin() {
         queryParams: { access_type: 'offline', prompt: 'consent' }
       }
     });
-
     if (error) {
       const msgId = document.getElementById('panel-login').style.display !== 'none' ? 'login-msg' : 'register-msg';
       showMsg(msgId, 'Error al conectar con Google. Intenta de nuevo.', 'error');
-      return;
     }
   } catch (e) {
     const msgId = document.getElementById('panel-login').style.display !== 'none' ? 'login-msg' : 'register-msg';
@@ -255,29 +234,18 @@ async function doGoogleLogin() {
 
 async function doForgotPassword() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
-
-  if (!email) {
-    showMsg('login-msg', 'Ingresa tu email primero.', 'error');
-    return;
-  }
-
+  if (!email) return showMsg('login-msg', 'Ingresa tu email primero.', 'error');
   try {
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/reset-password.html'
     });
-
-    if (error) {
-      showMsg('login-msg', 'Error al enviar email de recuperación. Intenta de nuevo.', 'error');
-      return;
-    }
-
-    showMsg('login-msg', 'Se envió un email de recuperación. Revisa tu bandeja de entrada.', 'success');
+    if (error) return showMsg('login-msg', 'Error al enviar email de recuperación.', 'error');
+    showMsg('login-msg', 'Se envió un email de recuperación. Revisa tu bandeja.', 'success');
   } catch (e) {
-    showMsg('login-msg', 'Error al procesar la solicitud. Intenta de nuevo.', 'error');
+    showMsg('login-msg', 'Error al procesar la solicitud.', 'error');
   }
 }
 
-// ── KEYBOARD SUPPORT ──────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
   const loginPanel = document.getElementById('panel-login');
