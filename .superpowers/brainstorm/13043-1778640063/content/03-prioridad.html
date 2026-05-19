@@ -1,0 +1,26 @@
+<h2>¿Por cuál empezamos?</h2>
+<p class="subtitle">Son dos features independientes — podemos hacer las dos, pero primero una</p>
+
+<div class="options">
+  <div class="option" data-choice="home" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Home muestra todos los emails</h3>
+      <p>El dashboard principal deja de filtrar solo leads conocidos y muestra todos los emails del inbox. Para los que son leads, muestra el badge de CRM. Para los desconocidos, los muestra igual.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="reply" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Reply desde Gmail en el CRM</h3>
+      <p>Agregar el input de respuesta en el panel Gmail (como en la foto). Requiere agregar el scope gmail.send al OAuth — el usuario re-autoriza una sola vez.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="ambos" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>Las dos juntas</h3>
+      <p>Diseñar e implementar ambas en esta sesión.</p>
+    </div>
+  </div>
+</div>

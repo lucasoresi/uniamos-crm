@@ -1,0 +1,127 @@
+<h2>Diseño completo — Arquitectura</h2>
+<p class="subtitle">Cómo fluyen los datos desde Gmail hasta el movimiento automático de leads</p>
+
+<div class="section">
+
+  <!-- Flow diagram -->
+  <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:24px;font-size:.78rem">
+
+    <!-- Row 1: Triggers -->
+    <div style="text-align:center;margin-bottom:20px">
+      <span style="font-size:.7rem;color:#555;letter-spacing:.08em;font-weight:700">DISPARADORES</span>
+    </div>
+    <div style="display:flex;justify-content:center;gap:16px;margin-bottom:20px">
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 16px;text-align:center">
+        <div style="font-size:.75rem;font-weight:700;color:#eee">Abrir pantalla Inicio</div>
+        <div style="font-size:.65rem;color:#555;margin-top:2px">al cargar la vista</div>
+      </div>
+      <div style="color:#555;display:flex;align-items:center">ó</div>
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 16px;text-align:center">
+        <div style="font-size:.75rem;font-weight:700;color:#eee">Click "↻ Actualizar"</div>
+        <div style="font-size:.65rem;color:#555;margin-top:2px">manual desde cualquier vista</div>
+      </div>
+    </div>
+
+    <!-- Arrow down -->
+    <div style="text-align:center;color:#333;font-size:1.2rem;margin-bottom:12px">↓</div>
+
+    <!-- Row 2: Client fetches -->
+    <div style="text-align:center;margin-bottom:10px">
+      <span style="font-size:.7rem;color:#555;letter-spacing:.08em;font-weight:700">CLIENTE (navegador)</span>
+    </div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:12px">
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 14px;text-align:center">
+        <div style="font-size:.68rem;color:#C4E538;font-weight:700">① Fetch Gmail Inbox</div>
+        <div style="font-size:.6rem;color:#555;margin-top:2px">30 emails — asunto + snippet</div>
+        <div style="font-size:.58rem;color:#333;margin-top:1px">ya implementado ✓</div>
+      </div>
+      <div style="color:#333;display:flex;align-items:center">+</div>
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 14px;text-align:center">
+        <div style="font-size:.68rem;color:#C4E538;font-weight:700">② Fetch leads Supabase</div>
+        <div style="font-size:.6rem;color:#555;margin-top:2px">email + etapa actual de cada lead</div>
+        <div style="font-size:.58rem;color:#333;margin-top:1px">ya implementado ✓</div>
+      </div>
+      <div style="color:#333;display:flex;align-items:center">→</div>
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 14px;text-align:center">
+        <div style="font-size:.68rem;color:#eee;font-weight:700">③ Match email → lead</div>
+        <div style="font-size:.6rem;color:#555;margin-top:2px">por dirección de email del remitente</div>
+      </div>
+    </div>
+
+    <!-- Arrow down -->
+    <div style="text-align:center;color:#333;font-size:1.2rem;margin-bottom:12px">↓ emails matcheados</div>
+
+    <!-- Row 3: Edge Function -->
+    <div style="text-align:center;margin-bottom:10px">
+      <span style="font-size:.7rem;color:#555;letter-spacing:.08em;font-weight:700">SUPABASE EDGE FUNCTION — <span style="color:#C4E538">classify-email-lead</span></span>
+    </div>
+    <div style="background:#0a1a0a;border:1px solid rgba(196,229,56,.2);border-radius:8px;padding:12px 16px;max-width:600px;margin:0 auto 12px">
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <div style="font-size:.65rem;color:#C4E538;font-weight:700;margin-bottom:6px">Input (por lead matcheado)</div>
+          <div style="font-size:.6rem;color:#888;line-height:1.7;font-family:monospace">
+            subject: "Re: Propuesta de servicio"<br>
+            snippet: "Perfecto, me interesa avanzar…"<br>
+            current_stage: "frio"<br>
+            lead_name: "Juan Pérez"
+          </div>
+        </div>
+        <div style="color:#333;display:flex;align-items:center;font-size:1.2rem">→</div>
+        <div style="flex:1">
+          <div style="font-size:.65rem;color:#C4E538;font-weight:700;margin-bottom:6px">Claude API → Output</div>
+          <div style="font-size:.6rem;color:#888;line-height:1.7;font-family:monospace">
+            new_stage: "cierre"<br>
+            signal: "hot"<br>
+            reason: "Confirmó interés en avanzar"
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow down -->
+    <div style="text-align:center;color:#333;font-size:1.2rem;margin-bottom:12px">↓</div>
+
+    <!-- Row 4: Client updates -->
+    <div style="text-align:center;margin-bottom:10px">
+      <span style="font-size:.7rem;color:#555;letter-spacing:.08em;font-weight:700">CLIENTE — acciones post-análisis</span>
+    </div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:0">
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 14px;text-align:center">
+        <div style="font-size:.68rem;color:#eee;font-weight:700">④ Upsert leads en Supabase</div>
+        <div style="font-size:.6rem;color:#555;margin-top:2px">actualiza etapa si cambió</div>
+      </div>
+      <div style="color:#333;display:flex;align-items:center">+</div>
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 14px;text-align:center">
+        <div style="font-size:.68rem;color:#eee;font-weight:700">⑤ Renderiza Home</div>
+        <div style="font-size:.6rem;color:#555;margin-top:2px">muestra movimientos del día</div>
+      </div>
+      <div style="color:#333;display:flex;align-items:center">+</div>
+      <div style="background:#161616;border:1px solid #2a2a2a;border-radius:6px;padding:8px 14px;text-align:center">
+        <div style="font-size:.68rem;color:#eee;font-weight:700">⑥ Actualiza kanban</div>
+        <div style="font-size:.6rem;color:#555;margin-top:2px">leads en nueva posición</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div style="background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:14px 18px;margin-top:16px">
+  <div style="font-size:.75rem;font-weight:700;color:#eee;margin-bottom:8px">Qué hay que construir — resumen</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.7rem;color:#888;line-height:1.7">
+    <div>
+      <span style="color:#C4E538">✦ Nuevo:</span> Edge Function <code style="color:#aaa;font-size:.65rem">classify-email-lead</code><br>
+      <span style="color:#C4E538">✦ Nuevo:</span> Vista "Inicio" en <code style="color:#aaa;font-size:.65rem">app.html</code><br>
+      <span style="color:#C4E538">✦ Nuevo:</span> Inbox drawer en vista CRM
+    </div>
+    <div>
+      <span style="color:#555">— Reutilizado:</span> <code style="color:#666;font-size:.65rem">gmail_loadInbox()</code> existente<br>
+      <span style="color:#555">— Reutilizado:</span> <code style="color:#666;font-size:.65rem">getGoogleToken()</code> existente<br>
+      <span style="color:#555">— Reutilizado:</span> tabla <code style="color:#666;font-size:.65rem">leads</code> existente
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;text-align:center">
+  <div style="font-size:.75rem;color:#555">¿Esta arquitectura tiene sentido? → Respondé en terminal para continuar al diseño de las pantallas</div>
+</div>

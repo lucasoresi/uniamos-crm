@@ -1,0 +1,225 @@
+<h2>Concepto: dos pantallas complementarias</h2>
+<p class="subtitle">¿Se parece esto a lo que tenés en mente? La pantalla de inicio muestra el panorama general; la de CRM muestra el movimiento automático.</p>
+
+<div class="split" style="gap:24px;align-items:flex-start">
+
+  <!-- SCREEN 1: Home Dashboard -->
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header" style="display:flex;align-items:center;gap:8px">
+      <span style="background:#C4E538;color:#000;font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:700">1</span>
+      Pantalla de Inicio — vista por defecto
+    </div>
+    <div class="mockup-body" style="background:#0a0a0a;padding:0;overflow:hidden;border-radius:6px">
+      <div style="display:flex;height:320px">
+        <!-- Sidebar -->
+        <div style="width:44px;background:#0d0d0d;border-right:1px solid #1e1e1e;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:7px">
+          <div style="width:26px;height:5px;background:#C4E538;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+        </div>
+        <!-- Dashboard content -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <!-- Topbar -->
+          <div style="height:30px;background:#111;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;padding:0 10px">
+            <span style="font-size:.58rem;color:#aaa">🏠 Inicio</span>
+            <span style="font-size:.52rem;color:#555;margin-left:auto">Miércoles 30 Abr</span>
+          </div>
+          <!-- Stats cards row -->
+          <div style="display:flex;gap:5px;padding:7px 8px 5px">
+            <div style="flex:1;background:#161616;border-radius:5px;padding:5px 6px;border:1px solid #222">
+              <div style="font-size:.44rem;color:#666;margin-bottom:2px">Pipeline total</div>
+              <div style="font-size:.8rem;font-weight:700;color:#C4E538">$48.5k</div>
+            </div>
+            <div style="flex:1;background:#161616;border-radius:5px;padding:5px 6px;border:1px solid #222">
+              <div style="font-size:.44rem;color:#666;margin-bottom:2px">Leads activos</div>
+              <div style="font-size:.8rem;font-weight:700;color:#eee">12</div>
+            </div>
+            <div style="flex:1;background:#161616;border-radius:5px;padding:5px 6px;border:1px solid #222">
+              <div style="font-size:.44rem;color:#666;margin-bottom:2px">Emails nuevos</div>
+              <div style="font-size:.8rem;font-weight:700;color:#C4E538">3</div>
+            </div>
+            <div style="flex:1;background:#161616;border-radius:5px;padding:5px 6px;border:1px solid #222">
+              <div style="font-size:.44rem;color:#666;margin-bottom:2px">Follow-ups</div>
+              <div style="font-size:.8rem;font-weight:700;color:#ef4444">5</div>
+            </div>
+          </div>
+          <!-- Main content: 2 columns -->
+          <div style="display:flex;gap:5px;padding:0 8px 7px;flex:1;overflow:hidden">
+            <!-- Left: Inbox reciente -->
+            <div style="flex:56;background:#111;border-radius:5px;border:1px solid #1e1e1e;display:flex;flex-direction:column;overflow:hidden">
+              <div style="padding:5px 8px;font-size:.52rem;color:#C4E538;font-weight:700;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;gap:5px">
+                📧 Emails recientes
+                <span style="margin-left:auto;font-size:.44rem;color:#555">Ver todos →</span>
+              </div>
+              <div style="flex:1;padding:5px;overflow:hidden;display:flex;flex-direction:column;gap:3px">
+                <!-- Email 1 - hot lead, auto-moved -->
+                <div style="background:#1a1a1a;border-radius:4px;padding:4px 6px;border-left:3px solid #C4E538;display:flex;align-items:flex-start;gap:4px">
+                  <div style="width:20px;height:20px;border-radius:50%;background:rgba(196,229,56,.15);display:flex;align-items:center;justify-content:center;font-size:.45rem;font-weight:700;color:#C4E538;flex-shrink:0">JP</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <span style="font-size:.5rem;font-weight:700;color:#eee">Juan Pérez</span>
+                      <span style="font-size:.42rem;color:#555">10:32</span>
+                    </div>
+                    <div style="font-size:.46rem;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Re: Propuesta de servicio</div>
+                    <div style="font-size:.42rem;color:#C4E538;margin-top:2px;background:rgba(196,229,56,.08);padding:1px 4px;border-radius:2px;display:inline-block">✦ Movido a Cierre automáticamente</div>
+                  </div>
+                </div>
+                <!-- Email 2 - neutral -->
+                <div style="background:#1a1a1a;border-radius:4px;padding:4px 6px;border-left:3px solid #0284C7;display:flex;align-items:flex-start;gap:4px">
+                  <div style="width:20px;height:20px;border-radius:50%;background:rgba(2,132,199,.12);display:flex;align-items:center;justify-content:center;font-size:.45rem;font-weight:700;color:#0284C7;flex-shrink:0">AG</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <span style="font-size:.5rem;color:#ccc">Ana García</span>
+                      <span style="font-size:.42rem;color:#555">09:15</span>
+                    </div>
+                    <div style="font-size:.46rem;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Consulta sobre precios</div>
+                    <div style="font-size:.42rem;color:#0284C7;margin-top:2px">💬 Negociación activa</div>
+                  </div>
+                </div>
+                <!-- Email 3 - cold -->
+                <div style="background:#1a1a1a;border-radius:4px;padding:4px 6px;border-left:3px solid #444;display:flex;align-items:flex-start;gap:4px">
+                  <div style="width:20px;height:20px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:.45rem;font-weight:700;color:#666;flex-shrink:0">CL</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <span style="font-size:.5rem;color:#888">Carlos López</span>
+                      <span style="font-size:.42rem;color:#555">ayer</span>
+                    </div>
+                    <div style="font-size:.46rem;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">¿Cuándo podemos hablar?</div>
+                    <div style="font-size:.42rem;color:#888;margin-top:2px">❄️ Frío — sin respuesta</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Right: Actividad IA + Follow-ups -->
+            <div style="flex:44;display:flex;flex-direction:column;gap:4px;overflow:hidden">
+              <!-- AI activity -->
+              <div style="flex:1;background:#111;border-radius:5px;border:1px solid #1e1e1e;overflow:hidden">
+                <div style="padding:5px 8px;font-size:.52rem;color:#C4E538;font-weight:700;border-bottom:1px solid #1e1e1e">✦ Movimientos automáticos</div>
+                <div style="padding:5px;display:flex;flex-direction:column;gap:3px">
+                  <div style="font-size:.44rem;color:#eee">Juan Pérez <span style="color:#888">Frío</span> <span style="color:#C4E538">→ Cierre</span></div>
+                  <div style="font-size:.44rem;color:#aaa">Empresa X <span style="color:#888">Activa</span> → <span style="color:#888">Ghost</span></div>
+                  <div style="font-size:.44rem;color:#aaa">María Vega <span style="color:#888">Sin info</span> → <span style="color:#0284C7">Activa</span></div>
+                </div>
+              </div>
+              <!-- Follow-ups urgentes -->
+              <div style="flex:1;background:#111;border-radius:5px;border:1px solid #1e1e1e;overflow:hidden">
+                <div style="padding:5px 8px;font-size:.52rem;color:#ef4444;font-weight:700;border-bottom:1px solid #1e1e1e">⚠ Follow-ups urgentes</div>
+                <div style="padding:5px;display:flex;flex-direction:column;gap:3px">
+                  <div style="font-size:.44rem;color:#ef4444">Empresa X — 18 días</div>
+                  <div style="font-size:.44rem;color:#ef4444">Empresa Y — 15 días</div>
+                  <div style="font-size:.44rem;color:#f59e0b">Empresa Z — 9 días</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:60px;color:#555;font-size:1.2rem;flex-shrink:0">
+    →<br>
+    <span style="font-size:.6rem;color:#555;margin-top:4px;text-align:center">click<br>CRM</span>
+  </div>
+
+  <!-- SCREEN 2: CRM with Drawer -->
+  <div class="mockup" style="flex:1">
+    <div class="mockup-header" style="display:flex;align-items:center;gap:8px">
+      <span style="background:#333;color:#aaa;font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:700">2</span>
+      Vista CRM — con drawer de email estados
+    </div>
+    <div class="mockup-body" style="background:#0a0a0a;padding:0;overflow:hidden;border-radius:6px">
+      <div style="display:flex;height:320px">
+        <!-- Sidebar -->
+        <div style="width:44px;background:#0d0d0d;border-right:1px solid #1e1e1e;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:7px">
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#C4E538;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+          <div style="width:26px;height:5px;background:#2a2a2a;border-radius:2px"></div>
+        </div>
+        <!-- CRM content -->
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <!-- Topbar -->
+          <div style="height:30px;background:#111;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;padding:0 10px;gap:6px">
+            <span style="font-size:.55rem;color:#888">Pipeline</span>
+            <div style="margin-left:auto;background:rgba(196,229,56,.08);color:#C4E538;font-size:.48rem;padding:2px 7px;border-radius:4px;border:1px solid rgba(196,229,56,.25);cursor:pointer">📧 Emails (3) ▾</div>
+          </div>
+          <!-- Email drawer strip (open) -->
+          <div style="background:#111;border-bottom:2px solid rgba(196,229,56,.2);padding:5px 7px;display:flex;gap:4px;overflow:hidden">
+            <!-- Card 1 - auto moved -->
+            <div style="flex:1;background:#0f1a0f;border-radius:4px;padding:4px 5px;border:1px solid rgba(196,229,56,.2)">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+                <span style="font-size:.48rem;font-weight:700;color:#eee">Juan Pérez</span>
+                <span style="font-size:.38rem;background:rgba(196,229,56,.15);color:#C4E538;padding:1px 4px;border-radius:2px">✦ AUTO</span>
+              </div>
+              <div style="font-size:.42rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">Re: Propuesta de serv…</div>
+              <div style="font-size:.42rem;color:#666">Frío <span style="color:#C4E538">→ Cierre 🔥</span></div>
+            </div>
+            <!-- Card 2 -->
+            <div style="flex:1;background:#1a1a1a;border-radius:4px;padding:4px 5px;border:1px solid #2a2a2a">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+                <span style="font-size:.48rem;color:#ccc">Ana García</span>
+              </div>
+              <div style="font-size:.42rem;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">Consulta sobre precio…</div>
+              <div style="font-size:.42rem;color:#0284C7">💬 Activa (sin cambio)</div>
+            </div>
+            <!-- Card 3 -->
+            <div style="flex:1;background:#1a1a1a;border-radius:4px;padding:4px 5px;border:1px solid #2a2a2a">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+                <span style="font-size:.48rem;color:#666">Carlos López</span>
+              </div>
+              <div style="font-size:.42rem;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px">¿Cuándo podemos h…</div>
+              <div style="font-size:.42rem;color:#888">❄️ Frío (sin cambio)</div>
+            </div>
+            <!-- More button -->
+            <div style="flex-shrink:0;display:flex;align-items:center;padding:0 3px">
+              <div style="font-size:.48rem;color:#555;cursor:pointer">› Ver<br>todos</div>
+            </div>
+          </div>
+          <!-- Kanban -->
+          <div style="display:flex;gap:4px;padding:6px 7px;flex:1;overflow:hidden">
+            <div style="flex:1;background:#111;border-radius:4px;padding:4px 5px;border:1px solid #1e1e1e">
+              <div style="font-size:.44rem;color:#C4E538;margin-bottom:4px;font-weight:700">🔥 CIERRE</div>
+              <div style="background:#1a1a1a;border-radius:3px;padding:3px 4px;margin-bottom:2px;border-left:2px solid #C4E538">
+                <div style="font-size:.44rem;color:#eee">Empresa A</div>
+                <div style="font-size:.38rem;color:#C4E538">↑ movido hoy</div>
+              </div>
+              <div style="background:#1a1a1a;border-radius:3px;padding:3px 4px;border-left:2px solid #C4E538"><div style="font-size:.44rem;color:#eee">Empresa B</div></div>
+            </div>
+            <div style="flex:1;background:#111;border-radius:4px;padding:4px 5px;border:1px solid #1e1e1e">
+              <div style="font-size:.44rem;color:#16A34A;margin-bottom:4px;font-weight:700">🔵 ACTIVA</div>
+              <div style="background:#1a1a1a;border-radius:3px;padding:3px 4px;margin-bottom:2px;border-left:2px solid #16A34A"><div style="font-size:.44rem;color:#eee">Empresa C</div></div>
+              <div style="background:#1a1a1a;border-radius:3px;padding:3px 4px;border-left:2px solid #16A34A"><div style="font-size:.44rem;color:#eee">Empresa D</div></div>
+            </div>
+            <div style="flex:1;background:#111;border-radius:4px;padding:4px 5px;border:1px solid #1e1e1e">
+              <div style="font-size:.44rem;color:#888;margin-bottom:4px;font-weight:700">👻 GHOST</div>
+              <div style="background:#1a1a1a;border-radius:3px;padding:3px 4px;border-left:2px solid #444"><div style="font-size:.44rem;color:#666">Empresa E</div></div>
+            </div>
+            <div style="flex:1;background:#111;border-radius:4px;padding:4px 5px;border:1px solid #1e1e1e">
+              <div style="font-size:.44rem;color:#6b7280;margin-bottom:4px;font-weight:700">❄️ FRÍO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:20px;background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:16px">
+  <div style="font-size:.82rem;color:#C4E538;font-weight:700;margin-bottom:8px">¿Cómo fluye esto?</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div>
+      <div style="font-size:.75rem;font-weight:600;color:#eee;margin-bottom:4px">Pantalla 1 — Inicio (default)</div>
+      <div style="font-size:.72rem;color:#888;line-height:1.6">Estadísticas generales · Emails recientes con calificación IA · Movimientos automáticos del día · Follow-ups urgentes</div>
+    </div>
+    <div>
+      <div style="font-size:.75rem;font-weight:600;color:#eee;margin-bottom:4px">Pantalla 2 — CRM Pipeline</div>
+      <div style="font-size:.72rem;color:#888;line-height:1.6">Drawer colapsable de emails arriba del kanban · Cada tarjeta muestra el estado actual del email y si se movió automáticamente</div>
+    </div>
+  </div>
+</div>

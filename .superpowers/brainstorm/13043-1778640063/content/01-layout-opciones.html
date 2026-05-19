@@ -1,0 +1,115 @@
+<h2>¿Cómo querés ver el editor de email en el CRM?</h2>
+<p class="subtitle">Tres opciones para integrar Redactar / Responder en la vista Gmail</p>
+
+<div class="cards">
+
+  <!-- Opción A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:#888;height:200px;display:flex;flex-direction:column;gap:6px;overflow:hidden">
+        <!-- topbar -->
+        <div style="background:#1a1a1a;border-radius:4px;padding:5px 10px;display:flex;gap:8px;align-items:center">
+          <span style="color:#C4E538;font-weight:700">↻ Actualizar</span>
+          <span style="margin-left:auto;background:#C4E538;color:#000;padding:3px 10px;border-radius:4px;font-weight:700">✏ Redactar</span>
+        </div>
+        <!-- two panels -->
+        <div style="display:flex;gap:6px;flex:1;min-height:0">
+          <!-- lista -->
+          <div style="width:38%;background:#1a1a1a;border-radius:4px;padding:6px;display:flex;flex-direction:column;gap:4px">
+            <div style="background:#222;border-radius:3px;padding:4px 6px;color:#ccc;border-left:2px solid #C4E538">Twilio · Marketing</div>
+            <div style="background:#1e1e1e;border-radius:3px;padding:4px 6px;color:#666">Bot My Solutions</div>
+            <div style="background:#1e1e1e;border-radius:3px;padding:4px 6px;color:#666">Gmail Team</div>
+          </div>
+          <!-- preview con reply abajo -->
+          <div style="flex:1;background:#1a1a1a;border-radius:4px;padding:6px;display:flex;flex-direction:column;gap:4px">
+            <div style="color:#ccc;font-size:10px;font-weight:700">Re: Lanzamientos Twilio 2026</div>
+            <div style="color:#555;font-size:9px">Twilio · hace 2h</div>
+            <div style="color:#777;font-size:9px;flex:1">Reducí la fricción de tus operaciones...</div>
+            <div style="height:1px;background:#333"></div>
+            <!-- reply box -->
+            <div style="background:#222;border-radius:3px;padding:5px;display:flex;flex-direction:column;gap:3px">
+              <div style="color:#555;font-size:8px">↩ Responder a: Twilio</div>
+              <div style="background:#2a2a2a;border-radius:2px;height:28px;border:1px solid #333"></div>
+              <div style="display:flex;justify-content:flex-end">
+                <span style="background:#C4E538;color:#000;padding:2px 8px;border-radius:3px;font-size:8px;font-weight:700">Enviar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Reply inline en el panel</h3>
+      <p>Al hacer click en "Responder", el editor aparece dentro del mismo panel de preview, debajo del email. Flujo natural sin interrupciones. Botón "Redactar" en el topbar para emails nuevos.</p>
+    </div>
+  </div>
+
+  <!-- Opción B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:#888;height:200px;display:flex;flex-direction:column;gap:6px;overflow:hidden;position:relative">
+        <!-- faded background -->
+        <div style="display:flex;gap:6px;flex:1;opacity:.3">
+          <div style="width:38%;background:#1a1a1a;border-radius:4px"></div>
+          <div style="flex:1;background:#1a1a1a;border-radius:4px"></div>
+        </div>
+        <!-- modal overlay -->
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <div style="background:#1e1e1e;border:1px solid #C4E538;border-radius:8px;padding:12px;width:80%;box-shadow:0 8px 32px rgba(0,0,0,.8)">
+            <div style="color:#ccc;font-weight:700;font-size:10px;margin-bottom:6px">✏ Nuevo email / Responder</div>
+            <div style="background:#2a2a2a;border-radius:3px;padding:4px 6px;font-size:9px;color:#666;margin-bottom:4px">Para: twilio@email.com</div>
+            <div style="background:#2a2a2a;border-radius:3px;padding:4px 6px;font-size:9px;color:#666;margin-bottom:4px">Asunto: Re: Lanzamientos...</div>
+            <div style="background:#2a2a2a;border-radius:3px;height:40px;margin-bottom:6px;border:1px solid #333"></div>
+            <div style="display:flex;justify-content:flex-end;gap:6px">
+              <span style="color:#555;font-size:8px;padding:2px 8px">Cancelar</span>
+              <span style="background:#C4E538;color:#000;padding:2px 10px;border-radius:3px;font-size:8px;font-weight:700">Enviar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Modal centrado</h3>
+      <p>El editor aparece como un modal sobre la vista Gmail. Bloqueante pero muy claro. Permite ver Para/Asunto/Cuerpo sin perder el contexto de qué email estás respondiendo.</p>
+    </div>
+  </div>
+
+  <!-- Opción C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:#888;height:200px;display:flex;flex-direction:column;gap:6px;overflow:hidden">
+        <div style="background:#1a1a1a;border-radius:4px;padding:5px 10px;display:flex;gap:8px;align-items:center">
+          <span style="color:#C4E538;font-weight:700">Inbox Gmail</span>
+          <span style="margin-left:auto;background:#C4E538;color:#000;padding:3px 10px;border-radius:4px;font-weight:700">✏ Redactar</span>
+        </div>
+        <div style="display:flex;gap:6px;flex:1;min-height:0">
+          <!-- lista -->
+          <div style="width:30%;background:#1a1a1a;border-radius:4px;padding:6px;display:flex;flex-direction:column;gap:4px">
+            <div style="background:#222;border-radius:3px;padding:4px 6px;color:#ccc;border-left:2px solid #C4E538;font-size:9px">Twilio</div>
+            <div style="background:#1e1e1e;border-radius:3px;padding:4px 6px;color:#666;font-size:9px">Bot My Solutions</div>
+          </div>
+          <!-- preview email -->
+          <div style="width:35%;background:#1a1a1a;border-radius:4px;padding:6px;display:flex;flex-direction:column;gap:3px">
+            <div style="color:#ccc;font-size:9px;font-weight:700">Re: Lanzamientos Twilio</div>
+            <div style="color:#555;font-size:8px">hace 2h</div>
+            <div style="color:#666;font-size:8px;flex:1">Reducí la fricción de tus operaciones...</div>
+            <div style="background:#C4E538;color:#000;padding:2px 6px;border-radius:3px;font-size:8px;font-weight:700;text-align:center">↩ Responder</div>
+          </div>
+          <!-- editor panel -->
+          <div style="flex:1;background:#1a1a1a;border-radius:4px;padding:6px;border:1px solid #333;display:flex;flex-direction:column;gap:3px">
+            <div style="color:#C4E538;font-size:8px;font-weight:700">↩ Responder</div>
+            <div style="background:#222;border-radius:2px;padding:3px 5px;font-size:8px;color:#666">Para: twilio@email.com</div>
+            <div style="background:#222;border-radius:2px;padding:3px 5px;font-size:8px;color:#666">Asunto: Re: Lanzamientos...</div>
+            <div style="flex:1;background:#222;border-radius:2px;border:1px solid #333"></div>
+            <div style="background:#C4E538;color:#000;padding:2px 6px;border-radius:3px;font-size:8px;font-weight:700;text-align:center">Enviar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Tres paneles (lista / email / editor)</h3>
+      <p>Al responder, la vista se divide en 3 columnas: lista de emails, preview del email original, y el editor. Permite ver el email original mientras escribís la respuesta.</p>
+    </div>
+  </div>
+
+</div>

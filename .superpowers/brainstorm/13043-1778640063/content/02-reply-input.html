@@ -1,0 +1,85 @@
+<h2>Panel de preview con reply input</h2>
+<p class="subtitle">¿Así se ve bien? El input reemplaza el botón "Abrir en Gmail"</p>
+
+<div class="mockup">
+  <div class="mockup-header">Vista Gmail — panel derecho (preview)</div>
+  <div class="mockup-body" style="padding:0;background:#0f0f0f;border-radius:0 0 8px 8px;overflow:hidden">
+
+    <!-- Two panel layout simulation -->
+    <div style="display:flex;height:440px">
+
+      <!-- Left: email list (faded) -->
+      <div style="width:38%;border-right:1px solid #222;padding:10px;display:flex;flex-direction:column;gap:6px;background:#0f0f0f">
+        <div style="padding:6px 8px;border-radius:6px;background:#1a1a1a;border-left:3px solid #C4E538;cursor:pointer">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="font-size:.75rem;font-weight:700;color:#eee">Twilio</span>
+            <span style="font-size:.65rem;color:#444">10:21</span>
+          </div>
+          <div style="font-size:.7rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Re: Lanzamientos Twilio 2026</div>
+          <div style="font-size:.65rem;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Reducí la fricción de tus operaciones...</div>
+        </div>
+        <div style="padding:6px 8px;border-radius:6px;background:#161616;cursor:pointer;opacity:.5">
+          <div style="font-size:.75rem;font-weight:600;color:#888;margin-bottom:2px">Bot My Solutions</div>
+          <div style="font-size:.7rem;color:#555">Consulta sobre tu servicio</div>
+        </div>
+        <div style="padding:6px 8px;border-radius:6px;background:#161616;cursor:pointer;opacity:.4">
+          <div style="font-size:.75rem;font-weight:600;color:#888;margin-bottom:2px">Gmail Team</div>
+          <div style="font-size:.7rem;color:#555">Bienvenido a Gmail</div>
+        </div>
+      </div>
+
+      <!-- Right: preview panel -->
+      <div style="flex:1;display:flex;flex-direction:column;background:#0f0f0f">
+
+        <!-- Email content (scrollable area) -->
+        <div style="flex:1;padding:28px 28px 16px;overflow-y:auto">
+          <div style="font-size:.72rem;color:#555;margin-bottom:4px">notifications@twilio.com</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:6px;line-height:1.3">Re: Lanzamientos Twilio 2026</div>
+          <div style="font-size:.72rem;color:#444;padding-bottom:14px;border-bottom:1px solid #222;margin-bottom:16px">12 mayo 2026, 10:21</div>
+          <div style="font-size:.84rem;color:#aaa;line-height:1.75">
+            Reducí la fricción de tus operaciones: Lanzamientos Twilio 2026 y siguientes pasos que podés tomar para seguir adelante con tu negocio.
+          </div>
+        </div>
+
+        <!-- Reply bar — Apple style -->
+        <div style="padding:14px 20px 18px;border-top:1px solid #1e1e1e;background:#0f0f0f">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1;display:flex;align-items:center;background:#1c1c1e;border-radius:22px;padding:0 16px;height:44px;border:1px solid #2a2a2a">
+              <span style="font-size:.84rem;color:#3a3a3c">Responder a Twilio…</span>
+            </div>
+            <button style="width:44px;height:44px;border-radius:50%;background:#C4E538;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <div style="font-size:.68rem;color:#3a3a3c;text-align:center;margin-top:8px">Presioná Enter o el botón para enviar · <span style="color:#C4E538;cursor:pointer">Ver en Gmail ↗</span></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top:24px">
+  <h3>¿Qué te parece este diseño?</h3>
+  <p class="subtitle">El input reemplaza el botón "Abrir en Gmail". Cuando hacés click en el input se expande para escribir. El link a Gmail queda como texto secundario abajo.</p>
+  <div class="options" style="margin-top:16px">
+    <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content">
+        <h3>Me gusta, así lo quiero</h3>
+        <p>Avanzar con este diseño</p>
+      </div>
+    </div>
+    <div class="option" data-choice="ajustar" onclick="toggleSelect(this)">
+      <div class="letter">~</div>
+      <div class="content">
+        <h3>Casi, pero ajustar algo</h3>
+        <p>Te cuento qué cambiaría</p>
+      </div>
+    </div>
+  </div>
+</div>

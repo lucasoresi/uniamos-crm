@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diseño de pantallas</title>
+<style>
+  body { background: #0a0a0a; color: #e5e5e5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 32px; }
+  h2 { font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0 0 6px; }
+  .subtitle { font-size: .82rem; color: #666; margin: 0 0 28px; }
+  .screens { display: flex; gap: 28px; align-items: flex-start; }
+  .screen-wrap { flex: 1; }
+  .screen-label { font-size: .65rem; font-weight: 700; letter-spacing: .1em; color: #555; margin-bottom: 10px; text-transform: uppercase; }
+  .screen-label span { background: #C4E538; color: #000; padding: 2px 8px; border-radius: 10px; margin-right: 8px; font-size: .62rem; }
+  .crm-app { border: 1px solid #1e1e1e; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.5); }
+  .app-chrome { height: 26px; background: #111; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 12px; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .url-bar { flex: 1; background: #1a1a1a; border-radius: 4px; height: 14px; margin: 0 8px; }
+  .app-body { display: flex; height: 520px; }
+  .sidebar { width: 48px; background: #0d0d0d; border-right: 1px solid #1a1a1a; padding: 12px 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .sb-dot { width: 28px; height: 5px; border-radius: 3px; cursor: pointer; }
+  .sb-dot.active { background: #C4E538; }
+  .sb-dot.inactive { background: #1e1e1e; }
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* HOME SCREEN */
+  .home-topbar { height: 32px; background: #111; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 14px; gap: 8px; }
+  .home-topbar-title { font-size: .62rem; font-weight: 700; color: #fff; }
+  .home-topbar-date { font-size: .55rem; color: #444; margin-left: auto; }
+  .refresh-btn { font-size: .52rem; color: #666; border: 1px solid #222; border-radius: 4px; padding: 2px 8px; background: none; cursor: pointer; margin-left: 8px; }
+  .stats-row { display: flex; gap: 6px; padding: 8px 10px 6px; }
+  .stat-card { flex: 1; background: #161616; border: 1px solid #1e1e1e; border-radius: 6px; padding: 6px 8px; }
+  .stat-card .label { font-size: .48rem; color: #555; margin-bottom: 2px; }
+  .stat-card .value { font-size: .9rem; font-weight: 800; }
+  .stat-card .value.lime { color: #C4E538; }
+  .stat-card .value.white { color: #eee; }
+  .stat-card .value.red { color: #ef4444; }
+  .home-body { display: flex; gap: 6px; padding: 0 10px 8px; flex: 1; overflow: hidden; }
+  .home-col-main { flex: 58; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+  .home-col-side { flex: 42; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+  .home-panel { background: #111; border: 1px solid #1a1a1a; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
+  .panel-hd { padding: 5px 9px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .panel-hd-title { font-size: .56rem; font-weight: 700; color: #C4E538; }
+  .panel-hd-sub { font-size: .5rem; color: #444; margin-left: auto; }
+  .panel-body { flex: 1; padding: 6px; overflow: hidden; display: flex; flex-direction: column; gap: 4px; }
+  .email-row { background: #1a1a1a; border-radius: 4px; padding: 5px 6px; display: flex; gap: 6px; align-items: flex-start; border-left: 3px solid transparent; }
+  .email-row.hot { border-left-color: #C4E538; background: #0f1a0f; }
+  .email-row.warm { border-left-color: #0284C7; }
+  .email-row.cold { border-left-color: #333; }
+  .avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .5rem; font-weight: 700; flex-shrink: 0; }
+  .avatar.hot { background: rgba(196,229,56,.12); color: #C4E538; }
+  .avatar.warm { background: rgba(2,132,199,.12); color: #0284C7; }
+  .avatar.cold { background: #222; color: #555; }
+  .email-name { font-size: .52rem; font-weight: 700; color: #eee; }
+  .email-name.warm { color: #ccc; font-weight: 600; }
+  .email-name.cold { color: #666; font-weight: 400; }
+  .email-subject { font-size: .48rem; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .email-tag { font-size: .42rem; display: inline-block; padding: 1px 5px; border-radius: 3px; margin-top: 2px; }
+  .email-tag.moved { background: rgba(196,229,56,.1); color: #C4E538; }
+  .email-tag.active { background: rgba(2,132,199,.1); color: #0284C7; }
+  .email-tag.cold-tag { background: rgba(100,100,100,.1); color: #666; }
+  .email-time { font-size: .44rem; color: #333; white-space: nowrap; flex-shrink: 0; }
+
+  /* movements panel */
+  .move-row { display: flex; align-items: center; gap: 5px; padding: 4px 6px; background: #1a1a1a; border-radius: 4px; }
+  .move-name { font-size: .52rem; color: #ccc; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .move-from { font-size: .46rem; color: #555; }
+  .move-arrow { font-size: .5rem; color: #444; }
+  .move-to { font-size: .46rem; font-weight: 700; }
+  .move-to.cierre { color: #C4E538; }
+  .move-to.activa { color: #16A34A; }
+  .move-to.ghost { color: #888; }
+  .move-to.frio { color: #6b7280; }
+  .move-auto { font-size: .4rem; background: rgba(196,229,56,.08); color: #C4E538; padding: 1px 4px; border-radius: 2px; flex-shrink: 0; }
+
+  /* followups panel */
+  .fu-row { display: flex; align-items: center; gap: 5px; padding: 3px 6px; border-radius: 3px; }
+  .fu-name { font-size: .52rem; flex: 1; color: #ccc; }
+  .fu-days { font-size: .48rem; font-weight: 700; }
+  .fu-days.critical { color: #ef4444; }
+  .fu-days.warn { color: #f59e0b; }
+
+  /* CRM SCREEN */
+  .crm-topbar { height: 32px; background: #111; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; padding: 0 14px; gap: 8px; }
+  .crm-topbar-bc { font-size: .58rem; color: #666; }
+  .inbox-toggle { margin-left: auto; background: rgba(196,229,56,.07); color: #C4E538; font-size: .5rem; padding: 3px 9px; border-radius: 5px; border: 1px solid rgba(196,229,56,.2); cursor: pointer; }
+  .drawer { background: #0e1410; border-bottom: 2px solid rgba(196,229,56,.15); padding: 7px 10px; display: flex; gap: 6px; flex-shrink: 0; overflow: hidden; }
+  .drawer-card { flex: 1; background: #161f16; border: 1px solid rgba(196,229,56,.1); border-radius: 5px; padding: 5px 7px; cursor: pointer; transition: border-color .15s; min-width: 0; }
+  .drawer-card.plain { background: #161616; border-color: #1e1e1e; }
+  .dc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+  .dc-name { font-size: .52rem; font-weight: 700; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .dc-name.dim { color: #888; font-weight: 400; }
+  .dc-auto { font-size: .4rem; background: rgba(196,229,56,.1); color: #C4E538; padding: 1px 4px; border-radius: 2px; flex-shrink: 0; }
+  .dc-subj { font-size: .44rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  .dc-stage { font-size: .44rem; }
+  .dc-stage .from { color: #444; }
+  .dc-stage .to { font-weight: 700; }
+  .dc-stage .to.cierre { color: #C4E538; }
+  .dc-stage .to.activa { color: #16A34A; }
+  .dc-stage .to.ghost { color: #888; }
+  .dc-stage .unchanged { color: #555; }
+  .drawer-more { flex-shrink: 0; display: flex; align-items: center; padding: 0 4px; font-size: .48rem; color: #444; cursor: pointer; }
+  .kanban { display: flex; gap: 6px; padding: 8px 10px; flex: 1; overflow: hidden; }
+  .kol { flex: 1; background: #0e0e0e; border-radius: 6px; padding: 6px 7px; border: 1px solid #1a1a1a; display: flex; flex-direction: column; overflow: hidden; }
+  .kol-hd { font-size: .5rem; font-weight: 700; margin-bottom: 6px; flex-shrink: 0; }
+  .kol-hd.cierre { color: #C4E538; }
+  .kol-hd.propuesta { color: #0284C7; }
+  .kol-hd.activa { color: #16A34A; }
+  .kol-hd.ghost { color: #888; }
+  .kol-hd.frio { color: #6b7280; }
+  .kcard { background: #1a1a1a; border-radius: 4px; padding: 5px 6px; margin-bottom: 4px; border-left: 2px solid transparent; cursor: pointer; }
+  .kcard.cierre { border-left-color: #C4E538; }
+  .kcard.propuesta { border-left-color: #0284C7; }
+  .kcard.activa { border-left-color: #16A34A; }
+  .kcard.ghost { border-left-color: #555; }
+  .kcard-name { font-size: .5rem; font-weight: 600; color: #ddd; }
+  .kcard-meta { font-size: .43rem; color: #555; margin-top: 1px; }
+  .kcard-moved { font-size: .4rem; color: #C4E538; background: rgba(196,229,56,.06); padding: 1px 4px; border-radius: 2px; display: inline-block; margin-top: 2px; }
+
+  /* annotation arrows */
+  .annotation { font-size: .62rem; color: #555; font-style: italic; margin-top: 8px; padding: 6px 10px; background: #0d0d0d; border-left: 2px solid #222; border-radius: 0 4px 4px 0; }
+  .annotation strong { color: #C4E538; font-style: normal; }
+</style>
+</head>
+<body>
+
+<h2>Diseño de pantallas — detalle completo</h2>
+<p class="subtitle">Revisá cada pantalla. Respondé en terminal si querés ajustar algo antes de pasar al plan de implementación.</p>
+
+<div class="screens">
+
+  <!-- ===== SCREEN 1: HOME ===== -->
+  <div class="screen-wrap">
+    <div class="screen-label"><span>1</span> Pantalla de Inicio — default al abrir el CRM</div>
+    <div class="crm-app">
+      <div class="app-chrome">
+        <div class="dot" style="background:#ef4444"></div>
+        <div class="dot" style="background:#f59e0b"></div>
+        <div class="dot" style="background:#22c55e"></div>
+        <div class="url-bar"></div>
+      </div>
+      <div class="app-body">
+        <!-- Sidebar - home active -->
+        <div class="sidebar">
+          <div class="sb-dot active" title="Inicio"></div>
+          <div class="sb-dot inactive" title="CRM"></div>
+          <div class="sb-dot inactive" title="PRM"></div>
+          <div class="sb-dot inactive" title="Gmail"></div>
+          <div class="sb-dot inactive" title="Tareas"></div>
+          <div class="sb-dot inactive" title="Calendario"></div>
+        </div>
+        <!-- Home content -->
+        <div class="content">
+          <div class="home-topbar">
+            <div class="home-topbar-title">🏠 Inicio</div>
+            <div class="home-topbar-date">Miércoles 30 Abr 2026</div>
+            <button class="refresh-btn">↻ Actualizar</button>
+          </div>
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="label">Pipeline total</div>
+              <div class="value lime">$48.5k</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Leads activos</div>
+              <div class="value white">12</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Emails nuevos</div>
+              <div class="value lime">3</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Follow-ups</div>
+              <div class="value red">5</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Movimientos hoy</div>
+              <div class="value lime">2</div>
+            </div>
+          </div>
+          <div class="home-body">
+            <!-- Emails recientes -->
+            <div class="home-col-main">
+              <div class="home-panel" style="flex:1">
+                <div class="panel-hd">
+                  <div class="panel-hd-title">📧 Emails recientes</div>
+                  <div class="panel-hd-sub" style="color:#C4E538;cursor:pointer">Analizado por IA ✦</div>
+                </div>
+                <div class="panel-body">
+                  <div class="email-row hot">
+                    <div class="avatar hot">JP</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;justify-content:space-between">
+                        <span class="email-name">Juan Pérez</span>
+                        <span class="email-time">10:32</span>
+                      </div>
+                      <div class="email-subject">Re: Propuesta de servicio</div>
+                      <span class="email-tag moved">✦ Movido a Cierre automáticamente</span>
+                    </div>
+                  </div>
+                  <div class="email-row warm">
+                    <div class="avatar warm">AG</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;justify-content:space-between">
+                        <span class="email-name warm">Ana García</span>
+                        <span class="email-time">09:15</span>
+                      </div>
+                      <div class="email-subject">Consulta sobre precios y tiempos</div>
+                      <span class="email-tag active">💬 Negociación activa — sin cambio</span>
+                    </div>
+                  </div>
+                  <div class="email-row cold">
+                    <div class="avatar cold">CL</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;justify-content:space-between">
+                        <span class="email-name cold">Carlos López</span>
+                        <span class="email-time">ayer</span>
+                      </div>
+                      <div class="email-subject">¿Cuándo podemos tener una llamada?</div>
+                      <span class="email-tag cold-tag">❄️ Frío — sin respuesta recibida</span>
+                    </div>
+                  </div>
+                  <div class="email-row" style="border-left-color:#333;background:#161616">
+                    <div class="avatar" style="background:#1a1a1a;color:#444">MV</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;justify-content:space-between">
+                        <span class="email-name" style="color:#888">María Vega</span>
+                        <span class="email-time">lun</span>
+                      </div>
+                      <div class="email-subject">Quiero saber más sobre el servicio</div>
+                      <span class="email-tag" style="background:rgba(22,163,74,.1);color:#16A34A">↑ Movido a Activa automáticamente</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Side panels -->
+            <div class="home-col-side">
+              <!-- Movimientos automáticos -->
+              <div class="home-panel" style="flex:1">
+                <div class="panel-hd">
+                  <div class="panel-hd-title">✦ Movimientos automáticos de hoy</div>
+                </div>
+                <div class="panel-body">
+                  <div class="move-row">
+                    <div class="move-name">Juan Pérez</div>
+                    <span class="move-from">Frío</span>
+                    <span class="move-arrow">→</span>
+                    <span class="move-to cierre">Cierre 🔥</span>
+                    <span class="move-auto">IA</span>
+                  </div>
+                  <div class="move-row">
+                    <div class="move-name">María Vega</div>
+                    <span class="move-from">Sin info</span>
+                    <span class="move-arrow">→</span>
+                    <span class="move-to activa">Activa</span>
+                    <span class="move-auto">IA</span>
+                  </div>
+                  <div style="font-size:.48rem;color:#333;padding:4px 6px">— Empresa X: sin cambio</div>
+                  <div style="font-size:.48rem;color:#333;padding:2px 6px">— Ana García: sin cambio</div>
+                </div>
+              </div>
+              <!-- Follow-ups urgentes -->
+              <div class="home-panel" style="flex:1">
+                <div class="panel-hd">
+                  <div class="panel-hd-title" style="color:#ef4444">⚠ Follow-ups urgentes</div>
+                </div>
+                <div class="panel-body">
+                  <div class="fu-row"><span class="fu-name">Empresa X</span><span class="fu-days critical">18 días</span></div>
+                  <div class="fu-row"><span class="fu-name">Empresa Y</span><span class="fu-days critical">15 días</span></div>
+                  <div class="fu-row"><span class="fu-name">Empresa Z</span><span class="fu-days warn">9 días</span></div>
+                  <div class="fu-row"><span class="fu-name">Pedro Ruiz</span><span class="fu-days warn">7 días</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      <strong>Carga automática:</strong> al abrir esta vista, el sistema fetcha Gmail + leads, matchea por email, llama a Claude y actualiza las etapas. El botón <strong>↻ Actualizar</strong> repite el ciclo manualmente.
+    </div>
+  </div>
+
+  <!-- ===== SCREEN 2: CRM ===== -->
+  <div class="screen-wrap">
+    <div class="screen-label"><span style="background:#333;color:#aaa">2</span> Vista CRM — kanban con drawer de emails</div>
+    <div class="crm-app">
+      <div class="app-chrome">
+        <div class="dot" style="background:#ef4444"></div>
+        <div class="dot" style="background:#f59e0b"></div>
+        <div class="dot" style="background:#22c55e"></div>
+        <div class="url-bar"></div>
+      </div>
+      <div class="app-body">
+        <!-- Sidebar - crm active -->
+        <div class="sidebar">
+          <div class="sb-dot inactive" title="Inicio"></div>
+          <div class="sb-dot active" title="CRM"></div>
+          <div class="sb-dot inactive" title="PRM"></div>
+          <div class="sb-dot inactive" title="Gmail"></div>
+          <div class="sb-dot inactive" title="Tareas"></div>
+          <div class="sb-dot inactive" title="Calendario"></div>
+        </div>
+        <!-- CRM content -->
+        <div class="content">
+          <div class="crm-topbar">
+            <span class="crm-topbar-bc">Ventas › Pipeline</span>
+            <div class="inbox-toggle">📧 Emails (3 nuevos) ▾</div>
+          </div>
+          <!-- Inbox drawer (expanded) -->
+          <div class="drawer">
+            <div class="drawer-card">
+              <div class="dc-header">
+                <span class="dc-name">Juan Pérez</span>
+                <span class="dc-auto">✦ AUTO</span>
+              </div>
+              <div class="dc-subj">Re: Propuesta de servicio</div>
+              <div class="dc-stage">
+                <span class="from">Frío →</span>
+                <span class="to cierre"> Cierre 🔥</span>
+              </div>
+            </div>
+            <div class="drawer-card plain">
+              <div class="dc-header">
+                <span class="dc-name dim">Ana García</span>
+              </div>
+              <div class="dc-subj">Consulta sobre precios</div>
+              <div class="dc-stage">
+                <span class="unchanged">💬 Activa (sin cambio)</span>
+              </div>
+            </div>
+            <div class="drawer-card plain">
+              <div class="dc-header">
+                <span class="dc-name dim">María Vega</span>
+                <span class="dc-auto" style="background:rgba(22,163,74,.1);color:#16A34A">↑ AUTO</span>
+              </div>
+              <div class="dc-subj">Quiero saber más sobre el servicio</div>
+              <div class="dc-stage">
+                <span class="from">Sin info →</span>
+                <span class="to activa"> Activa</span>
+              </div>
+            </div>
+            <div class="drawer-card plain">
+              <div class="dc-header">
+                <span class="dc-name dim">Carlos López</span>
+              </div>
+              <div class="dc-subj">¿Cuándo podemos hablar?</div>
+              <div class="dc-stage">
+                <span class="unchanged">❄️ Frío (sin cambio)</span>
+              </div>
+            </div>
+            <div class="drawer-more">› más</div>
+          </div>
+          <!-- Kanban -->
+          <div class="kanban">
+            <div class="kol">
+              <div class="kol-hd cierre">🔥 CIERRE</div>
+              <div class="kcard cierre">
+                <div class="kcard-name">Juan Pérez</div>
+                <div class="kcard-meta">Empresa A</div>
+                <div class="kcard-moved">↑ movido hoy por IA</div>
+              </div>
+              <div class="kcard cierre">
+                <div class="kcard-name">Empresa B</div>
+                <div class="kcard-meta">Pedro Ruiz</div>
+              </div>
+            </div>
+            <div class="kol">
+              <div class="kol-hd propuesta">🟢 PROPUESTA</div>
+              <div class="kcard propuesta">
+                <div class="kcard-name">Empresa C</div>
+                <div class="kcard-meta">Laura Torres</div>
+              </div>
+            </div>
+            <div class="kol">
+              <div class="kol-hd activa">🔵 ACTIVA</div>
+              <div class="kcard activa">
+                <div class="kcard-name">Ana García</div>
+                <div class="kcard-meta">Empresa D</div>
+              </div>
+              <div class="kcard activa">
+                <div class="kcard-name">María Vega</div>
+                <div class="kcard-meta">Empresa E</div>
+                <div class="kcard-moved" style="color:#16A34A;background:rgba(22,163,74,.06)">↑ movido hoy por IA</div>
+              </div>
+            </div>
+            <div class="kol">
+              <div class="kol-hd ghost">👻 GHOST</div>
+              <div class="kcard ghost">
+                <div class="kcard-name">Empresa X</div>
+                <div class="kcard-meta">18 días sin contacto</div>
+              </div>
+            </div>
+            <div class="kol">
+              <div class="kol-hd frio">❄️ FRÍO</div>
+              <div class="kcard" style="border-left-color:#6b7280">
+                <div class="kcard-name">Carlos López</div>
+                <div class="kcard-meta">Empresa Z</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="annotation">
+      El <strong>drawer</strong> se abre/cierra con el botón del topbar. Las tarjetas con <strong style="color:#C4E538">✦ AUTO</strong> son las movidas por IA. Las tarjetas en el kanban muestran el badge <strong style="color:#C4E538">"movido hoy por IA"</strong> durante el día.
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:28px;background:#111;border:1px solid #1e1e1e;border-radius:8px;padding:16px 20px">
+  <div style="font-size:.78rem;font-weight:700;color:#fff;margin-bottom:10px">Respondé en terminal si querés cambiar algo</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:.68rem;color:#666;line-height:1.6">
+    <div><span style="color:#C4E538">Pantalla de Inicio:</span><br>¿Los 5 stats son los correctos?<br>¿Querés más/menos info visible?</div>
+    <div><span style="color:#C4E538">Drawer de emails:</span><br>¿Las 4 tarjetas por defecto están bien?<br>¿Querés colapsar por defecto o abierto?</div>
+    <div><span style="color:#C4E538">Kanban:</span><br>¿El badge "movido hoy por IA" en las tarjetas te parece útil?</div>
+  </div>
+</div>
+
+<script>
+// Prevent default toggleSelect since we're using full doc mode
+</script>
+</body>
+</html>
