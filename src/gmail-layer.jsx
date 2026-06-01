@@ -35,8 +35,32 @@ function _parseAddresses(raw) {
   });
 }
 
-const _NOISE = /noreply|no-reply|mailer-daemon|newsletter|notifications?|unsubscribe|bounce|donotreply|do-not-reply|@googlegroups|@list\./i;
+function _gmailExtractBody(msg) {
+  function findText(part) {
+    if (!part) return '';
+    if (part.mimeType === 'text/plain' && part.body?.data) {
+      try { return atob(part.body.data.replace(/-/g, '+').replace(/_/g, '/')); } catch { return ''; }
+    }
+    if (part.parts) {
+      for (const p of part.parts) { const t = findText(p); if (t) return t; }
+    }
+    return '';
+  }
+  return findText(msg.payload).replace(/\s+/g, ' ').trim().slice(0, 500);
+}
+
+const _NOISE = /noreply|no-reply|mailer-daemon|newsletter|notifications?|unsubscribe|bounce|donotreply|do-not-reply|@googlegroups|@list\.|automated?|auto-?confirm|billing@|invoices?@|payments?@|alerts?@|updates?@|cuentas?@|pagos?@|facturas?@|hello@mercury|mercury\.com|@stripe\.com|@paypal\.|@mercadopago\.|@bank|dmarc|postmaster|report@|digest@|@brevo\.|@mailchimp\.|@sendgrid\.|@hubspot\.|@salesforce\./i;
 const _PERSONAL = new Set(['gmail.com','hotmail.com','yahoo.com','outlook.com','icloud.com','live.com','protonmail.com','me.com','msn.com']);
+
+// Patrones de asunto que indican emails transaccionales/comerciales (no B2B)
+const _TRANSACTIONAL_SUBJECT = /\b(pago\s+(exitoso|aprobado|recibido|realizado)|factura|recibo\s+de\s+pago|comprobante|confirmaci[oó]n\s+de\s+(compra|pago|pedido)|su\s+pedido|order\s+confirm|payment\s+(receipt|confirm)|invoice\s+#|su\s+transacci[oó]n|operaci[oó]n\s+exitosa|c[oó]digo\s+de\s+(seguridad|verificaci[oó]n)|alerta\s+de\s+(cuenta|seguridad)|saldo\s+disponible|estado\s+de\s+cuenta|compra\s+aprobada|ticket\s+#|número\s+de\s+orden|your\s+receipt|your\s+order|shipping\s+confirm|envío\s+en\s+camino)\b/i;
+
+function gmail_isNoise(fromHeader, subjectHeader) {
+  if (!fromHeader) return true;
+  if (_NOISE.test(fromHeader)) return true;
+  if (_TRANSACTIONAL_SUBJECT.test(subjectHeader || '')) return true;
+  return false;
+}
 
 // ── Token management ─────────────────────────────────────────
 
@@ -80,6 +104,15 @@ function gmail_storeTokens(session) {
   }
 }
 
+async function _loadIgnoredSenders() {
+  try {
+    const { data } = await window.sb.from('ignored_senders').select('platform,identifier');
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
 // ── Gmail Sync (auto-discover leads on login) ────────────────
 
 let _syncRunning = false;
@@ -108,11 +141,24 @@ async function gmailSync_run() {
     const { leads: enriched } = await res.json();
     if (!enriched?.length) return;
 
+    // Cruzar lastTs y days_since_last de los contactos originales
+    const contactByEmail = new Map(contacts.map(c => [c.email.toLowerCase(), c]));
+    enriched.forEach(l => {
+      const orig = contactByEmail.get((l.email || '').toLowerCase());
+      l.lastTs = orig?.lastTs || 0;
+      l.days_since_last = orig?.days_since_last ?? null;
+    });
+
     const uid = session.user.id;
     for (const l of enriched) {
       if (!l.email) continue;
       const { data: existing } = await window.sb.from('leads')
-        .select('id').eq('user_id', uid).eq('data->>email', l.email).maybeSingle();
+        .select('id, data').eq('user_id', uid).eq('data->>email', l.email).maybeSingle();
+
+      // Usar la fecha real del email más reciente, no la fecha de hoy
+      const realLastContact = l.lastTs && l.lastTs > 0
+        ? new Date(l.lastTs).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
 
       const rowData = {
         empresa: l.empresa || '',
@@ -124,12 +170,22 @@ async function gmailSync_run() {
         valor: null,
         resumen: l.notas || '',
         accion: '',
-        ultimoContacto: new Date().toISOString().split('T')[0],
+        ultimoContacto: realLastContact,
         channel: 'gmail',
       };
 
       if (existing?.id) {
-        await window.sb.from('leads').update({ data: rowData, updated_at: new Date().toISOString() }).eq('id', existing.id);
+        // Preservar etapas avanzadas seteadas manualmente — gmailSync no debe degradar un deal activo
+        const existingEstado = existing.data?.estado || 'sininfo';
+        const PROTECTED_STAGES = ['cierre', 'propuesta', 'activa'];
+        // Solo avanzar ultimoContacto si el email real es más reciente que el guardado
+        const existingLastContact = existing.data?.ultimoContacto;
+        const existingTs = existingLastContact ? new Date(existingLastContact).getTime() : 0;
+        const keepDate = existingTs > 0 && existingTs >= (l.lastTs || 0) ? existingLastContact : realLastContact;
+        const finalData = PROTECTED_STAGES.includes(existingEstado)
+          ? { ...rowData, estado: existingEstado, prioridad: existing.data?.prioridad || rowData.prioridad, accion: existing.data?.accion || '', resumen: existing.data?.resumen || rowData.resumen, ultimoContacto: keepDate }
+          : { ...rowData, ultimoContacto: keepDate };
+        await window.sb.from('leads').update({ data: finalData, updated_at: new Date().toISOString() }).eq('id', existing.id);
       } else {
         await window.sb.from('leads').insert({ user_id: uid, data: rowData, updated_at: new Date().toISOString() });
       }
@@ -154,7 +210,7 @@ async function _fetchContacts(token) {
   ];
 
   const results = await Promise.allSettled(refs.map(({ id, src }) =>
-    fetch(`${_GAPI}/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject`, { headers: h })
+    fetch(`${_GAPI}/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`, { headers: h })
       .then(r => r.json()).then(m => ({ ...m, _src: src }))
   ));
 
@@ -168,20 +224,35 @@ async function _fetchContacts(token) {
       ? (_gmailHdr(msg, 'To') + (_gmailHdr(msg, 'Cc') ? ',' + _gmailHdr(msg, 'Cc') : ''))
       : _gmailHdr(msg, 'From');
 
+    const msgDate = _gmailHdr(msg, 'Date');
+    const msgTs = msgDate ? new Date(msgDate).getTime() : 0;
+
     _parseAddresses(raw).forEach(({ email, name }) => {
       if (!email || email === myEmail || _NOISE.test(email)) return;
       const domain = email.split('@')[1] || '';
-      if (!contactMap.has(email)) contactMap.set(email, { email, name, domain, subjects: [], sent_count: 0, received_count: 0 });
+      if (!contactMap.has(email)) contactMap.set(email, { email, name, domain, subjects: [], sent_count: 0, received_count: 0, lastTs: 0, days_since_last: null });
       const c = contactMap.get(email);
       if (src === 'sent') c.sent_count++; else c.received_count++;
+      if (msgTs > c.lastTs) {
+        c.lastTs = msgTs;
+        c.days_since_last = msgTs > 0 ? Math.floor((Date.now() - msgTs) / 86400000) : null;
+      }
       const subj = _gmailHdr(msg, 'Subject');
       if (subj && c.subjects.length < 3) c.subjects.push(subj);
       if (!c.name && name) c.name = name;
     });
   });
 
+  const ignored = await _loadIgnoredSenders();
+  const ignoredEmails = new Set(ignored.filter(i => i.platform === 'email').map(i => i.identifier.toLowerCase()));
+  const ignoredDomains = new Set(ignored.filter(i => i.platform === 'domain').map(i => i.identifier.toLowerCase()));
+
   return Array.from(contactMap.values())
-    .filter(c => !(_PERSONAL.has(c.domain) && (c.sent_count + c.received_count) < 3))
+    .filter(c => {
+      if (ignoredEmails.has(c.email.toLowerCase())) return false;
+      if (ignoredDomains.has((c.domain || '').toLowerCase())) return false;
+      return !(_PERSONAL.has(c.domain) && (c.sent_count + c.received_count) < 3);
+    })
     .sort((a, b) => (b.sent_count + b.received_count) - (a.sent_count + a.received_count))
     .slice(0, 40);
 }
@@ -307,7 +378,7 @@ async function gmail_sendReply(originalMsg, replyText, fromEmail) {
   }
 }
 
-async function gmail_loadForContact(email) {
+async function gmail_loadForContact(email, { withBodies = false } = {}) {
   const token = await getGoogleToken();
   if (!token) return { hasToken: false, messages: [] };
 
@@ -323,8 +394,10 @@ async function gmail_loadForContact(email) {
     const msgs = listData.messages || [];
     if (!msgs.length) return { hasToken: true, messages: [] };
 
+    const format = withBodies ? 'minimal' : 'metadata';
+    const metaHeaders = 'metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date';
     const details = await Promise.all(msgs.slice(0, 15).map(m =>
-      fetch(`${_GAPI}/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject&metadataHeaders=Date`, { headers: h })
+      fetch(`${_GAPI}/messages/${m.id}?format=${format}&${metaHeaders}`, { headers: h })
         .then(r => r.json())
     ));
     return { hasToken: true, messages: details };
@@ -333,15 +406,91 @@ async function gmail_loadForContact(email) {
   }
 }
 
+async function gmail_analyzeEmails(matched, leads) {
+  const { data: { session } } = await window.sb.auth.getSession();
+  const jwt = session?.access_token;
+  if (!jwt) return [];
+
+  const { data: services } = await window.sb.from('user_services').select('id,name,price,currency');
+  const userServices = (services || []).map(s => ({ id: s.id, name: s.name, price: s.price }));
+
+  const token = await getGoogleToken();
+
+  const results = await Promise.allSettled(matched.map(async ({ msg, lead }) => {
+    const histResult = token
+      ? await gmail_loadForContact(lead.email, { withBodies: true })
+      : { messages: [] };
+
+    const history = histResult.messages.map(m => {
+      const from = _gmailHdr(m, 'From');
+      const isOwn = from.includes(session.user.email || '__nobody__');
+      return {
+        subject: _gmailHdr(m, 'Subject'),
+        body: _gmailExtractBody(m),
+        date: _gmailHdr(m, 'Date'),
+        direction: isOwn ? 'sent' : 'received',
+      };
+    });
+
+    const res = await fetch(`${_SF}/analyze-lead`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+      body: JSON.stringify({
+        email: {
+          subject: _gmailHdr(msg, 'Subject'),
+          from: _gmailHdr(msg, 'From'),
+          snippet: msg.snippet || '',
+        },
+        conversation_history: history,
+        current_stage: lead.stage,
+        lead_name: lead.co,
+        user_services: userServices,
+      }),
+    });
+
+    const classification = res.ok
+      ? await res.json()
+      : { is_noise: false, new_stage: lead.stage, matched_services: [], signal: 'neutral', reason: '' };
+
+    if (!classification.is_noise && classification.new_stage !== lead.stage) {
+      const raw = lead._raw || {};
+      await window.sb.from('leads').update({
+        data: { ...raw, estado: classification.new_stage },
+        updated_at: new Date().toISOString(),
+      }).eq('id', lead.id);
+    }
+
+    if (!classification.is_noise && classification.matched_services?.length > 0) {
+      const raw = lead._raw || {};
+      const matchedSvcs = userServices.filter(s => classification.matched_services.includes(s.id));
+      const valor = matchedSvcs.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+      if (valor > 0) {
+        await window.sb.from('leads').update({
+          data: { ...raw, services: matchedSvcs, valor },
+          updated_at: new Date().toISOString(),
+        }).eq('id', lead.id);
+      }
+    }
+
+    return { msg, lead, classification };
+  }));
+
+  return results
+    .filter(r => r.status === 'fulfilled' && !r.value.classification.is_noise)
+    .map(r => r.value);
+}
+
 Object.assign(window, {
   getGoogleToken,
   gmail_storeTokens,
   gmailSync_run,
   gmail_fetchForHome,
   gmail_matchEmailsToLeads,
+  gmail_analyzeEmails,
   gmail_fetchInbox,
   gmail_sendReply,
   gmail_loadForContact,
+  gmail_isNoise,
   _gmailHdr,
   _gmailFmtTime,
 });

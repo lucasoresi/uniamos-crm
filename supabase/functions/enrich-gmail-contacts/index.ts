@@ -79,14 +79,15 @@ serve(async (req) => {
   }
 
   const sanitize = (s: string, max = 100) => String(s || '').replace(/[\n\r]/g, ' ').slice(0, max)
-  const contactLines = contacts.map((c, i) => {
+  const contactLines = contacts.map((c: Contact & { days_since_last?: number | null }, i) => {
     const name = sanitize(c.name || '?', 80)
     const domain = sanitize(c.domain, 80)
     const subjects = (Array.isArray(c.subjects) ? c.subjects : [])
       .slice(0, 3)
-      .map(s => sanitize(s, 100))
+      .map((s: string) => sanitize(s, 100))
       .join(' / ') || 'sin asuntos'
-    return `${i + 1}. Email: ${sanitize(c.email, 150)} | Nombre: ${name} | Dominio: ${domain} | Enviados: ${c.sent_count} | Recibidos: ${c.received_count} | Asuntos: ${subjects}`
+    const recencia = c.days_since_last != null ? `${c.days_since_last}d desde último email` : 'fecha desconocida'
+    return `${i + 1}. Email: ${sanitize(c.email, 150)} | Nombre: ${name} | Dominio: ${domain} | Enviados: ${c.sent_count} | Recibidos: ${c.received_count} | Último contacto: ${recencia} | Asuntos: ${subjects}`
   }).join('\n')
 
   const prompt = `Sos un asistente de CRM experto en ventas B2B.
@@ -96,10 +97,15 @@ Analizá estos ${contacts.length} contactos extraídos de Gmail de un vendedor. 
 Contactos:
 ${contactLines}
 
-Devolvé SOLO un array JSON con los contactos que SÍ son leads B2B de ventas. Ignorá completamente:
-- Newsletters, notificaciones automáticas, servicios (Slack, GitHub, Jira, Google, etc.)
-- Emails de soporte técnico, facturación automática, alertas de sistema
-- Contactos sin contexto de negocio claro
+Devolvé SOLO un array JSON con los contactos que SÍ son leads B2B de ventas. Ignorá completamente y NO incluyas en el resultado:
+- Newsletters, notificaciones automáticas, servicios de software (Slack, GitHub, Jira, Google, Notion, Linear, etc.)
+- Emails de soporte técnico, facturación automática, alertas de sistema, tracking de pedidos
+- Contactos de comercios B2C: supermercados, tiendas de ropa, restaurantes, farmacéuticas de consumo, retail en general
+- Apps de pago y fintech de consumo: MercadoPago, PayPal, Visa, Mastercard, bancos en modo transaccional
+- Servicios de delivery, transporte, turismo, hotelería para consumo personal
+- Suscripciones de entretenimiento: Netflix, Spotify, plataformas de streaming
+- Confirmaciones de compras personales, recibos, facturas de servicios domésticos
+- Contactos sin contexto de negocio claro o sin intercambio bidireccional real
 
 Para cada lead B2B incluí exactamente este formato:
 {
@@ -112,19 +118,19 @@ Para cada lead B2B incluí exactamente este formato:
   "notas": "1 oración corta de contexto basada en los asuntos detectados"
 }
 
-Criterios de estado:
+Criterios de estado (la recencia es DETERMINANTE — aplicala siempre):
 - "cierre": asuntos mencionan firma, contrato firmado, cierre, deal cerrado
-- "propuesta": asuntos mencionan propuesta, cotización, presupuesto
-- "activa": sent_count + received_count >= 3, conversación bidireccional en curso
-- "ghost": intercambio previo pero sin respuesta reciente (solo 1 mensaje del contacto)
-- "frio": 1 solo email sin intercambio real, o señal de desinterés
-- "sininfo": poco contexto, asuntos vagos o insuficientes
+- "propuesta": asuntos mencionan propuesta, cotización, presupuesto Y último contacto < 30 días
+- "activa": conversación bidireccional real (sent+received >= 3) Y último contacto <= 14 días
+- "ghost": hubo intercambio previo PERO último contacto > 14 días o solo 1 mensaje del contacto
+- "frio": último contacto > 45 días, 1 solo email, señal de desinterés, o dominio personal sin contexto B2B
+- "sininfo": fecha desconocida, asuntos vagos o contexto insuficiente para clasificar
 
 Criterios de prioridad:
 - "urgente": 6+ intercambios totales o asuntos con urgencia explícita
 - "alta": 3-5 intercambios o asuntos con propuesta/reunión
-- "media": 2 intercambios
-- "baja": 1 solo email
+- "media": 2 intercambios o último contacto entre 7-14 días
+- "baja": 1 solo email o último contacto > 30 días
 
 Respondé SOLO con el array JSON, sin texto adicional, sin markdown.`
 

@@ -2,10 +2,10 @@
    Sidebar
    ============================================================ */
 
-function Sidebar({ view, onView, user, onLogout }) {
+function Sidebar({ view, onView, user, onLogout, leads = [] }) {
   const items1 = [
     { id: 'inicio',   name: 'Inicio',         icon: 'home',     badge: null },
-    { id: 'pipeline', name: 'CRM Pipeline',   icon: 'pipeline', badge: 14, badgeColor: 'accent' },
+    { id: 'pipeline', name: 'CRM Pipeline',   icon: 'pipeline', badge: leads.length || null, badgeColor: 'accent' },
     { id: 'prm',      name: 'PRM Prospectos', icon: 'target',   badge: 7 },
   ];
   const items2 = [
@@ -14,9 +14,11 @@ function Sidebar({ view, onView, user, onLogout }) {
     { id: 'calendar', name: 'Calendario',     icon: 'calendar', badge: null },
   ];
   const items3 = [
-    { id: 'auto',     name: 'Automatizaciones', icon: 'bolt',   badge: null },
-    { id: 'integ',    name: 'Integraciones',    icon: 'link',   badge: null },
-    { id: 'api',      name: 'API',              icon: 'code',   badge: null },
+    { id: 'auto',       name: 'Automatizaciones', icon: 'bolt',   badge: null },
+    { id: 'servicios',  name: 'Servicios',         icon: 'layers', badge: null },
+    { id: 'bloqueados', name: 'Bloqueados',         icon: 'shield', badge: null },
+    { id: 'integ',      name: 'Integraciones',      icon: 'link',   badge: null },
+    { id: 'api',        name: 'API',                icon: 'code',   badge: null },
   ];
 
   return (

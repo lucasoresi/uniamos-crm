@@ -80,6 +80,10 @@ const Icon = ({ name, size = 16, stroke = 1.6, ...rest }) => {
       return <svg {...common}><path d="m6 9 6 6 6-6"/></svg>;
     case 'chevron-right':
       return <svg {...common}><path d="m9 6 6 6-6 6"/></svg>;
+    case 'layers':
+      return <svg {...common}><path d="M2 12 12 7l10 5-10 5L2 12Z"/><path d="M2 17l10 5 10-5"/><path d="M2 7l10 5 10-5"/></svg>;
+    case 'shield':
+      return <svg {...common}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>;
     case 'logo':
       return <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         <path d="M5 7v6a7 7 0 1 0 14 0V7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>

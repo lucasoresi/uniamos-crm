@@ -192,6 +192,32 @@ function LeadDetail({ lead, onClose, onStageChange }) {
                 <dt>Score</dt><dd>{lead.score}/100</dd>
                 <dt>Etapa</dt><dd>{stage.name}</dd>
               </dl>
+
+              {/* Servicios detectados por IA */}
+              {Array.isArray(lead.services) && lead.services.length > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ color: 'var(--text-4)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>
+                    Servicios detectados
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {lead.services.map((sv, i) => (
+                      <div key={i} style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        background: 'var(--accent-soft)', border: '1px solid var(--accent-line)',
+                        borderRadius: 6, padding: '6px 10px',
+                      }}>
+                        <span style={{ color: 'var(--text-2)', fontSize: 12 }}>{sv.name}</span>
+                        <span style={{ color: 'var(--accent)', fontSize: 12, fontWeight: 700, fontFamily: 'var(--ff-mono)' }}>
+                          ${(sv.price || 0).toLocaleString('en-US')} {sv.currency || 'USD'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ color: 'var(--text-4)', fontSize: 10, marginTop: 6 }}>
+                    Detectado por IA · valor total: ${(lead.value || 0).toLocaleString('en-US')}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

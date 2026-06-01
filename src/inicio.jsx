@@ -28,10 +28,12 @@ function Inicio({ onOpenLead, onView, leads = [], homeEmails = null, user = null
   }));
   const total = stageDist.reduce((a, b) => a + b.value, 0);
 
-  // real derived data (no mock)
+  // métricas reales derivadas de leads
+  const activeLeads = leads.filter(l => ['activa', 'propuesta'].includes(l.stage)).length;
   const closingCount = leads.filter(l => l.stage === 'cierre').length;
-  const ghostLeads = leads.filter(l => l.stage === 'ghost');
-  const followups = ghostLeads
+  // Follow-ups urgentes: ghost Y frío (ambos necesitan acción)
+  const followups = leads
+    .filter(l => l.stage === 'ghost' || l.stage === 'frio')
     .map(l => {
       const days = l.lastContact
         ? Math.floor((Date.now() - new Date(l.lastContact).getTime()) / 86400000)
@@ -81,8 +83,7 @@ function Inicio({ onOpenLead, onView, leads = [], homeEmails = null, user = null
             <div className="in-hero-stat-val tnum"><span className="currency">$</span>{fmtMoney(total)}</div>
             <div className="in-hero-stat-delta">
               <Icon name="trend-up" size={13}/>
-              +12.4% vs. mes pasado
-              <span style={{ color: 'var(--text-3)', fontWeight: 500, marginLeft: 8 }}>· 14 leads activos</span>
+              <span style={{ color: 'var(--text-3)', fontWeight: 500, marginLeft: 8 }}>· {leads.length} leads en pipeline</span>
             </div>
             <div className="in-hero-stat-bar" title="Distribución por etapa">
               {stageDist.filter(s => s.value > 0).map(s => (
@@ -107,9 +108,9 @@ function Inicio({ onOpenLead, onView, leads = [], homeEmails = null, user = null
               <span className="metric-icon"><Icon name="target" size={12}/></span>
               Leads activos
             </div>
-            <div className="metric-val tnum">{METRICS.activeLeads}</div>
-            <div className="metric-delta pos"><Icon name="arrow-up-right" size={11}/> +2 esta semana</div>
-            <Sparkline data={[8,9,10,11,10,12,13,14]} width={90} height={36} color="var(--accent)"/>
+            <div className="metric-val tnum">{activeLeads}</div>
+            <div className="metric-delta pos"><Icon name="pipeline" size={11}/> activa + propuesta</div>
+            <Sparkline data={[8,9,10,11,10,12,13,activeLeads]} width={90} height={36} color="var(--accent)"/>
           </div>
           <div className="metric">
             <div className="metric-label">
@@ -125,9 +126,9 @@ function Inicio({ onOpenLead, onView, leads = [], homeEmails = null, user = null
               <span className="metric-icon"><Icon name="clock" size={12}/></span>
               Follow-ups urgentes
             </div>
-            <div className="metric-val tnum" style={{ color: 'var(--p-urg)' }}>{METRICS.followupsOverdue}</div>
-            <div className="metric-delta neg"><Icon name="arrow-up-right" size={11} style={{ transform: 'rotate(45deg)' }}/> +1 desde ayer</div>
-            <Sparkline data={[3,4,3,5,4,5,5,6]} width={90} height={36} color="var(--p-urg)"/>
+            <div className="metric-val tnum" style={{ color: 'var(--p-urg)' }}>{followups.length}</div>
+            <div className="metric-delta neg"><Icon name="clock" size={11}/> ghost + frío</div>
+            <Sparkline data={[3,4,3,5,4,5,5,followups.length]} width={90} height={36} color="var(--p-urg)"/>
           </div>
           <div className="metric">
             <div className="metric-label">

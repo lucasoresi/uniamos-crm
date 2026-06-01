@@ -144,13 +144,14 @@ function KanbanColumn({ stage, onOpenLead, selectedId }) {
         </div>
       </div>
 
-      <div className="col2-body">
+      <div className="col2-body" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
         {stage.leads.map(l => (
           <LeadCard2
             key={l.id}
             lead={l}
             selected={l.id === selectedId}
             onClick={() => onOpenLead(l)}
+            showSummary={stage.leads.length <= 5}
           />
         ))}
         {stage.leads.length === 0 && (
@@ -171,7 +172,7 @@ function KanbanColumn({ stage, onOpenLead, selectedId }) {
    Lead card V2 — priority edge, hero value, score progress
    ============================================================ */
 
-function LeadCard2({ lead, selected, onClick }) {
+function LeadCard2({ lead, selected, onClick, showSummary = true }) {
   const stage = STAGE_BY_ID[lead.stage];
   const priClass = {
     urg: 'pri-urg',
@@ -200,14 +201,14 @@ function LeadCard2({ lead, selected, onClick }) {
       <div className="lc2-edge"/>
       <div className="lc2-body">
         <header className="lc2-head">
-          <CompanyLogo co={lead.co} size={28} radius={7}/>
+          <CompanyLogo co={lead.co} size={36} radius={9}/>
           <div className="lc2-name-block">
             <div className="lc2-co">{lead.co}</div>
             <div className="lc2-ct">{lead.contact}</div>
           </div>
           {lead.priority === 'urg' && (
             <span className="lc2-flag" title="Urgente">
-              <Icon name="flame" size={11}/>
+              <Icon name="flame" size={12}/>
             </span>
           )}
         </header>
@@ -230,20 +231,16 @@ function LeadCard2({ lead, selected, onClick }) {
           <i style={{ width: lead.score + '%', background: stage.color }}/>
         </div>
 
+        {showSummary && lead.last && (
+          <div className="lc2-summary">{lead.last}</div>
+        )}
+
         <div className="lc2-meta">
           <div className="lc2-tags">
-            <span className="lc2-tag">{lead.country}</span>
-            {lead.sector !== '—' && <span className="lc2-tag">{lead.sector}</span>}
             {lead.channel === 'whatsapp' && <span className="lc2-tag canal-wa">WA</span>}
             {lead.channel === 'linkedin' && <span className="lc2-tag canal-li">in</span>}
           </div>
           <div className="lc2-stats">
-            <span title="Emails"><Icon name="mail" size={11}/> {lead.emails}</span>
-            {lead.tasksOpen > 0 && (
-              <span title="Tareas" style={{ color: 'var(--p-alta)' }}>
-                <Icon name="check-square" size={11}/> {lead.tasksOpen}
-              </span>
-            )}
             <span title="Última actividad" style={{ marginLeft: 'auto' }}>
               <Icon name="clock" size={11}/> {lead.lastActivity}
             </span>

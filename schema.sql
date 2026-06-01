@@ -103,6 +103,59 @@ CREATE POLICY "Users can delete their own token"
   ON google_tokens FOR DELETE
   USING (auth.uid() = user_id);
 
+-- 5. USER SERVICES (Catálogo de servicios del usuario)
+-- Almacena los servicios que el usuario ofrece, con precio y moneda.
+-- Usado por la IA para emparejar servicios con leads.
+CREATE TABLE IF NOT EXISTS public.user_services (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name        TEXT        NOT NULL,
+  price       NUMERIC(10,2) NOT NULL,
+  currency    TEXT        NOT NULL DEFAULT 'USD',
+  description TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.user_services ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "user_services_select" ON public.user_services
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "user_services_insert" ON public.user_services
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "user_services_update" ON public.user_services
+  FOR UPDATE USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "user_services_delete" ON public.user_services
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- 6. IGNORED SENDERS (Remitentes ignorados)
+-- Almacena identificadores (email, dominio, LinkedIn, Instagram)
+-- que el sistema debe ignorar al procesar contactos y leads.
+CREATE TABLE IF NOT EXISTS public.ignored_senders (
+  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  platform   TEXT        NOT NULL DEFAULT 'email',
+  identifier TEXT        NOT NULL,
+  source     TEXT        NOT NULL DEFAULT 'manual',
+  reason     TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, platform, identifier)
+);
+
+ALTER TABLE public.ignored_senders ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "ignored_senders_select" ON public.ignored_senders
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "ignored_senders_insert" ON public.ignored_senders
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "ignored_senders_delete" ON public.ignored_senders
+  FOR DELETE USING (auth.uid() = user_id);
+
 -- ============================================================
 -- ÍNDICES
 -- ============================================================
@@ -112,3 +165,5 @@ CREATE INDEX IF NOT EXISTS idx_prospects_user    ON prospects(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_entity ON activities(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_activities_user   ON activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_date   ON activities(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_services_user   ON public.user_services(user_id);
+CREATE INDEX IF NOT EXISTS idx_ignored_senders_user ON public.ignored_senders(user_id);

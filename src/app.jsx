@@ -78,49 +78,41 @@ function App() {
     const { hasToken, messages } = await window.gmail_fetchForHome();
     if (!hasToken || !messages.length) { setHomeEmails([]); return; }
 
-    // Update inbox badge count
     const inbox = messages.filter(m => m._type === 'inbox');
     setInboxCount(inbox.length);
 
-    // Match emails to leads and format for Inicio
+    // Match inbox emails to known leads
     const matched = window.gmail_matchEmailsToLeads(inbox, currentLeads);
-    const matchedCos = new Set(matched.map(m => m.lead.co));
 
-    // Build list: matched leads first, then unmatched inbox emails
-    const emailItems = [];
-    matched.slice(0, 5).forEach(({ msg, lead }) => {
-      const from = _gmailHdr(msg, 'From');
-      emailItems.push({
-        co: lead.co,
-        from: from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?',
-        subject: _gmailHdr(msg, 'Subject') || '(sin asunto)',
-        time: _gmailFmtTime(_gmailHdr(msg, 'Date')),
-        fromStage: lead.stage,
-        moveTo: null,
-        confidence: null,
-        isUnread: (msg.labelIds || []).includes('UNREAD'),
-        _lead: lead,
-      });
-    });
+    // Analyze matched emails with AI (classify noise, stage, services)
+    const analyzed = await window.gmail_analyzeEmails(matched, currentLeads);
 
-    // Add unmatched emails up to total of 8
-    messages.filter(m => m._type === 'inbox').slice(0, 20).forEach(msg => {
+    // Build email items from non-noise analyzed emails
+    const emailItems = analyzed.slice(0, 5).map(({ msg, lead, classification }) => ({
+      co: lead.co,
+      from: _gmailHdr(msg, 'From').replace(/<[^>]+>/, '').trim() || lead.email.split('@')[0] || '?',
+      subject: _gmailHdr(msg, 'Subject') || '(sin asunto)',
+      time: _gmailFmtTime(_gmailHdr(msg, 'Date')),
+      fromStage: lead.stage,
+      moveTo: classification.new_stage !== lead.stage ? classification.new_stage : null,
+      confidence: classification.signal === 'hot' ? 90 : classification.signal === 'warm' ? 70 : null,
+      isUnread: (msg.labelIds || []).includes('UNREAD'),
+      _lead: lead,
+    }));
+
+    // Fill remaining slots with unmatched inbox emails — skip transactional/noise
+    const matchedFroms = new Set(analyzed.map(a => _gmailHdr(a.msg, 'From')));
+    inbox.slice(0, 20).forEach(msg => {
       if (emailItems.length >= 8) return;
       const from = _gmailHdr(msg, 'From');
+      if (matchedFroms.has(from)) return;
+      if (window.gmail_isNoise(from, _gmailHdr(msg, 'Subject'))) return;
       const sender = from.replace(/<[^>]+>/, '').trim() || from.split('@')[0] || '?';
-      // Avoid showing if lead already shown
-      if (matched.find(m => {
-        const mFrom = _gmailHdr(m.msg, 'From');
-        return mFrom === from;
-      })) return;
       emailItems.push({
-        co: sender,
-        from: sender,
+        co: sender, from: sender,
         subject: _gmailHdr(msg, 'Subject') || '(sin asunto)',
         time: _gmailFmtTime(_gmailHdr(msg, 'Date')),
-        fromStage: null,
-        moveTo: null,
-        confidence: null,
+        fromStage: null, moveTo: null, confidence: null,
         isUnread: (msg.labelIds || []).includes('UNREAD'),
         _lead: null,
       });
@@ -177,6 +169,8 @@ function App() {
     tasks: ['Comunicaciones', 'Mis Tareas'],
     calendar: ['Comunicaciones', 'Calendario'],
     auto: ['Herramientas', 'Automatizaciones'],
+    servicios:  ['Configuración', 'Servicios'],
+    bloqueados: ['Configuración', 'Bloqueados'],
     integ: ['Herramientas', 'Integraciones'],
     api: ['Herramientas', 'API'],
   };
@@ -188,7 +182,7 @@ function App() {
   return (
     <>
       <div className="app">
-        <Sidebar view={view} onView={setView} user={user} onLogout={window.signOut}/>
+        <Sidebar view={view} onView={setView} user={user} onLogout={window.signOut} leads={leads}/>
         <main className="main">
           {loadState === 'error' && <ErrorBanner onRetry={fetchLeads}/>}
           <div className="topbar">
@@ -222,7 +216,9 @@ function App() {
           {view === 'inicio' && tweaks.inicioVariant === 'v2' && <InicioV2 leads={leads} onOpenLead={handleOpenLead} onView={setView}/>}
           {view === 'pipeline' && <Pipeline leads={leads} onOpenLead={handleOpenLead} selectedId={openLead?.id}/>}
           {view === 'inbox' && <Inbox user={user}/>}
-          {view !== 'inicio' && view !== 'pipeline' && view !== 'inbox' && <Placeholder view={view}/>}
+          {view === 'servicios' && <Servicios/>}
+          {view === 'bloqueados' && <Bloqueados/>}
+          {view !== 'inicio' && view !== 'pipeline' && view !== 'inbox' && view !== 'servicios' && view !== 'bloqueados' && <Placeholder view={view}/>}
         </main>
       </div>
 

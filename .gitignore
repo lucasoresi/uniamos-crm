@@ -1,5 +1,8 @@
 .vercel
 
+# MCP config with tokens — usar .mcp.json.local para tokens reales
+.mcp.json.local
+
 # Playwright
 node_modules/
 /test-results/

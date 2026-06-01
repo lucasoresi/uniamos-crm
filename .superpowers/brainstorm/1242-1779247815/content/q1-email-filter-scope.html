@@ -1,0 +1,28 @@
+<h2>¿Dónde aparecen los emails no deseados?</h2>
+<p class="subtitle">Esto define en qué capa del sistema hay que filtrar</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>En el Pipeline CRM</h3>
+      <p>Contactos como el supermercado, tiendas o servicios personales aparecen como <strong>leads dentro del pipeline</strong> (columnas Cierre, Propuesta, Activa, etc.). El problema es que el sync inicial los crea como leads.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>En el Dashboard (Actividades recientes)</h3>
+      <p>Los emails indeseados aparecen en la sección <strong>"Actividades recientes"</strong> del Inicio — emails de pago, notificaciones de apps, publicidad — aunque el lead sea legítimo en el pipeline.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Ambos lados</h3>
+      <p>El problema existe en <strong>ambas capas</strong>: contactos indeseados entran al pipeline como leads Y emails de ruido aparecen en el dashboard aunque el lead sea real.</p>
+    </div>
+  </div>
+</div>
