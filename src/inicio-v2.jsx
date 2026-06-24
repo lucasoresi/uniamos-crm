@@ -57,7 +57,7 @@ function InicioV2({ onOpenLead, onView, leads = [] }) {
               <button className="btn btn-primary btn-sm" onClick={() => onView('pipeline')}>
                 Ver pipeline <Icon name="arrow-right" size={12}/>
               </button>
-              <button className="btn btn-outline btn-sm">
+              <button className="btn btn-outline btn-sm" onClick={() => onView && onView('auto')}>
                 <Icon name="sparkles" size={12}/> Replantear plan
               </button>
               <span className="brief-meta">
@@ -77,7 +77,7 @@ function InicioV2({ onOpenLead, onView, leads = [] }) {
                 <strong className="num">{TODAY_PLAN.filter(p => !p.done).length}</strong>
                 <span style={{ color: 'var(--text-3)' }}>/{TODAY_PLAN.length}</span> pendientes
               </span>
-              <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto' }}>
+              <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto' }} onClick={() => onView && onView('tasks')}>
                 <Icon name="plus" size={11}/> Agregar
               </button>
             </div>
@@ -193,7 +193,7 @@ function InicioV2({ onOpenLead, onView, leads = [] }) {
           <div className="v2-inbox-hd">
             <h2 className="plan-title">Inbox priorizado</h2>
             <span className="ai-tag"><Icon name="sparkles" size={9}/> Clasificado por IA</span>
-            <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto' }}>
+            <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto' }} onClick={() => onView && onView('inbox')}>
               Ver todos · {METRICS.newEmails}
               <Icon name="arrow-right" size={11}/>
             </button>

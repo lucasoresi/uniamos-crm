@@ -6,11 +6,11 @@ function Sidebar({ view, onView, user, onLogout, leads = [] }) {
   const items1 = [
     { id: 'inicio',   name: 'Inicio',         icon: 'home',     badge: null },
     { id: 'pipeline', name: 'CRM Pipeline',   icon: 'pipeline', badge: leads.length || null, badgeColor: 'accent' },
-    { id: 'prm',      name: 'PRM Prospectos', icon: 'target',   badge: 7 },
+    { id: 'prm',      name: 'PRM Prospectos', icon: 'target',   badge: null },
   ];
   const items2 = [
-    { id: 'inbox',    name: 'Gmail Inbox',    icon: 'mail',     badge: 29 },
-    { id: 'tasks',    name: 'Mis Tareas',     icon: 'check-square', badge: 8 },
+    { id: 'inbox',    name: 'Gmail Inbox',    icon: 'mail',     badge: null },
+    { id: 'tasks',    name: 'Mis Tareas',     icon: 'check-square', badge: null },
     { id: 'calendar', name: 'Calendario',     icon: 'calendar', badge: null },
   ];
   const items3 = [
@@ -89,7 +89,7 @@ function Sidebar({ view, onView, user, onLogout, leads = [] }) {
           <div className="sb-uname">{user ? user.name : '—'}</div>
           <div className="sb-uemail">{user ? user.email : ''}</div>
         </div>
-        <button className="sb-bottom-btn" title="Configuración">
+        <button className="sb-bottom-btn" title="Configuración" onClick={() => onView('servicios')}>
           <Icon name="settings" size={14}/>
         </button>
         <button

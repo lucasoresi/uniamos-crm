@@ -111,14 +111,22 @@ function initials(name) {
 
 /* ---- Stage definitions ------------------------------------- */
 const STAGES = [
+  { id: 'ganado',    name: 'Ganado', short: 'Ganado',              color: 'var(--st-ganado)',    desc: 'Trato cerrado / firmado', terminal: 'won' },
   { id: 'cierre',    name: 'Cierre Inminente', short: 'Cierre',    color: 'var(--st-cierre)',    desc: 'Decisión en <7 días' },
   { id: 'propuesta', name: 'Propuesta Enviada', short: 'Propuesta', color: 'var(--st-propuesta)', desc: 'Esperando respuesta' },
   { id: 'activa',    name: 'Negociación Activa', short: 'Activa',   color: 'var(--st-activa)',    desc: 'En conversación' },
   { id: 'ghost',     name: 'Ghost', short: 'Ghost',                color: 'var(--st-ghost)',     desc: '+10 días sin respuesta' },
   { id: 'frio',      name: 'Frío', short: 'Frío',                  color: 'var(--st-frio)',      desc: 'Lead nuevo, sin contacto' },
   { id: 'sininfo',   name: 'Sin Info', short: 'Sin Info',          color: 'var(--st-sininfo)',   desc: 'Necesita enriquecer' },
+  { id: 'perdido',   name: 'Perdido', short: 'Perdido',            color: 'var(--st-perdido)',   desc: 'Descartado / no avanza', terminal: 'lost' },
 ];
 const STAGE_BY_ID = Object.fromEntries(STAGES.map(s => [s.id, s]));
+
+// Probabilidad de cierre por etapa (para el pronóstico ponderado, estilo Salesforce/Pipedrive)
+const STAGE_PROB = {
+  ganado: 1.0, cierre: 0.85, propuesta: 0.55, activa: 0.30,
+  ghost: 0.10, frio: 0.05, sininfo: 0.05, perdido: 0,
+};
 
 /* ---- Inicio sample data ------------------------------------ */
 const INICIO_EMAILS = [
@@ -203,6 +211,6 @@ function CompanyLogo({ co, size = 32, radius = 8 }) {
 }
 
 Object.assign(window, {
-  Icon, STAGES, STAGE_BY_ID, INICIO_EMAILS, FOLLOWUPS, AI_MOVES, METRICS,
+  Icon, STAGES, STAGE_BY_ID, STAGE_PROB, INICIO_EMAILS, FOLLOWUPS, AI_MOVES, METRICS,
   Sparkline, StageTag, CompanyLogo, initials, logoColors,
 });

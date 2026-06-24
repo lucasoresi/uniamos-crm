@@ -5,7 +5,7 @@
    - Card redesign: priority edge, prominent value, score bar
    ============================================================ */
 
-function Pipeline({ leads, onOpenLead, selectedId }) {
+function Pipeline({ leads, onOpenLead, selectedId, onNewLead, onSync, syncing }) {
   const [filter, setFilter] = React.useState('all');
   const [query, setQuery] = React.useState('');
   const [sort, setSort] = React.useState('score');
@@ -37,7 +37,9 @@ function Pipeline({ leads, onOpenLead, selectedId }) {
 
   const totalValue = totals.reduce((a, b) => a + b.value, 0);
   const activeCount = totals.filter(s => ['cierre', 'propuesta', 'activa'].includes(s.id)).reduce((a, b) => a + b.leads.length, 0);
-  const closingValue = totals.find(s => s.id === 'cierre').value + totals.find(s => s.id === 'propuesta').value;
+  const closingValue = (totals.find(s => s.id === 'cierre')?.value || 0) + (totals.find(s => s.id === 'propuesta')?.value || 0);
+  // Pronóstico ponderado (forecast) = Σ(valor × probabilidad de la etapa)
+  const forecast = filtered.reduce((a, l) => a + (l.value || 0) * (STAGE_PROB[l.stage] ?? 0), 0);
 
   return (
     <div className="pipe-wrap view-enter">
@@ -47,12 +49,12 @@ function Pipeline({ leads, onOpenLead, selectedId }) {
             Pipeline <span className="pipe-title2-cnt">{leads.length}</span>
           </h1>
           <div className="pipe-meta">
-            <span><Icon name="trend-up" size={12}/> ${(totalValue/1000).toFixed(0)}k pipeline · <strong style={{ color: 'var(--accent)' }}>${(closingValue/1000).toFixed(0)}k</strong> cerca de cierre</span>
+            <span><Icon name="trend-up" size={12}/> ${(totalValue/1000).toFixed(0)}k pipeline · <strong style={{ color: 'var(--accent)' }}>${(forecast/1000).toFixed(0)}k</strong> forecast ponderado</span>
           </div>
         </div>
         <div className="pipe-head2-right">
-          <button className="btn btn-outline btn-sm"><Icon name="refresh" size={12}/> Sync</button>
-          <button className="btn btn-primary btn-sm"><Icon name="plus" size={12}/> Nuevo lead</button>
+          <button className="btn btn-outline btn-sm" onClick={onSync} disabled={syncing}><Icon name="refresh" size={12}/> {syncing ? 'Sync…' : 'Sync'}</button>
+          <button className="btn btn-primary btn-sm" onClick={() => onNewLead && onNewLead()}><Icon name="plus" size={12}/> Nuevo lead</button>
         </div>
       </header>
 
@@ -114,6 +116,7 @@ function Pipeline({ leads, onOpenLead, selectedId }) {
             stage={stage}
             onOpenLead={onOpenLead}
             selectedId={selectedId}
+            onNewLead={onNewLead}
           />
         ))}
       </div>
@@ -125,7 +128,7 @@ function Pipeline({ leads, onOpenLead, selectedId }) {
    Column
    ============================================================ */
 
-function KanbanColumn({ stage, onOpenLead, selectedId }) {
+function KanbanColumn({ stage, onOpenLead, selectedId, onNewLead }) {
   return (
     <section className="col2" style={{ '--col-c': stage.color }}>
       <div className="col2-hd">
@@ -160,7 +163,7 @@ function KanbanColumn({ stage, onOpenLead, selectedId }) {
             Vacío
           </div>
         )}
-        <button className="col2-add">
+        <button className="col2-add" onClick={() => onNewLead && onNewLead(stage.id)}>
           <Icon name="plus" size={11}/> Añadir lead
         </button>
       </div>
@@ -239,6 +242,11 @@ function LeadCard2({ lead, selected, onClick, showSummary = true }) {
           <div className="lc2-tags">
             {lead.channel === 'whatsapp' && <span className="lc2-tag canal-wa">WA</span>}
             {lead.channel === 'linkedin' && <span className="lc2-tag canal-li">in</span>}
+            {(lead.health === 'en-riesgo' || lead.health === 'dormido') && (
+              <span className="health-pill" style={{ '--h': HEALTH_LABELS[lead.health].color }}>
+                {HEALTH_LABELS[lead.health].label}
+              </span>
+            )}
           </div>
           <div className="lc2-stats">
             <span title="Última actividad" style={{ marginLeft: 'auto' }}>

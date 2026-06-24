@@ -44,6 +44,8 @@ function ErrorBanner({ onRetry }) {
 function App() {
   const [view, setView] = React.useState('inicio');
   const [openLead, setOpenLead] = React.useState(null);
+  const [formLead, setFormLead] = React.useState(null); // lead en edición/creación (modal)
+  const [syncing, setSyncing] = React.useState(false);
   const [leads, setLeads] = React.useState([]);
   const [user, setUser] = React.useState(null);
   const [loadState, setLoadState] = React.useState('loading'); // 'loading' | 'ready' | 'error'
@@ -72,6 +74,47 @@ function App() {
       return [];
     }
   }, []);
+
+  // Refresca leads sin parpadeo de splash; opcionalmente re-sincroniza el panel abierto
+  const refreshLeads = React.useCallback(async (focusId) => {
+    try {
+      const data = await window.loadLeads();
+      setLeads(data);
+      if (focusId !== undefined) {
+        const fresh = data.find(l => l.id === focusId) || null;
+        setOpenLead(fresh);
+      }
+      return data;
+    } catch (e) { console.error('refreshLeads error:', e); return []; }
+  }, []);
+
+  const openCreateLead = React.useCallback((stage) => {
+    setFormLead(window.blankLead(stage || 'sininfo'));
+  }, []);
+  const openEditLead = React.useCallback((lead) => { setFormLead(lead); }, []);
+
+  const handleFormSaved = React.useCallback(async (savedId) => {
+    setFormLead(null);
+    await refreshLeads(openLead ? savedId : undefined);
+  }, [refreshLeads, openLead]);
+
+  const handleStageChanged = React.useCallback(async (leadId) => {
+    await refreshLeads(leadId);
+  }, [refreshLeads]);
+
+  const handleLeadDeleted = React.useCallback(async (leadId) => {
+    setOpenLead(null);
+    await refreshLeads();
+  }, [refreshLeads]);
+
+  const handleSyncGmail = React.useCallback(async () => {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      await window.gmailSync_run();
+      await refreshLeads();
+    } finally { setSyncing(false); }
+  }, [syncing, refreshLeads]);
 
   const fetchHomeEmails = React.useCallback(async (currentLeads) => {
     setHomeEmails(null); // loading
@@ -195,7 +238,7 @@ function App() {
               ))}
             </div>
             <div className="topbar-actions">
-              <button className="btn btn-ghost btn-icon btn-sm" title="Notificaciones" style={{ position: 'relative' }}>
+              <button className="btn btn-ghost btn-icon btn-sm" title="Notificaciones" style={{ position: 'relative' }} onClick={() => setView('tasks')}>
                 <Icon name="bell" size={14}/>
                 <span style={{
                   position: 'absolute', top: 4, right: 4,
@@ -203,10 +246,10 @@ function App() {
                   background: 'var(--p-urg)',
                 }}/>
               </button>
-              <button className="btn btn-outline btn-sm" disabled title="Disponible en próximo sub-proyecto">
-                <Icon name="refresh" size={12}/> Sincronizar Gmail
+              <button className="btn btn-outline btn-sm" onClick={handleSyncGmail} disabled={syncing} title="Buscar y actualizar leads desde Gmail">
+                <Icon name="refresh" size={12}/> {syncing ? 'Sincronizando…' : 'Sincronizar Gmail'}
               </button>
-              <button className="btn btn-primary btn-sm">
+              <button className="btn btn-primary btn-sm" onClick={() => openCreateLead()}>
                 <Icon name="plus" size={12}/> Nuevo Lead
               </button>
             </div>
@@ -214,15 +257,37 @@ function App() {
 
           {view === 'inicio' && tweaks.inicioVariant === 'v1' && <Inicio leads={leads} onOpenLead={handleOpenLead} onView={setView} homeEmails={homeEmails} user={user}/>}
           {view === 'inicio' && tweaks.inicioVariant === 'v2' && <InicioV2 leads={leads} onOpenLead={handleOpenLead} onView={setView}/>}
-          {view === 'pipeline' && <Pipeline leads={leads} onOpenLead={handleOpenLead} selectedId={openLead?.id}/>}
+          {view === 'pipeline' && <Pipeline leads={leads} onOpenLead={handleOpenLead} selectedId={openLead?.id} onNewLead={openCreateLead} onSync={handleSyncGmail} syncing={syncing}/>}
+          {view === 'prm' && <Prm onPromoted={() => refreshLeads()}/>}
+          {view === 'auto' && <Automatizaciones leads={leads} onRefresh={refreshLeads} onOpenLead={handleOpenLead}/>}
+          {view === 'tasks' && <Tareas leads={leads} onOpenLead={handleOpenLead}/>}
+          {view === 'calendar' && <Calendario leads={leads} onOpenLead={handleOpenLead}/>}
+          {view === 'integ' && <Integraciones user={user}/>}
+          {view === 'api' && <Api leads={leads} onRefresh={refreshLeads}/>}
           {view === 'inbox' && <Inbox user={user}/>}
           {view === 'servicios' && <Servicios/>}
           {view === 'bloqueados' && <Bloqueados/>}
-          {view !== 'inicio' && view !== 'pipeline' && view !== 'inbox' && view !== 'servicios' && view !== 'bloqueados' && <Placeholder view={view}/>}
+          {!['inicio', 'pipeline', 'prm', 'auto', 'tasks', 'calendar', 'integ', 'api', 'inbox', 'servicios', 'bloqueados'].includes(view) && <Placeholder view={view}/>}
         </main>
       </div>
 
-      {openLead && <LeadDetail lead={openLead} onClose={() => setOpenLead(null)}/>}
+      {openLead && (
+        <LeadDetail
+          lead={openLead}
+          onClose={() => setOpenLead(null)}
+          onStageChange={handleStageChanged}
+          onEdit={openEditLead}
+          onDelete={handleLeadDeleted}
+        />
+      )}
+
+      {formLead && (
+        <LeadForm
+          lead={formLead}
+          onClose={() => setFormLead(null)}
+          onSaved={handleFormSaved}
+        />
+      )}
 
       <TweaksPanel title="Tweaks">
         <TweakSection label="Vista de Inicio">

@@ -480,9 +480,53 @@ async function gmail_analyzeEmails(matched, leads) {
     .map(r => r.value);
 }
 
+// ── Google Calendar ──────────────────────────────────────────
+const _GCAL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+
+// Devuelve eventos próximos (default: próximos 21 días)
+async function gcal_fetchUpcoming(days = 21) {
+  const token = await getGoogleToken();
+  if (!token) return { hasToken: false, events: [] };
+
+  const now = new Date();
+  const timeMin = now.toISOString();
+  const timeMax = new Date(now.getTime() + days * 86400000).toISOString();
+  const params = new URLSearchParams({
+    timeMin, timeMax, singleEvents: 'true', orderBy: 'startTime', maxResults: '50',
+  });
+
+  try {
+    const res = await fetch(`${_GCAL}?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.status === 401) {
+      sessionStorage.removeItem('gtoken'); sessionStorage.removeItem('gtoken_exp');
+      return { hasToken: false, events: [] };
+    }
+    if (!res.ok) return { hasToken: true, events: [], error: true };
+    const data = await res.json();
+    const events = (data.items || []).map(e => {
+      const startRaw = e.start?.dateTime || e.start?.date || '';
+      const allDay = !e.start?.dateTime;
+      return {
+        id: e.id,
+        title: e.summary || '(sin título)',
+        start: startRaw,
+        startMs: startRaw ? new Date(startRaw).getTime() : 0,
+        allDay,
+        location: e.location || '',
+        link: e.htmlLink || '',
+        attendees: (e.attendees || []).length,
+      };
+    }).filter(e => e.startMs > 0).sort((a, b) => a.startMs - b.startMs);
+    return { hasToken: true, events };
+  } catch {
+    return { hasToken: true, events: [], error: true };
+  }
+}
+
 Object.assign(window, {
   getGoogleToken,
   gmail_storeTokens,
+  gcal_fetchUpcoming,
   gmailSync_run,
   gmail_fetchForHome,
   gmail_matchEmailsToLeads,
